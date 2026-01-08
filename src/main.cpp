@@ -1,3 +1,4 @@
+#include <cfloat>
 #include <raylib.h>
 #include <frameflow/layout.hpp>
 
@@ -5,6 +6,10 @@
 #include FT_FREETYPE_H
 #include <hb.h>
 #include <hb-ft.h>
+
+#include <ixwebsocket/IXNetSystem.h>
+#include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXUserAgent.h>
 
 #include <string>
 #include <cstring>
@@ -109,6 +114,51 @@ void DrawTextHB(HBFont &font, const std::string &text, float x, float y, Color t
     hb_buffer_destroy(buf);
     hb_font_destroy(hb_font);
 }
+// -------------------------
+// TextMetrics struct
+// -------------------------
+struct TextMetrics {
+    float width;
+    float height;
+    float ascent;
+    float descent;
+};
+
+// -------------------------
+// Measure text with cached HBFont
+// -------------------------
+TextMetrics MeasureTextHB(HBFont &font, const std::string &text) {
+    hb_font_t* hb_font = hb_ft_font_create(font.face, nullptr);
+    hb_buffer_t* buf = hb_buffer_create();
+
+    hb_buffer_add_utf8(buf, text.c_str(), -1, 0, -1);
+    hb_buffer_guess_segment_properties(buf);
+    hb_shape(hb_font, buf, nullptr, 0);
+
+    unsigned int len = hb_buffer_get_length(buf);
+    hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buf, nullptr);
+    hb_glyph_position_t* pos = hb_buffer_get_glyph_positions(buf, nullptr);
+
+    float width = 0;
+    float minY = FLT_MAX, maxY = -FLT_MAX;
+
+    for (unsigned int i = 0; i < len; i++) {
+        Glyph &g = font.GetGlyph(info[i].codepoint);
+
+        float top = -g.bitmap_top;
+        float bottom = -g.bitmap_top + g.height;
+
+        if (top < minY) minY = top;
+        if (bottom > maxY) maxY = bottom;
+
+        width += pos[i].x_advance / 64.0f;
+    }
+
+    hb_buffer_destroy(buf);
+    hb_font_destroy(hb_font);
+
+    return { width, maxY - minY, -minY, maxY };
+}
 
 static Color color_for(NodeType type) {
     switch (type) {
@@ -119,6 +169,7 @@ static Color color_for(NodeType type) {
         default:                return MAGENTA;
     }
 }
+
 static const char* node_type_name(NodeType type) {
     switch (type) {
         case NodeType::Center:  return "Center";
@@ -158,11 +209,59 @@ static void DrawNodeRects(System& sys, NodeId id) {
     }
 }
 
+Rectangle rl_rect(Rect r) {
+    return {r.origin.x, r.origin.y, r.size.x, r.size.y};
+}
+
 int main() {
     // Make window resizable
     InitWindow(1920, 1080, "Pirate Scrabble");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
+
+    ix::initNetSystem();
+
+    // Our websocket object
+    ix::WebSocket webSocket;
+
+    // Connect to a server with encryption
+    // See https://machinezone.github.io/IXWebSocket/usage/#tls-support-and-configuration
+    //     https://github.com/machinezone/IXWebSocket/issues/386#issuecomment-1105235227 (self signed certificates)
+    std::string url("wss://api.playpiratescrabble.com/ws/account/tokenAuth");
+    webSocket.setUrl(url);
+
+    std::cout << "Connecting to " << url << "..." << std::endl;
+
+    // Setup a callback to be fired (in a background thread, watch out for race conditions !)
+    // when a message or an event (open, close, error) is received
+    webSocket.setOnMessageCallback([&webSocket](const ix::WebSocketMessagePtr& msg)
+        {
+            if (msg->type == ix::WebSocketMessageType::Message)
+            {
+                std::cout << "received message: " << msg->str << std::endl;
+                std::cout << "> " << std::flush;
+            }
+            else if (msg->type == ix::WebSocketMessageType::Open)
+            {
+                std::cout << "Connection established" << std::endl;
+                std::cout << "> " << std::flush;
+                // Send a message to the server (default to TEXT mode)
+                webSocket.send("hello world");
+            }
+            else if (msg->type == ix::WebSocketMessageType::Error)
+            {
+                // Maybe SSL is not configured properly
+                std::cout << "Connection error: " << msg->errorInfo.reason << std::endl;
+                std::cout << "> " << std::flush;
+            }
+        }
+    );
+
+    // Now that our callback is setup, we can start our background thread and receive messages
+    webSocket.start();
+
+
+
 
     // -------------------------
     // Initialize FreeType
@@ -195,6 +294,8 @@ int main() {
         get_node(ui, left).expand.x = 1;
     }
 
+    std::vector<NodeId> tileIds;
+
     {
         NodeId middle = add_generic(ui, hbox);
         get_node(ui, middle).anchors = {0, 0, 0, 1};
@@ -208,6 +309,7 @@ int main() {
         for (int i = 0; i < 144; i++) {
             NodeId tile = add_generic(ui, flow);
             get_node(ui, tile).minimum_size = {48, 48};
+            tileIds.push_back(tile);
         }
     }
 
@@ -235,11 +337,22 @@ int main() {
         BeginDrawing();
         ClearBackground(DARKGRAY);
 
-        DrawNodeRects(ui, root);
+        //DrawNodeRects(ui, root);
 
         DrawTextHB(font, "Hello, world!", 50, 300, BLACK);
         DrawTextHB(font, "f i ligatures!", 50, 360, RED);
-
+        for (auto tile_id : tileIds) {
+            auto node = get_node(ui, tile_id);
+            Rectangle rec = rl_rect(node.bounds);
+            DrawRectangleRoundedLinesEx(rec, 0.1, 5, 1, RED);
+            auto extents= MeasureTextHB(font, "A");
+            float2 offset{
+                (node.bounds.size.x - extents.width) * 0.5f,
+                (node.bounds.size.y - extents.height) * 0.5f
+            };
+            float2 text_pos = offset + node.bounds.origin;
+            DrawTextHB(font, "A", text_pos.x, text_pos.y + extents.ascent, BLACK);
+        }
 
         EndDrawing();
     }

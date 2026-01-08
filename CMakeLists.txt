@@ -9,6 +9,9 @@ add_subdirectory(external/frameflow)
 add_subdirectory(external/freetype)
 add_subdirectory(external/harfbuzz)
 
+set(USE_TLS 1 CACHE INTERNAL "Force TLS")
+add_subdirectory(external/IXWebSocket)
+
 add_executable(game
     src/main.cpp
 )
@@ -24,4 +27,5 @@ target_link_libraries(game
         frameflow::frameflow
         freetype
         harfbuzz
+        ixwebsocket::ixwebsocket
 )
