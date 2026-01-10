@@ -23,7 +23,7 @@ add_executable(game
         external/imgui/misc/cpp/imgui_stdlib.cpp
         external/rlImGui/rlImGui.cpp
         src/text/texthb.cpp
-        src/socket/socket.cpp
+        src/serialization/types.h
 )
 
 target_include_directories(game
@@ -33,6 +33,7 @@ target_include_directories(game
         external/imgui/misc/cpp
         external/rlImGui
         external/cereal/include
+        external/json
 )
 
 target_link_libraries(game
