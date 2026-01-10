@@ -135,7 +135,7 @@ struct User {
     std::string token;
     std::string salt;  // You probably shouldn't have this - security risk!
     std::string email;
-    std::string currentGame;
+    std::optional<std::string> currentGame;
 };
 
 struct UserLoginAttempt {

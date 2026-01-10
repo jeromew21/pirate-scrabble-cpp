@@ -22,8 +22,10 @@ add_executable(game
         external/imgui/imgui_demo.cpp
         external/imgui/misc/cpp/imgui_stdlib.cpp
         external/rlImGui/rlImGui.cpp
+        src/util.cpp
         src/text/texthb.cpp
         src/serialization/types.h
+        src/sockets.cpp
 )
 
 target_include_directories(game
