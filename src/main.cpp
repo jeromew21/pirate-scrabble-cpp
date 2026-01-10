@@ -195,12 +195,11 @@ struct MainMenuContext {
 
         void attempt_token_auth(std::string token) {
             std::cout << "Attempting token authentication" << std::endl;
-            std::erase_if(token, ::isspace);
             std::thread t(TokenAuth, std::ref(recv_login_queue),  token);
             t.detach();
         }
 
-        void render() {
+        void handle_incoming() {
             std::string msg;
             while (recv_login_queue.try_dequeue(msg)) {
                 auto response = deserialize<UserResponse>(msg);
@@ -216,6 +215,9 @@ struct MainMenuContext {
                     state = State::Active;
                 }
             }
+        }
+
+        void render() {
             if (state == State::Active || state == State::Loading) {
                 ImGui::Begin("Log in");
                 ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
@@ -240,17 +242,65 @@ struct MainMenuContext {
             PreInit, Gateway, GameSettings, Lobby, Playing
         };
 
+        std::optional<MultiplayerGame> game;
+
+        MainMenuContext *parent;
+
         State state = State::PreInit;
 
-        void renderGateway() {
+        Queue recv_create_queue;
+        Queue recv_join_queue;
+        Queue recv_game_queue;
 
+        void render_gateway() {
+            ImGui::Begin("Multiplayer");
+            if (ImGui::Button("New Game")) {
+                //
+                enter_game_settings();
+            }
+            if (ImGui::Button("Back")) {
+                parent->enter_main_menu();
+            }
+            ImGui::End();
+        }
+
+        void render_game_settings() {}
+
+        void render_lobby() {}
+
+        void render_playing() {}
+
+        void enter_gateway() {
+            state = State::Gateway;
+            // re authenticate in parallel?
+            if (!parent->user->currentGame.empty()) {
+                enter_playing();
+            }
+        }
+
+        void enter_game_settings() {
+            state = State::GameSettings;
+            // for now, skip
+            state = State::Lobby;
+        }
+
+        void enter_lobby() {
+            state = State::Lobby;
+        }
+
+        void enter_playing() {
+            state = State::Playing;
         }
 
         void render() {
-            if (state == State::Gateway || state == State::GameSettings) {
-                renderGateway();
-            } else if (state == State::Lobby || ) {
-
+            if (state == State::Gateway) {
+                render_gateway();
+            } else if (state == State::GameSettings) {
+                render_game_settings();
+            } else if (state == State::Lobby) {
+                render_lobby();
+            } else if (state == State::Playing) {
+                render_playing();
             }
         }
     };
@@ -268,6 +318,8 @@ struct MainMenuContext {
     std::optional<User> user;
 
     LoginContext login_context;
+
+    MultiplayerContext multiplayer_context;
 
     std::string token_path = "./token.txt";
 
@@ -309,6 +361,8 @@ struct MainMenuContext {
 
         if (ImGui::Button("Multiplayer")) {
             // set state to multiplayer gateway
+            state = State::Multiplayer;
+            multiplayer_context.enter_gateway();
         }
 
         if (ImGui::CollapsingHeader("Settings")) {
@@ -331,17 +385,38 @@ struct MainMenuContext {
         ImGui::End();
     }
 
-    void render(float delta) {
-        if (state == State::InitialLoading) {
-            loading_counter += delta;
-            if (loading_counter > loading_time) {
-                state = State::Menu;
+    void enter_main_menu() {
+        state = State::Menu;
+        if (user.has_value()) {
+            login_context.attempt_token_auth(user->token);
+        }
+    }
+
+    void render(const float delta) {
+        switch (state) {
+            case State::InitialLoading:
+            {
+                login_context.handle_incoming();
+                loading_counter += delta;
+                if (loading_counter > loading_time) {
+                    state = State::Menu;
+                    if (!user.has_value()) {
+                        login_context.state = LoginContext::State::Active;
+                    }
+                }
+                break;
             }
-        } else {
-            if (login_context.state == LoginContext::State::Bypassed) {
-                render_main_menu();
-            } else {
-                login_context.render();
+            case State::Multiplayer: {
+                multiplayer_context.render();
+                break;
+            }
+            case State::Menu: {
+                login_context.handle_incoming();
+                if (login_context.state == LoginContext::State::Bypassed) {
+                    render_main_menu();
+                } else {
+                    login_context.render();
+                }
             }
         }
     }
@@ -350,7 +425,9 @@ struct MainMenuContext {
         std::cout << "Initializing main context." << std::endl;
         load_persistent_data();
         login_context.parent = this;
+        multiplayer_context.parent = this;
         if (std::string token; read_file(token_path, token)) {
+            std::erase_if(token, ::isspace);
             login_context.attempt_token_auth(token);
         }
     }
@@ -369,7 +446,7 @@ struct MainMenuContext {
 int main() {
     // Make window resizable
     SetTraceLogLevel(LOG_NONE); //
-    InitWindow(1920, 1080, "Pirate Scrabble");
+    InitWindow(1920/2, 1080/2, "Pirate Scrabble");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
 
@@ -388,7 +465,7 @@ int main() {
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, "/home/jeromewei/projects/cpp-pirate-scrabble/arial.ttf", 0, &face)) {
+    if (FT_New_Face(ft, "arial.ttf", 0, &face)) {
         std::cerr << "Failed to load font\n";
         return 1;
     }

@@ -8,6 +8,127 @@ struct PersistentData {
     int dummy = 0;
 };
 
+struct TileProps {
+    std::string letter;
+    std::string id;
+    bool faceUp;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TileProps, letter, id, faceUp)
+
+struct Word {
+    std::vector<std::string> history;
+    std::string id;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Word, history, id)
+
+struct GameState {
+    int tileCount;
+    int wordMinimumSize;
+    int playerCount;
+    std::vector<TileProps> tiles;
+    std::string dictionary;
+    std::vector<std::vector<Word>> playerWords;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    GameState,
+    tileCount,
+    wordMinimumSize,
+    playerCount,
+    tiles,
+    dictionary,
+    playerWords
+)
+
+struct GameStateUpdate {
+    std::string actionType;
+    std::string flippedTileId;
+    std::string claimWord;
+    std::string stolenWordId;
+    int actingPlayer;
+    std::optional<int> stolenPlayer;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    GameStateUpdate,
+    actionType,
+    flippedTileId,
+    claimWord,
+    stolenWordId,
+    actingPlayer,
+    stolenPlayer
+)
+
+struct MultiplayerChatMessage {
+    std::string sender;
+    std::string timestamp;
+    std::string message;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    MultiplayerChatMessage,
+    sender,
+    timestamp,
+    message
+)
+
+struct MultiplayerAction {
+    int playerId;
+    std::string actionType;
+    GameStateUpdate action;
+    std::string data;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    MultiplayerAction,
+    playerId,
+    actionType,
+    action,
+    data
+)
+
+struct MultiplayerGame {
+    std::string id;
+    std::string phase;
+    GameState state;
+    std::vector<int> playerIds;
+    std::vector<std::string> playerNames;
+    std::optional<int> buzzHolder;
+    std::optional<int> buzzElapsed;
+    GameStateUpdate lastAction;
+    std::vector<MultiplayerChatMessage> chat;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    MultiplayerGame,
+    id,
+    phase,
+    state,
+    playerIds,
+    playerNames,
+    buzzHolder,
+    buzzElapsed,
+    lastAction,
+    chat
+)
+
+struct MultiplayerActionResponse {
+    bool ok;
+    MultiplayerGame game;
+    int hashCode;
+    std::string errorMessage;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    MultiplayerActionResponse,
+    ok,
+    game,
+    hashCode,
+    errorMessage
+)
+
 struct User {
     int id;
     std::string username;
