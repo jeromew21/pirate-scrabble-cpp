@@ -44,8 +44,9 @@ struct Profiler {
 void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char* title) {
 #ifdef __APPLE__
     // ideally this should be DPIScale, not hardcoded as 2, but whatever.
-    logicalWidth = logicalWidth / 2;
-    logicalHeight = logicalHeight / 2;
+    auto dpi_scale = GetWindowScaleDPI();
+    logicalWidth = logicalWidth / dpi_scale.x;
+    logicalHeight = logicalHeight / dpi_scale.y;
 #endif
 
     // Try to disable hidpi
