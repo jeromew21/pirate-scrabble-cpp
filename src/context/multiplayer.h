@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <ixwebsocket/IXWebSocket.h>
 
 #include "serialization/types.h"
 #include "util/util.h"
@@ -22,7 +21,7 @@ public:
 
     MainMenuContext *main_menu;
 
-    ix::WebSocket game_socket;
+    //ix::WebSocket game_socket;
 
     Queue recv_create_queue;
 

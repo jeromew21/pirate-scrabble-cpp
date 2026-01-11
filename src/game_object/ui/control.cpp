@@ -136,6 +136,7 @@ static void utf8_pop_back(std::string& s) {
 }
 
 void LineInput::Update(float /*delta_time*/) {
+    return;
     int codepoint;
     while ((codepoint = GetCharPressed()) != 0) {
         if (codepoint >= 32) {

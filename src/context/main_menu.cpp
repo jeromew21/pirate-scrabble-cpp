@@ -22,12 +22,13 @@ static bool write_token(const std::string &token_path, const std::string &token)
 
 static std::optional<PersistentData> load_persistent_data(const std::string &persistent_data_path) {
     std::string outContents;
-    read_file(persistent_data_path, outContents);
-    try {
-        return deserialize_or_throw<PersistentData>(outContents);
-    } catch (const std::exception &e) {
-        std::cerr << e.what() << "\n";
-        return std::nullopt;
+    if (read_file(persistent_data_path, outContents)) {
+        try {
+            return deserialize_or_throw<PersistentData>(outContents);
+        } catch (const std::exception &e) {
+            std::cerr << e.what() << "\n";
+            return std::nullopt;
+        }
     }
     return std::nullopt;
 }

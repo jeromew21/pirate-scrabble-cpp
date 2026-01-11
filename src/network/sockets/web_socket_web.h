@@ -33,7 +33,7 @@ struct WebSocketWeb : public IWebSocket {
             });
 
         emscripten_websocket_set_onerror_callback(ws, this,
-            [](int, const EmscriptenWebSocketMessageEvent*, void* user) -> EM_BOOL {
+            [](int, const EmscriptenWebSocketErrorEvent*, void* user) -> EM_BOOL {
                 auto self = static_cast<WebSocketWeb*>(user);
                 if (self->on_error) self->on_error("WebSocket error");
                 return EM_TRUE;

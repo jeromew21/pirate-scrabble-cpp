@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
 
 #include <raylib.h>
 #include <rlImGui.h>
@@ -23,14 +24,25 @@
 #include "game_object/tween/tween.h"
 #include "scrabble/tile.h"
 
-
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
+static std::function<void()> mainLoopFunc;
+
+extern "C" void loop_wrapper() {
+    mainLoopFunc();
+}
 
 using namespace frameflow;
 
+namespace fs = std::filesystem;
+
+#ifdef __EMSCRIPTEN__
+fs::path FS_ROOT = "/";
+#else
+fs::path FS_ROOT = ".";
+#endif
 
 struct Profiler {
     const char *name;
@@ -52,7 +64,9 @@ struct Profiler {
 
 
 void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char *title) {
-    // Try to disable hidpi
+#ifdef __APPLE__
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+#endif
     constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
                                    | FLAG_MSAA_4X_HINT
                                    | FLAG_VSYNC_HINT;
@@ -60,13 +74,28 @@ void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char *ti
 
     // Initialize with logical dimensions - raylib handles DPI internally
     InitWindow(logicalWidth, logicalHeight, title);
+#ifdef __EMSCRIPTEN__
+    // Get the actual canvas size set by JavaScript
+    int canvasWidth = EM_ASM_INT({
+        return Module.canvas.width;
+    });
+    int canvasHeight = EM_ASM_INT({
+        return Module.canvas.height;
+    });
+
+    // Tell raylib about the real size
+    SetWindowSize(canvasWidth, canvasHeight);
+
+    std::cout << "Synced raylib to canvas size: " << canvasWidth << "x" << canvasHeight << std::endl;
+#endif
 
 #ifdef __APPLE__
-    // ideally this should be DPIScale, not hardcoded as 2, but whatever.
+    /*
     auto dpi_scale = GetWindowScaleDPI();
     logicalWidth = logicalWidth / dpi_scale.x;
     logicalHeight = logicalHeight / dpi_scale.y;
     SetWindowSize(logicalWidth, logicalHeight);
+    */
 #endif
 }
 
@@ -77,8 +106,9 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
     // consider this just being an array...
     std::unordered_map<char, RenderTexture2D> tile_map;
 
+    const auto arial = FS_ROOT / "assets" / "arial.ttf";
     FT_Face face;
-    if (FT_New_Face(ft, "arial.ttf", 0, &face)) {
+    if (FT_New_Face(ft, arial.c_str(), 0, &face)) {
         std::cerr << "Failed to load font\n";
         exit(67);
     }
@@ -113,7 +143,6 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
         {
             ClearBackground({0, 0, 0, 0}); // IMPORTANT: alpha = 0dd
             tile->DrawRec();
-            EndTextureMode();
         }
         EndTextureMode();
         tile_map[i] = tile_texture;
@@ -139,8 +168,9 @@ int main() {
         return 1;
     }
 
+    const auto arial = FS_ROOT / "assets" / "arial.ttf";
     FT_Face face;
-    if (FT_New_Face(ft, "arial.ttf", 0, &face)) {
+    if (FT_New_Face(ft, arial.c_str(), 0, &face)) {
         std::cerr << "Failed to load font\n";
         return 1;
     }
@@ -182,55 +212,6 @@ int main() {
     sprite->transform.local_position = {500, 500};
 
 
-    /*
-    System *ui = new System();
-    NodeId root = add_generic(ui, NullNode);
-
-    NodeId loading_node = add_center(ui, root);
-    NodeId loading_text_node = add_generic(ui, loading_node);
-    {
-        get_node(ui, loading_node).anchors = {0, 0, 1, 1};
-        get_node(ui, loading_text_node).anchors = {.5, 0.5, 0.5, 0.5};
-        get_node(ui, loading_text_node).minimum_size = {400, 100};
-    }
-
-    NodeId multiplayer_node = add_box(ui, root, BoxData{Direction::Horizontal, Align::Start});
-    get_node(ui, multiplayer_node).anchors = {0, 0, 1, 1};
-
-    {
-        NodeId left = add_generic(ui, multiplayer_node);
-        get_node(ui, left).anchors = {0, 0, 0, 1};
-        get_node(ui, left).minimum_size = {100, 0};
-        get_node(ui, left).expand.x = 1;
-    }
-
-    std::vector<NodeId> tileIds;
-
-    {
-        NodeId middle = add_generic(ui, multiplayer_node);
-        get_node(ui, middle).anchors = {0, 0, 0, 1};
-        get_node(ui, middle).minimum_size = {48 * 10, 0};
-        NodeId vbox = add_box(ui, middle, BoxData{Direction::Vertical, Align::Start});
-        NodeId title = add_generic(ui, vbox);
-        get_node(ui, title).minimum_size = {0, 200};
-        get_node(ui, vbox).anchors = {0, 0, 1, 1};
-        NodeId flow = add_flow(ui, vbox, FlowData{Direction::Horizontal, Align::Start});
-        get_node(ui, flow).anchors = {0, 0, 1, 1};
-        for (int i = 0; i < 144; i++) {
-            NodeId tile = add_generic(ui, flow);
-            get_node(ui, tile).minimum_size = {48, 48};
-            tileIds.push_back(tile);
-        }
-    }
-
-    {
-        NodeId right = add_generic(ui, multiplayer_node);
-        get_node(ui, right).anchors = {0, 0, 0, 1};
-        get_node(ui, right).minimum_size = {100, 0};
-        get_node(ui, right).expand.x = 1;
-    }
-    */
-
     double updateTime = 0.0;
     int updateCount = 0;
     double drawTime = 0.0;
@@ -239,74 +220,95 @@ int main() {
     double updateAvg = 0;
     double drawAvg = 0;
 
+    mainLoopFunc = [&]() {
+        if (IsWindowResized()) {
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(
+            // Sync raylib with the new canvas size
+            int canvasWidth = EM_ASM_INT({
+                return Module.canvas.width;
+            });
+            int canvasHeight = EM_ASM_INT({
+                return Module.canvas.height;
+            });
+
+            SetWindowSize(canvasWidth, canvasHeight);
+            std::cout << "Resized to: " << canvasWidth << "x" << canvasHeight << std::endl;
 #else
-    while (!WindowShouldClose())
-        [&]() {
+            //SetWindowSize(, 800);
 #endif
-            if (IsWindowResized()) {
-                // maybe cancel tweens here...
-            }
 
-            // Update
+        }
+
+        // Update
+        {
+            Profiler p("UpdateRec", updateTime, updateCount);
+            const float dt = GetFrameTime();
+            root.UpdateRec(dt);
+            tween_manager.Update(dt);
+        }
+
+        // Draw
+        BeginDrawing();
+        {
+            ClearBackground(DARKGRAY);
+
+            rlImGuiBegin();
+
+            ImGuiIO& io = ImGui::GetIO();
+            io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+
             {
-                Profiler p("UpdateRec", updateTime, updateCount);
-                const float dt = GetFrameTime();
-                root.UpdateRec(dt);
-                tween_manager.Update(dt);
+                Profiler p("DrawRec", drawTime, drawCount);
+                root.DrawRec();
             }
 
-            // Draw
-            BeginDrawing();
             {
-                ClearBackground(DARKGRAY);
-                rlImGuiBegin();
+                auto now = std::chrono::high_resolution_clock::now();
+                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
+                if (elapsed >= 1) {
+                    updateAvg = (updateTime / updateCount);
+                    drawAvg = (drawTime / drawCount);
 
-                {
-                    Profiler p("DrawRec", drawTime, drawCount);
-                    root.DrawRec();
+                    // reset counters
+                    updateTime = 0.0;
+                    updateCount = 0;
+                    drawTime = 0.0;
+                    drawCount = 0;
+                    lastPrint = now;
                 }
-
-                {
-                    auto now = std::chrono::high_resolution_clock::now();
-                    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
-                    if (elapsed >= 1) {
-                        updateAvg = (updateTime / updateCount);
-                        drawAvg = (drawTime / drawCount);
-
-                        // reset counters
-                        updateTime = 0.0;
-                        updateCount = 0;
-                        drawTime = 0.0;
-                        drawCount = 0;
-                        lastPrint = now;
-                    }
-                    ImGui::Begin("Debug");
-                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                                ImGui::GetIO().Framerate);
-                    ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
-                    ImGui::Text("UpdateRec average: %f ms", updateAvg);
-                    ImGui::Text("DrawRec average: %f ms", drawAvg);
-                    if (ImGui::Button("Spin")) {
-                        tween_manager.CreateTweenFromTo(
-                            &sprite->transform.rotation,
-                            0,
-                            360,
-                            1,
-                            Easing::EaseInOutSine);
-                    }
-                    ImGui::End();
+                ImGui::Begin("Debug");
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                            ImGui::GetIO().Framerate);
+                ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
+                ImGui::Text("UpdateRec average: %f ms", updateAvg);
+                ImGui::Text("DrawRec average: %f ms", drawAvg);
+                ImGui::Text("Mouse position %i, %i", (int)GetMousePosition().x,(int) GetMousePosition().y);
+                ImGui::Text("Window size %i, %i", (int)GetScreenWidth(),(int) GetScreenHeight());
+                ImGui::Text("Render size %i, %i", (int)GetRenderWidth(),(int) GetRenderHeight());
+                ImGui::Text("DPI scale %i, %i", (int)GetWindowScaleDPI().x,(int) GetWindowScaleDPI().y);
+                ImGui::Text("ImGui display size %f, %f", io.DisplaySize.x, io.DisplaySize.y);
+                ImGui::Text("ImGui IO framebuffer scale %f, %f", io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+                if (ImGui::Button("Spin")) {
+                    tween_manager.CreateTweenFromTo(
+                        &sprite->transform.rotation,
+                        0,
+                        360,
+                        1,
+                        Easing::EaseInOutSine);
                 }
-
-                rlImGuiEnd();
+                ImGui::End();
             }
-            EndDrawing();
 
+            rlImGuiEnd();
+        }
+        EndDrawing();
+    };
 #ifdef __EMSCRIPTEN__
-        }, 0, 1);
+    emscripten_set_main_loop(loop_wrapper, 0, 1);
 #else
-        }();
+    while (!WindowShouldClose()) {
+        loop_wrapper();
+    }
 #endif
 
     // todo: shutdown harfbuzz/freetype

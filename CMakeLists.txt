@@ -4,6 +4,19 @@ project(game LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Detect Emscripten and set flags BEFORE adding subdirectories
+if(EMSCRIPTEN)
+    message(STATUS "Building for Emscripten with pthreads and SDL2")
+
+    # IMPORTANT: Must be BEFORE adding Raylib
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -sUSE_SDL=2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -sUSE_SDL=2")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -sUSE_PTHREADS=1 -sUSE_SDL=2")
+endif()
+
+if(NOT EMSCRIPTEN)
+    set(RAYLIB_GRAPHICS_BACKEND "SDL2")
+endif()
 add_subdirectory(external/raylib)
 add_subdirectory(external/frameflow)
 add_subdirectory(external/freetype)
@@ -74,31 +87,40 @@ target_link_libraries(game
         harfbuzz
         concurrentqueue
         fmt::fmt
-        ixwebsocket::ixwebsocket
 )
+
+if (NOT EMSCRIPTEN)
+    target_link_libraries(game
+            PRIVATE
+        ixwebsocket::ixwebsocket
+    )
+endif()
 
 # Detect Emscripten
 if(EMSCRIPTEN)
     message(STATUS "Building for Emscripten")
 
-    # Enable pthreads
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            LINK_FLAGS "-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4"
-            COMPILE_FLAGS "-pthread"
+    # Compile flags
+    target_compile_options(${PROJECT_NAME} PRIVATE
+            -pthread
     )
 
-    # Enable WebSockets
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s USE_WEBSOCKET=1"
+    target_link_options(${PROJECT_NAME} PRIVATE
+            -pthread
+            -sUSE_PTHREADS=1
+            -sPTHREAD_POOL_SIZE=4
+            -sFORCE_FILESYSTEM=1
+            -sINITIAL_MEMORY=33554432  # 32MB instead of 16MB
+            -sTOTAL_MEMORY=512MB
+            -sUSE_SDL=2
+            #-sALLOW_MEMORY_GROWTH=1
+            -sNO_DISABLE_EXCEPTION_CATCHING
+            -lwebsocket.js  # This is what you were missing!
+            --shell-file ${CMAKE_SOURCE_DIR}/shell.html
+            --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets
     )
 
-    # Enable filesystem (optional, if you want read/write access)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s FORCE_FILESYSTEM=1"
-    )
-
-    # Optional: set main loop style for async rendering
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s EXIT_RUNTIME=1"
+    set_target_properties(game PROPERTIES
+            SUFFIX ".html"
     )
 endif()
