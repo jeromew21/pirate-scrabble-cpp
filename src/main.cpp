@@ -10,8 +10,6 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <hb.h>
-#include <hb-ft.h>
 
 #include <imgui.h>
 #include <rlImGui.h>
@@ -19,12 +17,12 @@
 
 #include <frameflow/layout.hpp>
 
-#include "util.h"
+#include "util/util.h"
 #include "text/texthb.h"
 #include "serialization/types.h"
-#include "sockets.h"
-#include "ixwebsocket/IXWebSocket.h"
+#include "context/sockets.h"
 
+#include "context/main_menu.h"
 
 using namespace frameflow;
 
@@ -80,316 +78,6 @@ static void DrawNodeRects(System &sys, NodeId id) {
 static Rectangle rl_rect(Rect r) {
     return {r.origin.x, r.origin.y, r.size.x, r.size.y};
 }
-
-struct MainMenuContext {
-    struct LoginContext {
-        enum class State {
-            PreLogin,
-            Bypassed,
-            Active,
-            Loading,
-        };
-
-        MainMenuContext *parent;
-        Queue recv_login_queue;
-        State state = State::PreLogin;
-        std::string logs;
-        std::string username_label;
-        std::string password_label;
-
-        void attempt_token_auth(std::string token) {
-            std::cout << "Attempting token authentication" << std::endl;
-            std::thread t(TokenAuthSocket, std::ref(recv_login_queue),  token);
-            t.detach();
-        }
-
-        void handle_incoming() {
-            std::string msg;
-            while (recv_login_queue.try_dequeue(msg)) {
-                auto response = deserialize<UserResponse>(msg);
-                if (response.ok) {
-                    logs.append("USER AUTH SUCCESS\n");
-                    std::cout << "USER AUTH SUCCESS\n";
-                    // some callback, maybe
-                    parent->authenticate_user(response.user.value());
-                    state = State::Bypassed;
-                } else {
-                    logs.append("USER AUTH FAIL: " + response.error + "\n");
-                    std::cout << "USER AUTH FAIL\n";
-                    state = State::Active;
-                }
-            }
-        }
-
-        void render() {
-            if (state == State::Active || state == State::Loading) {
-                ImGui::Begin("Log in");
-                ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-                bool b1 = ImGui::InputText("Username", &username_label, flags);
-                bool b2 = ImGui::InputText("Password", &password_label, flags);
-                bool b3 = ImGui::Button("Log in");
-                if (b1 || b2 || b3) {
-                    // todo: loading state
-                    std::thread t(UserLoginSocket, std::ref(recv_login_queue), username_label, password_label);
-                    t.detach();
-                }
-                if (ImGui::CollapsingHeader("Socket Response Logs (incomplete)")) {
-                    ImGui::Text(logs.c_str());
-                }
-                ImGui::End();
-            }
-        }
-    };
-
-    struct MultiplayerContext {
-        enum class State {
-            PreInit, Gateway, Lobby, Playing
-        };
-
-        std::optional<MultiplayerGame> game;
-
-        MainMenuContext *parent;
-
-        State state = State::PreInit;
-
-        ix::WebSocket game_socket;
-
-        Queue recv_create_queue;
-
-        Queue recv_join_queue;
-
-        Queue recv_game_queue;
-
-        void handle_incoming() {
-            switch (state) {
-                case State::PreInit:
-                    break;
-                case State::Gateway: {
-                    // join or create
-                    std::string msg;
-                    while (recv_create_queue.try_dequeue(msg)) {
-                        auto response = deserialize<MultiplayerActionResponse>(msg);
-                        if (response.ok) {
-                            std::cout << "NEW GAME CREATED!" << std::endl;
-                            game = response.game;
-                            // start the socket?
-                            enter_lobby();
-                        } else {
-                            std::cerr << response.errorMessage << std::endl;
-                        }
-                    }
-                    while (recv_join_queue.try_dequeue(msg)) {
-                        std::cout << msg;
-                    }
-                    break;
-                }
-                case State::Playing:
-                case State::Lobby: {
-                    std::string msg;
-                    while (recv_game_queue.try_dequeue(msg)) {
-                        break;
-                    }
-                    break;
-                }
-            }
-        }
-
-        void render_gateway() {
-            ImGui::Begin("Multiplayer");
-            if (ImGui::Button("New Game")) {
-                // do new game socket thread
-                std::thread t(NewGameSocket, std::ref(recv_create_queue), parent->user->token);
-                t.detach();
-            }
-            if (ImGui::Button("Join Game")) {
-                // do new game socket thread
-            }
-            if (ImGui::Button("Back")) {
-                parent->enter_main_menu();
-            }
-            ImGui::End();
-        }
-
-        void render_lobby() {
-            ImGui::Begin("Game Lobby");
-            ImGui::End();
-        }
-
-        void render_playing() {
-            ImGui::Begin("Gameplay Debug");
-            ImGui::End();
-        }
-
-        void enter_gateway() {
-            state = State::Gateway;
-            parent->login_context.attempt_token_auth(parent->user->token);
-            // re authenticate in parallel?
-            // re authenticate every X seconds?
-            if (parent->user->currentGame.has_value()) {
-                enter_playing();
-            }
-        }
-
-        void enter_lobby() {
-            state = State::Lobby;
-        }
-
-        void enter_playing() {
-            state = State::Playing;
-        }
-
-        void render() {
-            if (state == State::Gateway) {
-                handle_incoming();
-                render_gateway();
-            } else if (state == State::Lobby) {
-                handle_incoming();
-                render_lobby();
-            } else if (state == State::Playing) {
-                handle_incoming();
-                render_playing();
-            } else {
-                // preinit
-            }
-        }
-    };
-
-    enum class State {
-        InitialLoading,
-        Menu,
-        Multiplayer,
-    };
-
-    State state = State::InitialLoading;
-
-    PersistentData persistent_data;
-
-    std::optional<User> user;
-
-    LoginContext login_context;
-
-    MultiplayerContext multiplayer_context;
-
-    std::string token_path = "./token.txt";
-
-    std::string persistent_data_path = "./gamedata.json";
-
-    float loading_counter = 0;
-
-    float loading_time = 2.0f;
-
-    void authenticate_user(User new_user) {
-        user = new_user;
-    }
-
-    bool load_persistent_data() {
-        std::string outContents;
-        read_file(persistent_data_path, outContents);
-        try {
-            persistent_data = deserialize_or_throw<PersistentData>(outContents);
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << "\n";
-            return false;
-        }
-        return true;
-    }
-
-    bool write_persistent_data() const {
-        return write_file(persistent_data_path, serialize(persistent_data));
-    }
-
-    bool write_token() const {
-        if (user.has_value()) {
-            return write_file(token_path, user->token);
-        }
-        return true;
-    }
-
-    void render_main_menu() {
-        ImGui::Begin("Main Menu");
-
-        if (ImGui::Button("Multiplayer")) {
-            // set state to multiplayer gateway
-            state = State::Multiplayer;
-            multiplayer_context.enter_gateway();
-        }
-
-        if (ImGui::CollapsingHeader("Settings")) {
-            ImGui::Text("Adjust graphics, audio, and controls.");
-            // Example settings sliders
-            static float volume = 1.0f;
-            ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f);
-        }
-
-        if (ImGui::CollapsingHeader("Profile")) {
-            ImGui::Text("User profile and statistics.");
-            ImGui::Text("Username: %s", user->username.c_str());
-        }
-
-        if (ImGui::CollapsingHeader("About")) {
-            ImGui::Text("Pirate Scrabble v1.0");
-            ImGui::Text("Copyright 2026");
-        }
-
-        ImGui::End();
-    }
-
-    void enter_main_menu() {
-        state = State::Menu;
-        if (user.has_value()) {
-            login_context.attempt_token_auth(user->token);
-        }
-    }
-
-    void render(const float delta) {
-        login_context.handle_incoming();
-        switch (state) {
-            case State::InitialLoading:
-            {
-                loading_counter += delta;
-                if (loading_counter > loading_time) {
-                    state = State::Menu;
-                    if (!user.has_value()) {
-                        login_context.state = LoginContext::State::Active;
-                    }
-                }
-                break;
-            }
-            case State::Multiplayer: {
-                multiplayer_context.render();
-                break;
-            }
-            case State::Menu: {
-                if (login_context.state == LoginContext::State::Bypassed) {
-                    render_main_menu();
-                } else {
-                    login_context.render();
-                }
-            }
-        }
-    }
-
-    MainMenuContext() {
-        std::cout << "Initializing main context." << std::endl;
-        load_persistent_data();
-        login_context.parent = this;
-        multiplayer_context.parent = this;
-        if (std::string token; read_file(token_path, token)) {
-            std::erase_if(token, ::isspace);
-            login_context.attempt_token_auth(token);
-        }
-    }
-
-    ~MainMenuContext() {
-        if (!write_persistent_data()) {
-            std::cout << "Failed to write persistent data to disk." << std::endl;
-        }
-        if (!write_token()) {
-            std::cout << "Failed to write token to disk." << std::endl;
-        }
-    }
-};
-
 
 int main() {
     // Make window resizable
@@ -480,6 +168,9 @@ int main() {
         // Compute layout
         compute_layout(ui, root);
 
+        // Update
+        menu_context.UpdateRec(GetFrameTime());
+
         // Draw
         BeginDrawing();
         {
@@ -487,7 +178,8 @@ int main() {
 
             rlImGuiBegin();
 
-            menu_context.render(GetFrameTime());
+
+            menu_context.DrawRec();
 
             //DrawNodeRects(ui, loading_node);
 

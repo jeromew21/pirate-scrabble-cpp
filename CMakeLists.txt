@@ -9,6 +9,7 @@ add_subdirectory(external/frameflow)
 add_subdirectory(external/freetype)
 add_subdirectory(external/harfbuzz)
 add_subdirectory(external/concurrentqueue)
+add_subdirectory(external/fmt)
 
 set(USE_TLS 1 CACHE INTERNAL "Force TLS")
 add_subdirectory(external/IXWebSocket)
@@ -22,10 +23,20 @@ add_executable(game
         external/imgui/imgui_demo.cpp
         external/imgui/misc/cpp/imgui_stdlib.cpp
         external/rlImGui/rlImGui.cpp
-        src/util.cpp
+        src/util/util.h
+        src/util/util.cpp
+        src/text/texthb.h
         src/text/texthb.cpp
-        src/serialization/types.h
-        src/sockets.cpp
+        src/context/sockets.h
+        src/context/sockets.cpp
+        src/context/main_menu.h
+        src/context/main_menu.cpp
+        src/context/login.cpp
+        src/context/login.h
+        src/context/multiplayer.cpp
+        src/context/multiplayer.h
+        src/game_object/game_object.h
+        src/game_object/game_object.cpp
 )
 
 target_include_directories(game
@@ -45,5 +56,6 @@ target_link_libraries(game
         freetype
         harfbuzz
         concurrentqueue
+        fmt::fmt
         ixwebsocket::ixwebsocket
 )

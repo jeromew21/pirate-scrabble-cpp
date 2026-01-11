@@ -4,7 +4,7 @@
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXUserAgent.h>
 
-#include "serialization/types.h"
+#include "../serialization/types.h"
 
 void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const std::string &password) {
     const std::string url = "wss://api.playpiratescrabble.com/ws/account/login";
