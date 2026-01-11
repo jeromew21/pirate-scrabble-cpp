@@ -156,11 +156,15 @@ void LineInput::Update(float /*delta_time*/) {
 void Label::Draw() {
     Control::Draw();
     //fallback color and font!
-    auto measure = MeasureTextHB(*font, text);
     DrawTextHB(*font,
         text,
         GetNode()->bounds.origin.x,
-        GetNode()->bounds.origin.y + measure.ascent,
+        GetNode()->bounds.origin.y + ascent,
         *color);
+}
+
+void Label::Update(float delta_time) {
+    auto measure = MeasureTextHB(*font, text);
+    ascent = measure.ascent;
     GetNode()->minimum_size = {measure.width, measure.height};
 }

@@ -1,84 +1,69 @@
 #include "sockets.h"
 
-#include <ixwebsocket/IXNetSystem.h>
-#include <ixwebsocket/IXWebSocket.h>
-#include <ixwebsocket/IXUserAgent.h>
-
 #include "../serialization/types.h"
+
+#ifdef __EMSCRIPTEN__
+#include "network/sockets/web_socket_web.h"
+using WebSocketImpl = WebSocketWeb;
+#else
+#include "network/sockets/web_socket_desktop.h"
+using WebSocketImpl = WebSocketDesktop;
+#endif
+
 
 void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const std::string &password) {
     const std::string url = "wss://api.playpiratescrabble.com/ws/account/login";
-    ix::WebSocket ws;
-    ws.setUrl(url);
-    ws.disableAutomaticReconnection();
 
     const auto payload = serialize(UserLoginAttempt{username, password});
 
-    ws.setOnMessageCallback([&](const ix::WebSocketMessagePtr &msg) {
-            if (msg->type == ix::WebSocketMessageType::Message) {
-                recvLoginQueue.enqueue(msg->str);
-            } else if (msg->type == ix::WebSocketMessageType::Open) {
-                ws.send(payload);
-            } else if (msg->type == ix::WebSocketMessageType::Error) {
-            }
-        }
-    );
+    const IWebSocket::Ptr ws = std::make_shared<WebSocketImpl>(url);
 
-    ws.start();
+    ws->on_open = [&]() {
+        ws->send(payload);
+    };
+    ws->on_message = [&recvLoginQueue](const std::string& msg) {
+        recvLoginQueue.enqueue(msg);
+    };
+    ws->on_error = [](const std::string& err) {};
+    ws->on_close = []() {};
 
-    // Wait for the server response (or timeout)
+    ws->connect();
+
     std::this_thread::sleep_for(std::chrono::seconds(4));
-
-    ws.stop(); // safely stops threads
-    ws.close();
 }
 
 void TokenAuthSocket(Queue &recvLoginQueue, std::string token) {
     const std::string url = "wss://api.playpiratescrabble.com/ws/account/tokenAuth";
-    ix::WebSocket ws;
-    ws.setUrl(url);
-    ws.disableAutomaticReconnection();
+    const IWebSocket::Ptr ws = std::make_shared<WebSocketImpl>(url);
 
-    ws.setOnMessageCallback([&](const ix::WebSocketMessagePtr &msg) {
-            if (msg->type == ix::WebSocketMessageType::Message) {
-                recvLoginQueue.enqueue(msg->str);
-            } else if (msg->type == ix::WebSocketMessageType::Open) {
-                ws.send(token);
-            } else if (msg->type == ix::WebSocketMessageType::Error) {
-            }
-        }
-    );
+    ws->on_open = [&]() {
+        ws->send(token);
+    };
+    ws->on_message = [&recvLoginQueue](const std::string& msg) {
+        recvLoginQueue.enqueue(msg);
+    };
+    ws->on_error = [](const std::string& err) {};
+    ws->on_close = []() {};
 
-    ws.start();
+    ws->connect();
 
-    // Wait for the server response (or timeout)
     std::this_thread::sleep_for(std::chrono::seconds(4));
-
-    ws.stop(); // safely stops threads
-    ws.close();
 }
 
 void NewGameSocket(Queue &recvLoginQueue, std::string token) {
     const std::string url = "wss://api.playpiratescrabble.com/ws/multiplayer/create";
-    ix::WebSocket ws;
-    ws.setUrl(url);
-    ws.disableAutomaticReconnection();
+    const IWebSocket::Ptr ws = std::make_shared<WebSocketImpl>(url);
 
-    ws.setOnMessageCallback([&](const ix::WebSocketMessagePtr &msg) {
-            if (msg->type == ix::WebSocketMessageType::Message) {
-                recvLoginQueue.enqueue(msg->str);
-            } else if (msg->type == ix::WebSocketMessageType::Open) {
-                ws.send(token);
-            } else if (msg->type == ix::WebSocketMessageType::Error) {
-            }
-        }
-    );
+    ws->on_open = [&]() {
+        ws->send(token);
+    };
+    ws->on_message = [&recvLoginQueue](const std::string& msg) {
+        recvLoginQueue.enqueue(msg);
+    };
+    ws->on_error = [](const std::string& err) {};
+    ws->on_close = []() {};
 
-    ws.start();
+    ws->connect();
 
-    // Wait for the server response (or timeout)
     std::this_thread::sleep_for(std::chrono::seconds(4));
-
-    ws.stop(); // safely stops threads
-    ws.close();
 }

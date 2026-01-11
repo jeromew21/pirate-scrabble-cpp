@@ -52,6 +52,9 @@ public:
     Color *color;
     explicit Label() = default;
     void Draw() override;
+    void Update(float delta_time) override;
+private:
+    float ascent;
 };
 
 class LineInput : public Control {

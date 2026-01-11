@@ -20,19 +20,27 @@
 #include "game_object/entity/entity.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
+#include "game_object/tween/tween.h"
 #include "scrabble/tile.h"
+
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 
 using namespace frameflow;
 
 
 struct Profiler {
-    const char* name;
-    double& accumulator;
-    int& count;
+    const char *name;
+    double &accumulator;
+    int &count;
     std::chrono::high_resolution_clock::time_point start;
 
-    Profiler(const char* n, double& acc, int& c)
-        : name(n), accumulator(acc), count(c), start(std::chrono::high_resolution_clock::now()) {}
+    Profiler(const char *n, double &acc, int &c)
+        : name(n), accumulator(acc), count(c), start(std::chrono::high_resolution_clock::now()) {
+    }
 
     ~Profiler() {
         auto end = std::chrono::high_resolution_clock::now();
@@ -43,9 +51,11 @@ struct Profiler {
 };
 
 
-void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char* title) {
+void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char *title) {
     // Try to disable hidpi
-    constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT;
+    constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
+                                   | FLAG_MSAA_4X_HINT
+                                   | FLAG_VSYNC_HINT;
     SetConfigFlags(flags);
 
     // Initialize with logical dimensions - raylib handles DPI internally
@@ -58,13 +68,13 @@ void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char* ti
     logicalHeight = logicalHeight / dpi_scale.y;
     SetWindowSize(logicalWidth, logicalHeight);
 #endif
-
 }
 
 bool Control::DrawDebugBorders = true;
 float Tile::dim = 256.0;
 
 std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
+    // consider this just being an array...
     std::unordered_map<char, RenderTexture2D> tile_map;
 
     FT_Face face;
@@ -75,7 +85,7 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
 
     auto black = BLACK;
 
-    HBFont font(face, (int)Tile::dim); // pixel size 48
+    HBFont font(face, static_cast<int>(Tile::dim)); // pixel size 48
 
     LayoutSystem sys{};
 
@@ -85,13 +95,13 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
     auto *c = new Label();
     tile->AddChild(c);
     c->font = &font,
-    c->text = "A";
+            c->text = "A";
     c->color = &black;
-    tile->GetNode()->bounds.origin ={0, 0};
+    tile->GetNode()->bounds.origin = {0, 0};
     tile->GetNode()->bounds.size = tile->GetNode()->minimum_size;
-    for (char i = 0; i < 127; i++){
+    for (char i = 0; i < 127; i++) {
         c->text = i;
-        c->Draw();
+        tile->UpdateRec(0.016f);
         compute_layout(sys.system.get(), tile->node_id_);
         // can we draw this to a render texture?
         const RenderTexture2D tile_texture = LoadRenderTexture(
@@ -117,7 +127,6 @@ int main() {
     // Make window resizable
     SetTraceLogLevel(LOG_NONE);
     InitCrossPlatformWindow(1920, 1080, "Pirate Scrabble");
-    //SetTargetFPS(60);
 
     rlImGuiSetup(true); // sets up ImGui with either a dark or light default theme
 
@@ -137,6 +146,8 @@ int main() {
     }
 
     HBFont font(face, 48); // pixel size 48
+
+    TweenManager tween_manager;
 
     GameObject root{};
 
@@ -164,7 +175,7 @@ int main() {
         label->color = &black;
     }
 
-    auto sprite = new Sprite();
+    auto *sprite = new Sprite();
     sprite->SetTexture(&tile_map['C'].texture);
     root.AddChild(sprite);
     sprite->transform.rotation = 45;
@@ -225,54 +236,79 @@ int main() {
     double drawTime = 0.0;
     int drawCount = 0;
     auto lastPrint = std::chrono::high_resolution_clock::now();
-    double updateAvg=0;
-    double drawAvg=0;
+    double updateAvg = 0;
+    double drawAvg = 0;
 
-    while (!WindowShouldClose()) {
-        // Update
-        {
-            Profiler p("UpdateRec", updateTime, updateCount);
-            root.UpdateRec(GetFrameTime());
-        }
-
-        // Draw
-        BeginDrawing();
-        {
-            ClearBackground(DARKGRAY);
-
-            rlImGuiBegin();
-            {
-                Profiler p("DrawRec", drawTime, drawCount);
-                root.DrawRec();
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(
+#else
+    while (!WindowShouldClose())
+        [&]() {
+#endif
+            if (IsWindowResized()) {
+                // maybe cancel tweens here...
             }
 
-            sprite->transform.rotation += 0.01;
-
+            // Update
             {
-                auto now = std::chrono::high_resolution_clock::now();
-                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
-                if (elapsed >= 1) {
-                    updateAvg = (updateTime / updateCount);
-                    drawAvg = (drawTime / drawCount);
+                Profiler p("UpdateRec", updateTime, updateCount);
+                const float dt = GetFrameTime();
+                root.UpdateRec(dt);
+                tween_manager.Update(dt);
+            }
 
-                    // reset counters
-                    updateTime = 0.0; updateCount = 0;
-                    drawTime = 0.0; drawCount = 0;
-                    lastPrint = now;
+            // Draw
+            BeginDrawing();
+            {
+                ClearBackground(DARKGRAY);
+                rlImGuiBegin();
+
+                {
+                    Profiler p("DrawRec", drawTime, drawCount);
+                    root.DrawRec();
                 }
-                ImGui::Begin("Debug");
-                ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
-                ImGui::Text("UpdateRec average: %f ms", updateAvg);
-                ImGui::Text("DrawRec average: %f ms", drawAvg);
-                ImGui::End();
+
+                {
+                    auto now = std::chrono::high_resolution_clock::now();
+                    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
+                    if (elapsed >= 1) {
+                        updateAvg = (updateTime / updateCount);
+                        drawAvg = (drawTime / drawCount);
+
+                        // reset counters
+                        updateTime = 0.0;
+                        updateCount = 0;
+                        drawTime = 0.0;
+                        drawCount = 0;
+                        lastPrint = now;
+                    }
+                    ImGui::Begin("Debug");
+                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                                ImGui::GetIO().Framerate);
+                    ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
+                    ImGui::Text("UpdateRec average: %f ms", updateAvg);
+                    ImGui::Text("DrawRec average: %f ms", drawAvg);
+                    if (ImGui::Button("Spin")) {
+                        tween_manager.CreateTweenFromTo(
+                            &sprite->transform.rotation,
+                            0,
+                            360,
+                            1,
+                            Easing::EaseInOutSine);
+                    }
+                    ImGui::End();
+                }
+
+                rlImGuiEnd();
             }
+            EndDrawing();
 
-            rlImGuiEnd();
-        }
-        EndDrawing();
+#ifdef __EMSCRIPTEN__
+        }, 0, 1);
+#else
+        }();
+#endif
 
-
-    }
     // todo: shutdown harfbuzz/freetype
     std::cout << "Shutting down." << std::endl;
 

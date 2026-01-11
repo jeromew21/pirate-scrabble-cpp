@@ -11,8 +11,10 @@ add_subdirectory(external/harfbuzz)
 add_subdirectory(external/concurrentqueue)
 add_subdirectory(external/fmt)
 
-set(USE_TLS 1 CACHE INTERNAL "Force TLS")
-add_subdirectory(external/IXWebSocket)
+if (NOT EMSCRIPTEN)
+    set(USE_TLS 1 CACHE INTERNAL "Force TLS")
+    add_subdirectory(external/IXWebSocket)
+endif()
 
 add_executable(game
         src/main.cpp
@@ -47,6 +49,11 @@ add_executable(game
         src/scrabble/tile.h
         src/game_object/entity/entity.cpp
         src/game_object/entity/entity.h
+        src/game_object/tween/tween.cpp
+        src/game_object/tween/tween.h
+        src/network/sockets/web_socket.h
+        src/network/sockets/web_socket_desktop.h
+        src/network/sockets/web_socket_web.h
 )
 
 target_include_directories(game
@@ -69,3 +76,29 @@ target_link_libraries(game
         fmt::fmt
         ixwebsocket::ixwebsocket
 )
+
+# Detect Emscripten
+if(EMSCRIPTEN)
+    message(STATUS "Building for Emscripten")
+
+    # Enable pthreads
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+            LINK_FLAGS "-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4"
+            COMPILE_FLAGS "-pthread"
+    )
+
+    # Enable WebSockets
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+            LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s USE_WEBSOCKET=1"
+    )
+
+    # Enable filesystem (optional, if you want read/write access)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+            LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s FORCE_FILESYSTEM=1"
+    )
+
+    # Optional: set main loop style for async rendering
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+            LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s EXIT_RUNTIME=1"
+    )
+endif()
