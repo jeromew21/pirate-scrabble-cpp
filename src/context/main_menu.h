@@ -14,8 +14,10 @@ struct MainMenuContext : GameObject {
         Multiplayer,
     };
 
+private:
     State state = State::InitialLoading;
 
+public:
     PersistentData persistent_data;
 
     std::optional<User> user{std::nullopt};
@@ -44,12 +46,5 @@ struct MainMenuContext : GameObject {
 
     void render_main_menu();
 
-    /*
-    void enter_main_menu() {
-        state = State::Menu;
-        if (user.has_value()) {
-            login_context.attempt_token_auth(user->token);
-        }
-    }
-    */
+    void enter_main_menu();
 };

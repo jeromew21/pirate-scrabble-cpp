@@ -37,6 +37,10 @@ add_executable(game
         src/context/multiplayer.h
         src/game_object/game_object.h
         src/game_object/game_object.cpp
+        src/game_object/ui/control.cpp
+        src/game_object/ui/control.h
+        src/game_object/ui/layout_system.cpp
+        src/game_object/ui/layout_system.h
 )
 
 target_include_directories(game

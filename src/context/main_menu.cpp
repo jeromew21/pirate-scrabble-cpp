@@ -2,11 +2,13 @@
 
 #include <fmt/core.h>
 
+#include <frameflow/layout.hpp>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
 #include "login.h"
 #include "multiplayer.h"
+#include "../text/texthb.h"
 #include "../util/util.h"
 #include "../serialization/types.h"
 
@@ -64,6 +66,21 @@ void MainMenuContext::authenticate_user(User new_user) {
 }
 
 void MainMenuContext::Draw() {
+    using namespace frameflow;
+
+    /*
+    if (state == State::InitialLoading) {
+        Node node = get_node(ui, loading_text_node);
+        std::string text = "Loading...";
+        auto extents = MeasureTextHB(font, text);
+        float2 offset{
+            (node.bounds.size.x - extents.width) * 0.5f,
+            (node.bounds.size.y - extents.height) * 0.5f
+        };
+        DrawTextHB(font, text, node.bounds.origin.x, node.bounds.origin.y + extents.ascent, BLACK);
+    }
+    */
+
     switch (state) {
         case State::InitialLoading:
             break;
@@ -124,4 +141,11 @@ void MainMenuContext::render_main_menu() {
     }
 
     ImGui::End();
+}
+
+void MainMenuContext::enter_main_menu() {
+    state = State::Menu;
+    if (user.has_value()) {
+        login_context->attempt_token_auth(user->token);
+    }
 }

@@ -3,13 +3,12 @@
 #pragma once
 
 #include <vector>
-#include <memory>
 
 class GameObject {
 public:
     virtual ~GameObject();
 
-    virtual void UpdateRec(float delta_time);
+    void UpdateRec(float delta_time);
 
     void DrawRec();
 
@@ -20,7 +19,9 @@ protected:
 
     virtual void Update(float delta_time);
 
-private:
+    virtual void AddChildHook(GameObject *child);;
+
     GameObject* parent{nullptr};
+
     std::vector<GameObject*> children;
 };

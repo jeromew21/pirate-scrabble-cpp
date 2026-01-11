@@ -19,8 +19,11 @@ void GameObject::DrawRec() {
 void GameObject::AddChild(GameObject* child) {
     child->parent = this;
     children.push_back(child);
+    AddChildHook(child);
 }
 
 void GameObject::Draw() {}
 
 void GameObject::Update(float delta_time) {}
+
+void GameObject::AddChildHook(GameObject *child) {}
