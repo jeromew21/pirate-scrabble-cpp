@@ -10,6 +10,8 @@ class LayoutSystem;
 
 class Control : public GameObject {
 public:
+    static bool DrawDebugBorders;
+
     LayoutSystem *layout_system_{nullptr};
 
     explicit Control() = default;
@@ -49,5 +51,16 @@ public:
     HBFont *font{nullptr};
     Color *color;
     explicit Label() = default;
-    void Draw() override;;
+    void Draw() override;
+};
+
+class LineInput : public Control {
+public:
+    std::string text;
+    HBFont *font{nullptr};
+    Color *color;
+    bool has_focus; // focusGroup?
+    explicit LineInput() = default;
+    void Draw() override;
+    void Update(float delta_time) override;;
 };

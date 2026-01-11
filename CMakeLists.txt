@@ -41,6 +41,12 @@ add_executable(game
         src/game_object/ui/control.h
         src/game_object/ui/layout_system.cpp
         src/game_object/ui/layout_system.h
+        src/game_object/ui/drawing.h
+        src/game_object/ui/drawing.cpp
+        src/scrabble/tile.cpp
+        src/scrabble/tile.h
+        src/game_object/entity/entity.cpp
+        src/game_object/entity/entity.h
 )
 
 target_include_directories(game

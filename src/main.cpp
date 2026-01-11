@@ -17,8 +17,10 @@
 #include "text/texthb.h"
 #include "serialization/types.h"
 #include "context/main_menu.h"
+#include "game_object/entity/entity.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
+#include "scrabble/tile.h"
 
 using namespace frameflow;
 
@@ -43,7 +45,7 @@ struct Profiler {
 
 void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char* title) {
     // Try to disable hidpi
-    constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE;
+    constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT;
     SetConfigFlags(flags);
 
     // Initialize with logical dimensions - raylib handles DPI internally
@@ -57,6 +59,58 @@ void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char* ti
     SetWindowSize(logicalWidth, logicalHeight);
 #endif
 
+}
+
+bool Control::DrawDebugBorders = true;
+float Tile::dim = 256.0;
+
+std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
+    std::unordered_map<char, RenderTexture2D> tile_map;
+
+    FT_Face face;
+    if (FT_New_Face(ft, "arial.ttf", 0, &face)) {
+        std::cerr << "Failed to load font\n";
+        exit(67);
+    }
+
+    auto black = BLACK;
+
+    HBFont font(face, (int)Tile::dim); // pixel size 48
+
+    LayoutSystem sys{};
+
+    auto *tile = new Tile();
+    sys.AddChild(tile);
+    tile->Initialize();
+    auto *c = new Label();
+    tile->AddChild(c);
+    c->font = &font,
+    c->text = "A";
+    c->color = &black;
+    tile->GetNode()->bounds.origin ={0, 0};
+    tile->GetNode()->bounds.size = tile->GetNode()->minimum_size;
+    for (char i = 0; i < 127; i++){
+        c->text = i;
+        c->Draw();
+        compute_layout(sys.system.get(), tile->node_id_);
+        // can we draw this to a render texture?
+        const RenderTexture2D tile_texture = LoadRenderTexture(
+            tile->GetNode()->minimum_size.x,
+            tile->GetNode()->minimum_size.y);
+        const bool temp = Control::DrawDebugBorders;
+        Control::DrawDebugBorders = false;
+        BeginTextureMode(tile_texture);
+        {
+            ClearBackground({0, 0, 0, 0}); // IMPORTANT: alpha = 0dd
+            tile->DrawRec();
+            EndTextureMode();
+        }
+        EndTextureMode();
+        tile_map[i] = tile_texture;
+        Control::DrawDebugBorders = temp;
+    }
+
+    return tile_map;
 }
 
 int main() {
@@ -86,11 +140,13 @@ int main() {
 
     GameObject root{};
 
-    auto black = BLACK;
+    auto tile_map = generate_tile_sprites(ft);
 
     // set up contexts
     MainMenuContext menu_context{};
     root.AddChild(&menu_context);
+
+    auto black = BLACK;
 
     LayoutSystem sys{};
     root.AddChild(&sys);
@@ -100,13 +156,19 @@ int main() {
         login_screen->GetNode()->anchors = {0, 0, 1, 1};
         auto *login_box = new BoxContainer(BoxData{Direction::Horizontal, Align::Start});
         login_screen->AddChild(login_box);
-        login_box->GetNode()->minimum_size = {100, 100};
-        auto *label = new Label();
+        login_box->GetNode()->minimum_size = {500, 500};
+        auto *label = new LineInput();
         login_box->AddChild(label);
         label->font = &font;
         label->text = "Hello world";
         label->color = &black;
     }
+
+    auto sprite = new Sprite();
+    sprite->SetTexture(&tile_map['C'].texture);
+    root.AddChild(sprite);
+    sprite->transform.rotation = 45;
+    sprite->transform.local_position = {500, 500};
 
 
     /*
@@ -184,6 +246,8 @@ int main() {
                 root.DrawRec();
             }
 
+            sprite->transform.rotation += 0.01;
+
             {
                 auto now = std::chrono::high_resolution_clock::now();
                 auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
@@ -196,7 +260,8 @@ int main() {
                     drawTime = 0.0; drawCount = 0;
                     lastPrint = now;
                 }
-                ImGui::Begin("Profiler");
+                ImGui::Begin("Debug");
+                ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
                 ImGui::Text("UpdateRec average: %f ms", updateAvg);
                 ImGui::Text("DrawRec average: %f ms", drawAvg);
                 ImGui::End();

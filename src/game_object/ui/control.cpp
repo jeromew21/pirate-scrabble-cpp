@@ -7,6 +7,7 @@
 
 #include "layout_system.h"
 #include "text/texthb.h"
+#include "drawing.h"
 
 // Try to convert node to frameflow node.
 // If parent is a LayoutSystem, consider that NullNode.
@@ -54,6 +55,7 @@ frameflow::Node *Control::GetNode() const {
 }
 
 void Control::Draw() {
+    if (!Control::DrawDebugBorders) return;
     using namespace frameflow;
     const auto node = *GetNode();
 
@@ -67,6 +69,7 @@ void Control::Draw() {
     //if (node.parent != NullNode) {
     Color c = color_for(node.type);
     DrawRectangleLinesEx(r, 1.0f, c);
+    //DrawRoundedRectangleLines(r.x, r.y, r.width, r.height, 3, 1, BLACK);
 
     // Draw node type text in top-left corner
     const char *type_str = node_type_name(node.type);
@@ -109,6 +112,46 @@ void CenterContainer::InitializeLayout(LayoutSystem *system) {
                               parent_node.value());
     }
 }
+
+void LineInput::Draw() {
+    Control::Draw();
+    //fallback color and font!
+    auto measure = MeasureTextHB(*font, text);
+    DrawTextHB(*font,
+        text,
+        GetNode()->bounds.origin.x,
+        GetNode()->bounds.origin.y + measure.ascent,
+        *color);
+    GetNode()->minimum_size = {measure.width, measure.height};
+}
+
+// move to util
+static void utf8_pop_back(std::string& s) {
+    while (!s.empty() && ((s.back() & 0xC0) == 0x80)) {
+        s.pop_back();
+    }
+    if (!s.empty()) {
+        s.pop_back();
+    }
+}
+
+void LineInput::Update(float /*delta_time*/) {
+    int codepoint;
+    while ((codepoint = GetCharPressed()) != 0) {
+        if (codepoint >= 32) {
+            int utf8Size = 0;
+            const char* utf8 = CodepointToUTF8(codepoint, &utf8Size);
+            if (utf8 && utf8Size > 0) {
+                text.append(utf8, utf8Size);
+            }
+        }
+    }
+
+    if (IsKeyPressed(KEY_BACKSPACE) && !text.empty()) {
+        utf8_pop_back(text);
+    }
+}
+
 
 void Label::Draw() {
     Control::Draw();
