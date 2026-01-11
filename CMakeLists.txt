@@ -6,17 +6,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Detect Emscripten and set flags BEFORE adding subdirectories
 if(EMSCRIPTEN)
-    message(STATUS "Building for Emscripten with pthreads and SDL2")
+    message(STATUS "Building for Emscripten with pthreads")
 
     # IMPORTANT: Must be BEFORE adding Raylib
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -sUSE_SDL=2")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -sUSE_SDL=2")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -sUSE_PTHREADS=1 -sUSE_SDL=2")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -sUSE_PTHREADS=1")
 endif()
 
-if(NOT EMSCRIPTEN)
-    set(RAYLIB_GRAPHICS_BACKEND "SDL2")
-endif()
 add_subdirectory(external/raylib)
 add_subdirectory(external/frameflow)
 add_subdirectory(external/freetype)
@@ -112,7 +109,6 @@ if(EMSCRIPTEN)
             -sFORCE_FILESYSTEM=1
             -sINITIAL_MEMORY=33554432  # 32MB instead of 16MB
             -sTOTAL_MEMORY=512MB
-            -sUSE_SDL=2
             #-sALLOW_MEMORY_GROWTH=1
             -sNO_DISABLE_EXCEPTION_CATCHING
             -lwebsocket.js  # This is what you were missing!

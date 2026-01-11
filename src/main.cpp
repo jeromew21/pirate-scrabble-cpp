@@ -65,7 +65,7 @@ struct Profiler {
 
 void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char *title) {
 #ifdef __APPLE__
-    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+    //SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 #endif
     constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
                                    | FLAG_MSAA_4X_HINT
@@ -90,12 +90,10 @@ void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char *ti
 #endif
 
 #ifdef __APPLE__
-    /*
     auto dpi_scale = GetWindowScaleDPI();
     logicalWidth = logicalWidth / dpi_scale.x;
     logicalHeight = logicalHeight / dpi_scale.y;
     SetWindowSize(logicalWidth, logicalHeight);
-    */
 #endif
 }
 
@@ -255,7 +253,6 @@ int main() {
             rlImGuiBegin();
 
             ImGuiIO& io = ImGui::GetIO();
-            io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
             {
                 Profiler p("DrawRec", drawTime, drawCount);
