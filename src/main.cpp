@@ -42,19 +42,21 @@ struct Profiler {
 
 
 void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char* title) {
-#ifdef __APPLE__
-    // ideally this should be DPIScale, not hardcoded as 2, but whatever.
-    auto dpi_scale = GetWindowScaleDPI();
-    logicalWidth = logicalWidth / dpi_scale.x;
-    logicalHeight = logicalHeight / dpi_scale.y;
-#endif
-
     // Try to disable hidpi
     constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE;
     SetConfigFlags(flags);
 
     // Initialize with logical dimensions - raylib handles DPI internally
     InitWindow(logicalWidth, logicalHeight, title);
+
+#ifdef __APPLE__
+    // ideally this should be DPIScale, not hardcoded as 2, but whatever.
+    auto dpi_scale = GetWindowScaleDPI();
+    logicalWidth = logicalWidth / dpi_scale.x;
+    logicalHeight = logicalHeight / dpi_scale.y;
+    SetWindowSize(logicalWidth, logicalHeight);
+#endif
+
 }
 
 int main() {
