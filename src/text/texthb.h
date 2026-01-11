@@ -39,7 +39,6 @@ public:
 // -------------------------
 void DrawTextHB(HBFont &font, const std::string &text, float x, float y, Color tint);
 
-
 // -------------------------
 // Measure text with cached HBFont
 // -------------------------

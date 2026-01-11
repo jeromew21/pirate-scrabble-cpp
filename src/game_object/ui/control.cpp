@@ -6,16 +6,17 @@
 #include <raylib.h>
 
 #include "layout_system.h"
+#include "text/texthb.h"
 
 // Try to convert node to frameflow node.
 // If parent is a LayoutSystem, consider that NullNode.
 // Otherwise, return nullopt.
 static std::optional<frameflow::NodeId> as_frameflow_node(GameObject *node) {
     if (node == nullptr) return std::nullopt;
-    if (dynamic_cast<LayoutSystem *>(node)) {
-        return frameflow::NullNode;
+    if (auto *sys = dynamic_cast<LayoutSystem *>(node)) {
+        return sys->root_node_id;
     }
-    if (const auto control = dynamic_cast<Control *>(node); control != nullptr) {
+    if (auto *control = dynamic_cast<Control *>(node); control != nullptr) {
         return control->node_id_;
     }
     return std::nullopt;
@@ -49,7 +50,7 @@ static const char *node_type_name(frameflow::NodeType type) {
  * Unsafe pointer! Could die after move
  */
 frameflow::Node *Control::GetNode() const {
-    return &frameflow::get_node(layout_system_->system_.get(), node_id_);
+    return frameflow::get_node(layout_system_->system.get(), node_id_);
 }
 
 void Control::Draw() {
@@ -90,13 +91,13 @@ BoxContainer::BoxContainer(const frameflow::BoxData &data) : box_data(data) {
 
 void Control::InitializeLayout(LayoutSystem *system) {
     if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
-        node_id_ = frameflow::add_generic(system->system_.get(), parent_node.value());
+        node_id_ = frameflow::add_generic(system->system.get(), parent_node.value());
     }
 }
 
 void BoxContainer::InitializeLayout(LayoutSystem *system) {
     if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
-        node_id_ = frameflow::add_box(system->system_.get(),
+        node_id_ = frameflow::add_box(system->system.get(),
                            parent_node.value(),
                            box_data);
     }
@@ -104,7 +105,19 @@ void BoxContainer::InitializeLayout(LayoutSystem *system) {
 
 void CenterContainer::InitializeLayout(LayoutSystem *system) {
     if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
-        node_id_ = frameflow::add_center(system->system_.get(),
+        node_id_ = frameflow::add_center(system->system.get(),
                               parent_node.value());
     }
+}
+
+void Label::Draw() {
+    Control::Draw();
+    //fallback color and font!
+    auto measure = MeasureTextHB(*font, text);
+    DrawTextHB(*font,
+        text,
+        GetNode()->bounds.origin.x,
+        GetNode()->bounds.origin.y + measure.ascent,
+        *color);
+    GetNode()->minimum_size = {measure.width, measure.height};
 }

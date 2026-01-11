@@ -1,16 +1,19 @@
 #include <string>
-#include <vector>
+#include <chrono>
 #include <iostream>
+#include <algorithm>
 
 #include <raylib.h>
+#include <rlImGui.h>
+
+#include <fmt/core.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <rlImGui.h>
-
 #include <frameflow/layout.hpp>
 
+#include "imgui.h"
 #include "text/texthb.h"
 #include "serialization/types.h"
 #include "context/main_menu.h"
@@ -20,16 +23,44 @@
 using namespace frameflow;
 
 
-static Rectangle rl_rect(Rect r) {
-    return {r.origin.x, r.origin.y, r.size.x, r.size.y};
+struct Profiler {
+    const char* name;
+    double& accumulator;
+    int& count;
+    std::chrono::high_resolution_clock::time_point start;
+
+    Profiler(const char* n, double& acc, int& c)
+        : name(n), accumulator(acc), count(c), start(std::chrono::high_resolution_clock::now()) {}
+
+    ~Profiler() {
+        auto end = std::chrono::high_resolution_clock::now();
+        auto ms = std::chrono::duration<double, std::milli>(end - start).count();
+        accumulator += ms;
+        count++;
+    }
+};
+
+
+void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char* title) {
+#ifdef __APPLE__
+    // ideally this should be DPIScale, not hardcoded as 2, but whatever.
+    logicalWidth = logicalWidth / 2;
+    logicalHeight = logicalHeight / 2;
+#endif
+
+    // Try to disable hidpi
+    constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE;
+    SetConfigFlags(flags);
+
+    // Initialize with logical dimensions - raylib handles DPI internally
+    InitWindow(logicalWidth, logicalHeight, title);
 }
 
 int main() {
     // Make window resizable
-    SetTraceLogLevel(LOG_NONE); //
-    InitWindow(1920, 1080, "Pirate Scrabble");
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
-    SetTargetFPS(60);
+    SetTraceLogLevel(LOG_NONE);
+    InitCrossPlatformWindow(1920, 1080, "Pirate Scrabble");
+    //SetTargetFPS(60);
 
     rlImGuiSetup(true); // sets up ImGui with either a dark or light default theme
 
@@ -52,18 +83,26 @@ int main() {
 
     GameObject root{};
 
+    auto black = BLACK;
+
     // set up contexts
     MainMenuContext menu_context{};
     root.AddChild(&menu_context);
 
-    LayoutSystem sys;
+    LayoutSystem sys{};
     root.AddChild(&sys);
     {
-        auto login_screen = new CenterContainer();
+        auto *login_screen = new CenterContainer();
         sys.AddChild(login_screen);
-        auto login_box = new Control();
+        login_screen->GetNode()->anchors = {0, 0, 1, 1};
+        auto *login_box = new BoxContainer(BoxData{Direction::Horizontal, Align::Start});
         login_screen->AddChild(login_box);
         login_box->GetNode()->minimum_size = {100, 100};
+        auto *label = new Label();
+        login_box->AddChild(label);
+        label->font = &font;
+        label->text = "Hello world";
+        label->color = &black;
     }
 
 
@@ -116,10 +155,20 @@ int main() {
     }
     */
 
-    while (!WindowShouldClose()) {
+    double updateTime = 0.0;
+    int updateCount = 0;
+    double drawTime = 0.0;
+    int drawCount = 0;
+    auto lastPrint = std::chrono::high_resolution_clock::now();
+    double updateAvg=0;
+    double drawAvg=0;
 
+    while (!WindowShouldClose()) {
         // Update
-        root.UpdateRec(GetFrameTime());
+        {
+            Profiler p("UpdateRec", updateTime, updateCount);
+            root.UpdateRec(GetFrameTime());
+        }
 
         // Draw
         BeginDrawing();
@@ -127,12 +176,34 @@ int main() {
             ClearBackground(DARKGRAY);
 
             rlImGuiBegin();
+            {
+                Profiler p("DrawRec", drawTime, drawCount);
+                root.DrawRec();
+            }
 
-            root.DrawRec();
+            {
+                auto now = std::chrono::high_resolution_clock::now();
+                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
+                if (elapsed >= 1) {
+                    updateAvg = (updateTime / updateCount);
+                    drawAvg = (drawTime / drawCount);
+
+                    // reset counters
+                    updateTime = 0.0; updateCount = 0;
+                    drawTime = 0.0; drawCount = 0;
+                    lastPrint = now;
+                }
+                ImGui::Begin("Profiler");
+                ImGui::Text("UpdateRec average: %f ms", updateAvg);
+                ImGui::Text("DrawRec average: %f ms", drawAvg);
+                ImGui::End();
+            }
 
             rlImGuiEnd();
         }
         EndDrawing();
+
+
     }
     // todo: shutdown harfbuzz/freetype
     std::cout << "Shutting down." << std::endl;

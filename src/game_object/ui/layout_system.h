@@ -2,7 +2,9 @@
 
 #include <memory>
 
+#include "frameflow/layout.hpp"
 #include "game_object/game_object.h"
+
 
 namespace frameflow {
     struct System;
@@ -10,13 +12,15 @@ namespace frameflow {
 
 class LayoutSystem : public GameObject {
 public:
-    std::unique_ptr<frameflow::System> system_;
+    std::unique_ptr<frameflow::System> system;
+
+    frameflow::NodeId root_node_id{frameflow::NullNode};
+
+    bool fill_screen{true};
 
     explicit LayoutSystem();
 
     void Update(float delta_time) override;
-
-    bool fill_screen{true};
 
 private:
 

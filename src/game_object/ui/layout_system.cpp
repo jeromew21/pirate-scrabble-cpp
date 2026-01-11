@@ -5,27 +5,19 @@
 
 #include "control.h"
 
-LayoutSystem::LayoutSystem(): system_(std::make_unique<frameflow::System>()) {
-
+LayoutSystem::LayoutSystem() : system(std::make_unique<frameflow::System>()) {
+    root_node_id = frameflow::add_generic(system.get(), frameflow::NullNode);
 }
 
 void LayoutSystem::Update(float delta_time) {
-    int win_width = 0;
-    int win_height = 0;
     if (fill_screen) {
-        win_width = GetScreenWidth();
-        win_height = GetScreenHeight();
+        const int win_width = GetScreenWidth();
+        const int win_height = GetScreenHeight();
+        frameflow::Node &node = *frameflow::get_node(system.get(), root_node_id);
+        node.bounds.size = {static_cast<float>(win_width), static_cast<float>(win_height)};
+        node.minimum_size = {static_cast<float>(win_width), static_cast<float>(win_height)};
     }
-    for (auto *child : children) {
-        if (const auto child_control = dynamic_cast<Control *>(child); child_control != nullptr) {
-            if (fill_screen) {
-                frameflow::Node *node = child_control->GetNode();
-                node->bounds.size = {static_cast<float>(win_width), static_cast<float>(win_height)};
-                node->minimum_size = {static_cast<float>(win_width), static_cast<float>(win_height)};
-            }
-            frameflow::compute_layout(system_.get(), child_control->node_id_);
-        }
-    }
+    frameflow::compute_layout(system.get(), root_node_id);
 }
 
 void LayoutSystem::AddChildHook(GameObject *child) {

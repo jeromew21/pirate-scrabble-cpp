@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 #include "frameflow/layout.hpp"
 #include "game_object/game_object.h"
@@ -27,13 +28,26 @@ private:
 
 class BoxContainer : public Control {
 public:
+    frameflow::BoxData box_data;
     explicit BoxContainer(const frameflow::BoxData &data);
     void InitializeLayout(LayoutSystem *system) override;
-    frameflow::BoxData box_data;
 };
 
 class CenterContainer : public Control {
 public:
     explicit CenterContainer() = default;
     void InitializeLayout(LayoutSystem *system) override;
+};
+
+
+class HBFont;
+struct Color;
+
+class Label : public Control {
+public:
+    std::string text;
+    HBFont *font{nullptr};
+    Color *color;
+    explicit Label() = default;
+    void Draw() override;;
 };
