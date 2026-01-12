@@ -8,16 +8,15 @@ struct LoginContext;
 struct MultiplayerContext;
 
 struct MainMenuContext : GameObject {
+public:
     enum class State {
         InitialLoading,
         Menu,
         Multiplayer,
     };
 
-private:
-    State state = State::InitialLoading;
+    State state{State::InitialLoading};
 
-public:
     PersistentData persistent_data;
 
     std::optional<User> user{std::nullopt};
@@ -26,25 +25,25 @@ public:
 
     std::unique_ptr<MultiplayerContext> multiplayer_context;
 
-    std::string token_path = "./token.txt";
+    std::string token_path{"./token.txt"};
 
-    std::string persistent_data_path = "./gamedata.json";
+    std::string persistent_data_path{"./gamedata.json"};
 
-    float loading_counter = 0;
+    float loading_counter{0};
 
-    float loading_time = 2.0f;
+    float loading_time{2.0f};
 
     MainMenuContext();
 
     ~MainMenuContext() override;
 
-    void authenticate_user(User new_user);
+    void AuthenticateUser(const User& new_user);
 
-    void Draw() override;;
+    void Draw() override;
 
     void Update(float delta_time) override;
 
-    void render_main_menu();
+    void RenderMainMenu();
 
-    void enter_main_menu();
+    void EnterMainMenu();
 };

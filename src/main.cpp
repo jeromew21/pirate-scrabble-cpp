@@ -28,15 +28,15 @@
 #include <emscripten.h>
 #endif
 
-static std::function<void()> mainLoopFunc;
+namespace fs = std::filesystem;
+
+static std::function<void()> main_loop_function;
 
 extern "C" void loop_wrapper() {
-    mainLoopFunc();
+    main_loop_function();
 }
 
 using namespace frameflow;
-
-namespace fs = std::filesystem;
 
 #ifdef __EMSCRIPTEN__
 fs::path FS_ROOT = "/";
@@ -62,18 +62,14 @@ struct Profiler {
     }
 };
 
-
-void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char *title) {
-#ifdef __APPLE__
-    //SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-#endif
+void InitCrossPlatformWindow(int logical_width, int logical_height, const char *title) {
     constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
                                    | FLAG_MSAA_4X_HINT
                                    | FLAG_VSYNC_HINT;
     SetConfigFlags(flags);
 
     // Initialize with logical dimensions - raylib handles DPI internally
-    InitWindow(logicalWidth, logicalHeight, title);
+    InitWindow(logical_width, logical_height, title);
 #ifdef __EMSCRIPTEN__
     // Get the actual canvas size set by JavaScript
     int canvasWidth = EM_ASM_INT({
@@ -91,16 +87,17 @@ void InitCrossPlatformWindow(int logicalWidth, int logicalHeight, const char *ti
 
 #ifdef __APPLE__
     auto dpi_scale = GetWindowScaleDPI();
-    logicalWidth = logicalWidth / dpi_scale.x;
-    logicalHeight = logicalHeight / dpi_scale.y;
-    SetWindowSize(logicalWidth, logicalHeight);
+    logical_width = logical_width / dpi_scale.x;
+    logical_height = logical_height / dpi_scale.y;
+    SetWindowSize(logical_width, logical_height);
 #endif
 }
 
 bool Control::DrawDebugBorders = true;
+
 float Tile::dim = 256.0;
 
-std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
+std::unordered_map<char, RenderTexture2D> generate_tile_sprites(const FT_Library ft) {
     // consider this just being an array...
     std::unordered_map<char, RenderTexture2D> tile_map;
 
@@ -151,7 +148,6 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
 }
 
 int main() {
-    // Make window resizable
     SetTraceLogLevel(LOG_NONE);
     InitCrossPlatformWindow(1920, 1080, "Pirate Scrabble");
 
@@ -206,9 +202,7 @@ int main() {
     auto *sprite = new Sprite();
     sprite->SetTexture(&tile_map['C'].texture);
     root.AddChild(sprite);
-    sprite->transform.rotation = 45;
     sprite->transform.local_position = {500, 500};
-
 
     double updateTime = 0.0;
     int updateCount = 0;
@@ -218,7 +212,7 @@ int main() {
     double updateAvg = 0;
     double drawAvg = 0;
 
-    mainLoopFunc = [&]() {
+    main_loop_function = [&]() {
         if (IsWindowResized()) {
 #ifdef __EMSCRIPTEN__
             // Sync raylib with the new canvas size
@@ -234,7 +228,6 @@ int main() {
 #else
             //SetWindowSize(, 800);
 #endif
-
         }
 
         // Update
@@ -249,16 +242,11 @@ int main() {
         BeginDrawing();
         {
             ClearBackground(DARKGRAY);
-
             rlImGuiBegin();
-
-            ImGuiIO& io = ImGui::GetIO();
-
             {
                 Profiler p("DrawRec", drawTime, drawCount);
                 root.DrawRec();
             }
-
             {
                 auto now = std::chrono::high_resolution_clock::now();
                 auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
@@ -273,6 +261,7 @@ int main() {
                     drawCount = 0;
                     lastPrint = now;
                 }
+                const ImGuiIO& io = ImGui::GetIO();
                 ImGui::Begin("Debug");
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                             ImGui::GetIO().Framerate);
@@ -295,7 +284,6 @@ int main() {
                 }
                 ImGui::End();
             }
-
             rlImGuiEnd();
         }
         EndDrawing();

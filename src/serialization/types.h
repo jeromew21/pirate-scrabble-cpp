@@ -8,6 +8,8 @@ struct PersistentData {
     int dummy = 0;
 };
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PersistentData, dummy)
+
 struct TileProps {
     std::string letter;
     std::string id;
@@ -62,7 +64,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
 )
 
 struct MultiplayerChatMessage {
-    std::string sender;
+    std::optional<std::string> sender;
     std::string timestamp;
     std::string message;
 };
@@ -77,7 +79,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
 struct MultiplayerAction {
     int playerId;
     std::string actionType;
-    GameStateUpdate action;
+    std::optional<GameStateUpdate> action;
     std::string data;
 };
 
@@ -97,7 +99,7 @@ struct MultiplayerGame {
     std::vector<std::string> playerNames;
     std::optional<int> buzzHolder;
     std::optional<int> buzzElapsed;
-    GameStateUpdate lastAction;
+    std::optional<GameStateUpdate> lastAction;
     std::vector<MultiplayerChatMessage> chat;
 };
 
@@ -116,7 +118,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
 
 struct MultiplayerActionResponse {
     bool ok;
-    MultiplayerGame game;
+    std::optional<MultiplayerGame> game;
     int hashCode;
     std::string errorMessage;
 };
@@ -138,16 +140,22 @@ struct User {
     std::optional<std::string> currentGame;
 };
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(User, id, username, token, salt, email, currentGame)
+
 struct UserLoginAttempt {
     std::string username;
     std::string password;
 };
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(UserLoginAttempt, username, password)
 
 struct UserResponse {
     bool ok;
     std::string error;
     std::optional<User> user;
 };
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(UserResponse, ok, error, user)
 
 // Add this template specialization for std::optional support
 namespace nlohmann {
@@ -170,12 +178,6 @@ namespace nlohmann {
         }
     };
 }
-
-// JSON mappings
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PersistentData, dummy)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(User, id, username, token, salt, email, currentGame)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(UserLoginAttempt, username, password)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(UserResponse, ok, error, user)
 
 // Serialization / Deserialization helpers
 template<typename T>

@@ -47,7 +47,9 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
     if (std::string token; read_file(token_path, token)) {
         std::erase_if(token, ::isspace);
         fmt::println("Read token from disk.");
-        login_context->attempt_token_auth(token);
+        login_context->AttemptTokenAuth(token);
+    } else {
+        login_context->state = LoginContext::State::Active;
     }
 }
 
@@ -62,7 +64,7 @@ MainMenuContext::~MainMenuContext() {
     }
 }
 
-void MainMenuContext::authenticate_user(User new_user) {
+void MainMenuContext::AuthenticateUser(const User& new_user) {
     user = new_user;
 }
 
@@ -90,7 +92,7 @@ void MainMenuContext::Draw() {
         }
         case State::Menu: {
             if (login_context->state == LoginContext::State::Bypassed) {
-                render_main_menu();
+                RenderMainMenu();
             }
         }
     }
@@ -99,6 +101,7 @@ void MainMenuContext::Draw() {
 void MainMenuContext::Update(const float delta_time) {
     switch (state) {
         case State::InitialLoading: {
+            /*
             loading_counter += delta_time;
             if (loading_counter > loading_time) {
                 state = State::Menu;
@@ -106,22 +109,22 @@ void MainMenuContext::Update(const float delta_time) {
                     login_context->state = LoginContext::State::Active;
                 }
             }
+            */
             break;
         }
         case State::Multiplayer:
-            break;
         case State::Menu:
             break;
     }
 }
 
-void MainMenuContext::render_main_menu() {
+void MainMenuContext::RenderMainMenu() {
     ImGui::Begin("Main Menu");
 
     if (ImGui::Button("Multiplayer")) {
         // set state to multiplayer gateway
         state = State::Multiplayer;
-        //multiplayer_context.enter_gateway();
+        multiplayer_context->EnterGateway();
     }
 
     if (ImGui::CollapsingHeader("Settings")) {
@@ -144,9 +147,9 @@ void MainMenuContext::render_main_menu() {
     ImGui::End();
 }
 
-void MainMenuContext::enter_main_menu() {
+void MainMenuContext::EnterMainMenu() {
     state = State::Menu;
     if (user.has_value()) {
-        login_context->attempt_token_auth(user->token);
+        login_context->AttemptTokenAuth(user->token);
     }
 }

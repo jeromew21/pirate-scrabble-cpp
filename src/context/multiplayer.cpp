@@ -1,11 +1,25 @@
 #include "multiplayer.h"
 
-#include "imgui.h"
+#include <cassert>
+
+#include <imgui.h>
 #include <imgui_stdlib.h>
+
+#include <fmt/core.h>
 
 #include "login.h"
 #include "main_menu.h"
 #include "sockets.h"
+
+static MultiplayerAction start_action(const int player_id) {
+    const auto action = MultiplayerAction{
+        .playerId = player_id,
+        .actionType = "START",
+        .action = std::nullopt,
+        .data = ""
+    };
+    return action;
+}
 
 void MultiplayerContext::Update(float delta_time) {
     switch (state) {
@@ -15,25 +29,40 @@ void MultiplayerContext::Update(float delta_time) {
             // join or create
             std::string msg;
             while (recv_create_queue.try_dequeue(msg)) {
-                auto response = deserialize<MultiplayerActionResponse>(msg);
-                if (response.ok) {
+                fmt::println("{}", msg);
+                if (auto response = deserialize<MultiplayerActionResponse>(msg); response.ok) {
                     std::cout << "NEW GAME CREATED!" << std::endl;
-                    game = response.game;
-                    // start the socket?
-                    enter_lobby();
+                    EnterLobby(response.game->id);
                 } else {
                     std::cerr << response.errorMessage << std::endl;
                 }
             }
+            /*
             while (recv_join_queue.try_dequeue(msg)) {
                 std::cout << msg;
             }
+            */
             break;
         }
         case State::Playing:
         case State::Lobby: {
             std::string msg;
             while (recv_game_queue.try_dequeue(msg)) {
+                if (auto response = deserialize<MultiplayerActionResponse>(msg); response.ok) {
+                    if (game_opt.has_value()) {
+                        if (state == State::Lobby && response.game->phase != "CREATED") {
+                            EnterPlaying();
+                        }
+                    }
+                    if (response.game->phase == "CREATED") {
+                        state = State::Lobby;
+                    } else {
+                        state = State::Playing;
+                    }
+                    game_opt = response.game;
+                } else {
+                    std::cerr << response.errorMessage << std::endl;
+                }
                 break;
             }
             break;
@@ -46,18 +75,18 @@ void MultiplayerContext::Draw() {
         case State::PreInit:
             break;
         case State::Gateway:
-            render_gateway();
+            RenderGateway();
             break;
         case State::Playing:
-            render_playing();
+            RenderPlaying();
             break;
         case State::Lobby:
-            render_lobby();
+            RenderLobby();
             break;
     }
 }
 
-void MultiplayerContext::render_gateway() {
+void MultiplayerContext::RenderGateway() {
     ImGui::Begin("Multiplayer");
     if (ImGui::Button("New Game")) {
         // do new game socket thread
@@ -68,35 +97,46 @@ void MultiplayerContext::render_gateway() {
         // do new game socket thread
     }
     if (ImGui::Button("Back")) {
-        main_menu->enter_main_menu();
+        main_menu->EnterMainMenu();
     }
     ImGui::End();
 }
 
-void MultiplayerContext::render_lobby() {
+void MultiplayerContext::RenderLobby() const {
+    assert(game_socket != nullptr);
     ImGui::Begin("Game Lobby");
+    if (ImGui::Button("Start Game")) {
+        game_socket->send(serialize(start_action(main_menu->user->id)));
+    }
     ImGui::End();
 }
 
-void MultiplayerContext::render_playing() {
+void MultiplayerContext::RenderPlaying() const {
+    assert(game_opt.has_value());
+    const MultiplayerGame game = *game_opt;
     ImGui::Begin("Gameplay Debug");
+    ImGui::Text("%s", game.phase.c_str());
     ImGui::End();
 }
 
-void MultiplayerContext::enter_gateway() {
+void MultiplayerContext::EnterGateway() {
     state = State::Gateway;
-    main_menu->login_context->attempt_token_auth(main_menu->user->token);
+    main_menu->login_context->AttemptTokenAuth(main_menu->user->token);
     // re authenticate in parallel?
     // re authenticate every X seconds?
     if (main_menu->user->currentGame.has_value()) {
-        enter_playing();
+        EnterLobby(main_menu->user->currentGame.value());
     }
 }
 
-void MultiplayerContext::enter_lobby() {
+void MultiplayerContext::EnterLobby(const std::string &game_id) {
     state = State::Lobby;
+    // check game socket, reconnect
+    game_socket = create_multiplayer_game_socket(&recv_game_queue,
+                                                 main_menu->user->token,
+                                                 game_id);
 }
 
-void MultiplayerContext::enter_playing() {
+void MultiplayerContext::EnterPlaying() {
     state = State::Playing;
 }

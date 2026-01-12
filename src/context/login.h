@@ -18,13 +18,12 @@ struct LoginContext : GameObject {
     MainMenuContext *main_menu;
     Queue recv_login_queue;
     State state = State::PreLogin;
-    std::string logs;
     std::string username_label;
     std::string password_label;
 
     void Update(float delta_time) override;
 
-    void Draw() override;;
+    void Draw() override;
 
-    void attempt_token_auth(std::string token);
+    void AttemptTokenAuth(const std::string &token);
 };

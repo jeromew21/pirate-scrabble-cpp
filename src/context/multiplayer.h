@@ -5,6 +5,7 @@
 #include "serialization/types.h"
 #include "util/util.h"
 #include "game_object/game_object.h"
+#include "network/sockets/web_socket.h"
 
 struct MainMenuContext;
 
@@ -17,33 +18,32 @@ private:
     State state = State::PreInit;
 
 public:
-    std::optional<MultiplayerGame> game;
+    std::optional<MultiplayerGame> game_opt;
 
     MainMenuContext *main_menu;
 
-    //ix::WebSocket game_socket;
+    WebSocketImpl *game_socket{nullptr};
 
-    Queue recv_create_queue;
+    Queue recv_create_queue; // Can we combine both of these? Idk why not...
+    //Queue recv_join_queue;
 
-    Queue recv_join_queue;
-
-    Queue recv_game_queue;
+    Queue recv_game_queue; // Active game
 
     void Update(float delta_time) override;
 
     void Draw() override;
 
-    void render_gateway();
+    void RenderGateway();
 
-    void render_lobby();
+    void RenderLobby() const;
 
-    void render_playing();
+    void RenderPlaying() const;
 
-    void enter_gateway();
+    void EnterGateway();
 
-    void enter_lobby();
+    void EnterLobby(const std::string &game_id);
 
-    void enter_playing();
+    void EnterPlaying();
 
     // exit playing?
 };

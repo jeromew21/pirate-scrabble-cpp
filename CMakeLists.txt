@@ -26,7 +26,7 @@ if (NOT EMSCRIPTEN)
     add_subdirectory(external/IXWebSocket)
 endif()
 
-add_executable(game
+set(SOURCES
         src/main.cpp
         external/imgui/imgui.cpp
         external/imgui/imgui_widgets.cpp
@@ -65,6 +65,14 @@ add_executable(game
         src/network/sockets/web_socket_desktop.h
         src/network/sockets/web_socket_web.h
 )
+
+if (EMSCRIPTEN)
+    list(APPEND SOURCES src/network/sockets/web_socket_web.cpp)
+else ()
+    list(APPEND SOURCES src/network/sockets/web_socket_desktop.cpp)
+endif ()
+
+add_executable(game ${SOURCES})
 
 target_include_directories(game
         PRIVATE

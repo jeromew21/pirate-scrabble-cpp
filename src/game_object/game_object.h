@@ -14,14 +14,27 @@ public:
 
     void AddChild(GameObject *child);
 
+    void Show();
+
+    void Hide();
+
+    [[nodiscard]] bool IsVisible() const;
+
 protected:
     virtual void Draw();
 
     virtual void Update(float delta_time);
 
-    virtual void AddChildHook(GameObject *child);;
+    virtual void AddChildHook(GameObject *child);
 
-    GameObject* parent{nullptr};
+    GameObject *parent{nullptr};
 
-    std::vector<GameObject*> children;
+    std::vector<GameObject *> children;
+
+private:
+    void UpdateVisibilityFromParent();
+
+    bool visible_self{true};
+
+    bool visible_in_tree{true};
 };

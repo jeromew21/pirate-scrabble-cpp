@@ -19,15 +19,14 @@ void LoginContext::Update(float delta_time) {
     std::string msg;
     while (recv_login_queue.try_dequeue(msg)) {
         auto response = deserialize<UserResponse>(msg);
+        if (main_menu->state == MainMenuContext::State::InitialLoading) {
+            main_menu->state = MainMenuContext::State::Menu;
+        }
         if (response.ok) {
-            logs.append("USER AUTH SUCCESS\n");
-            std::cout << "USER AUTH SUCCESS\n";
             // some callback, maybe
-            main_menu->authenticate_user(response.user.value());
+            main_menu->AuthenticateUser(response.user.value());
             state = State::Bypassed;
         } else {
-            logs.append("USER AUTH FAIL: " + response.error + "\n");
-            std::cout << "USER AUTH FAIL\n";
             state = State::Active;
         }
     }
@@ -45,15 +44,11 @@ void LoginContext::Draw() {
             std::thread t(UserLoginSocket, std::ref(recv_login_queue), username_label, password_label);
             t.detach();
         }
-        if (ImGui::CollapsingHeader("Socket Response Logs (incomplete)")) {
-            ImGui::Text(logs.c_str());
-        }
         ImGui::End();
     }
 }
 
-void LoginContext::attempt_token_auth(std::string token) {
-    fmt::println("Attempting token authentication");
+void LoginContext::AttemptTokenAuth(const std::string& token) {
     std::thread t(TokenAuthSocket, std::ref(recv_login_queue),  token);
     t.detach();
 }
