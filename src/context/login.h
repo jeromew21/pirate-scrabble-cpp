@@ -3,7 +3,7 @@
 #include <string>
 
 #include "game_object/game_object.h"
-#include "util/util.h"
+#include "util/queue.h"
 
 struct MainMenuContext;
 

@@ -35,8 +35,6 @@ set(SOURCES
         external/imgui/imgui_demo.cpp
         external/imgui/misc/cpp/imgui_stdlib.cpp
         external/rlImGui/rlImGui.cpp
-        src/util/util.h
-        src/util/util.cpp
         src/text/texthb.h
         src/text/texthb.cpp
         src/context/sockets.h
@@ -61,15 +59,19 @@ set(SOURCES
         src/game_object/entity/entity.h
         src/game_object/tween/tween.cpp
         src/game_object/tween/tween.h
-        src/network/sockets/web_socket.h
-        src/network/sockets/web_socket_desktop.h
-        src/network/sockets/web_socket_web.h
+        src/util/network/sockets/web_socket.h
+        src/util/network/sockets/web_socket_desktop.h
+        src/util/network/sockets/web_socket_web.h
+        src/util/filesystem.h
+        src/util/queue.h
+        src/util/math.h
+        src/util/filesystem.cpp
 )
 
 if (EMSCRIPTEN)
-    list(APPEND SOURCES src/network/sockets/web_socket_web.cpp)
+    list(APPEND SOURCES src/util/network/sockets/web_socket_web.cpp)
 else ()
-    list(APPEND SOURCES src/network/sockets/web_socket_desktop.cpp)
+    list(APPEND SOURCES src/util/network/sockets/web_socket_desktop.cpp)
 endif ()
 
 add_executable(game ${SOURCES})

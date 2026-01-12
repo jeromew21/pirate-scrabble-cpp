@@ -1,7 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <raylib.h>
+#include "raylib.h"
 
 // Draw a filled rounded rectangle
 void DrawRoundedRectangle(float x, float y, float width, float height, float radius, Color color);

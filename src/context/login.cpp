@@ -13,7 +13,7 @@
 #include "main_menu.h"
 #include "sockets.h"
 #include "serialization/types.h"
-#include "util/util.h"
+#include "util/math.h"
 
 void LoginContext::Update(float delta_time) {
     std::string msg;

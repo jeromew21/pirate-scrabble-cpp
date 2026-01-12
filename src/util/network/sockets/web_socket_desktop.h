@@ -2,7 +2,7 @@
 
 #include "web_socket.h"
 
-#include <ixwebsocket/IXWebSocket.h>
+#include "ixwebsocket/IXWebSocket.h"
 
 struct WebSocketDesktop : WebSocketImpl {
     ix::WebSocket ws;

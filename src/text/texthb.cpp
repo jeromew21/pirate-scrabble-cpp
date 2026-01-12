@@ -4,9 +4,8 @@
 #include <vector>
 #include <unordered_map>
 
-#include <hb.h>
-#include <hb-ft.h>
-
+#include "hb.h"
+#include "hb-ft.h"
 
 // -------------------------
 // Glyph struct for caching

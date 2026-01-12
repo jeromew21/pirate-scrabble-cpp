@@ -2,14 +2,14 @@
 
 #include <string>
 
-#include "util/util.h"
-#include "network/sockets/web_socket.h"
+#include "util/queue.h"
+#include "util/network/sockets/web_socket.h"
 
 #ifdef __EMSCRIPTEN__
-#include "network/sockets/web_socket_web.h"
+#include "util/network/sockets/web_socket_web.h"
 using WebSocket = WebSocketWeb;
 #else
-#include "network/sockets/web_socket_desktop.h"
+#include "util/network/sockets/web_socket_desktop.h"
 using WebSocket = WebSocketDesktop;
 #endif
 

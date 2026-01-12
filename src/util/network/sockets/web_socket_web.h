@@ -1,6 +1,7 @@
 #pragma once
 
 #include "web_socket.h"
+
 #include <emscripten/websocket.h>
 #include <string>
 

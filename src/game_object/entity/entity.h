@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game_object/game_object.h"
-#include "util/util.h"
+#include "util/math.h"
 
 #include <raylib.h>
 

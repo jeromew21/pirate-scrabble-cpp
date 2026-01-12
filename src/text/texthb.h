@@ -3,11 +3,10 @@
 #include <string>
 #include <memory>
 
-#include <raylib.h>
+#include "raylib.h"
 
-#include <ft2build.h>
+#include "ft2build.h"
 #include FT_FREETYPE_H
-
 
 // -------------------------
 // TextMetrics struct

@@ -2,17 +2,16 @@
 #include <chrono>
 #include <iostream>
 #include <algorithm>
-#include <filesystem>
 
-#include <raylib.h>
-#include <rlImGui.h>
+#include "raylib.h"
+#include "rlImGui.h"
 
-#include <fmt/core.h>
+#include "fmt/core.h"
 
-#include <ft2build.h>
+#include "ft2build.h"
 #include FT_FREETYPE_H
 
-#include <frameflow/layout.hpp>
+#include "frameflow/layout.hpp"
 
 #include "imgui.h"
 #include "text/texthb.h"
@@ -22,13 +21,12 @@
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 #include "game_object/tween/tween.h"
+#include "util/filesystem.h"
 #include "scrabble/tile.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-
-namespace fs = std::filesystem;
 
 static std::function<void()> main_loop_function;
 
@@ -38,11 +36,6 @@ extern "C" void loop_wrapper() {
 
 using namespace frameflow;
 
-#ifdef __EMSCRIPTEN__
-fs::path FS_ROOT = "/";
-#else
-fs::path FS_ROOT = ".";
-#endif
 
 struct Profiler {
     const char *name;
