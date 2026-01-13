@@ -1,6 +1,7 @@
 #include "sockets.h"
 
 #include "serialization/types.h"
+#include "util/logging/logging.h"
 
 void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const std::string &password) {
     const std::string url = "wss://api.playpiratescrabble.com/ws/account/login";
@@ -15,8 +16,12 @@ void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const s
     ws->on_message = [&recvLoginQueue](const std::string& msg) {
         recvLoginQueue.enqueue(msg);
     };
-    ws->on_error = [](const std::string& err) {};
-    ws->on_close = []() {};
+    ws->on_error = [](const std::string& err) {
+        Logger::instance().error("Credential auth socket error: {}", err);
+    };
+    ws->on_close = []() {
+        Logger::instance().error("Credential auth socket closed");
+    };
 
     ws->connect();
 
@@ -34,8 +39,12 @@ void TokenAuthSocket(Queue &recvLoginQueue, std::string token) {
     ws->on_message = [&recvLoginQueue](const std::string& msg) {
         recvLoginQueue.enqueue(msg);
     };
-    ws->on_error = [](const std::string& err) {};
-    ws->on_close = []() {};
+    ws->on_error = [](const std::string& err) {
+        Logger::instance().error("Token auth socket error: {}", err);
+    };
+    ws->on_close = []() {
+        Logger::instance().error("Token auth socket closed");
+    };
 
     ws->connect();
 
@@ -53,8 +62,12 @@ void NewGameSocket(Queue &recvLoginQueue, std::string token) {
     ws->on_message = [&recvLoginQueue](const std::string& msg) {
         recvLoginQueue.enqueue(msg);
     };
-    ws->on_error = [](const std::string& err) {};
-    ws->on_close = []() {};
+    ws->on_error = [](const std::string& err) {
+        Logger::instance().error("New game socket error: {}", err);
+    };
+    ws->on_close = []() {
+        Logger::instance().error("New game socket closed");
+    };
 
     ws->connect();
 
@@ -72,8 +85,12 @@ WebSocketImpl *create_multiplayer_game_socket(Queue *recvLoginQueue, const std::
     ws->on_message = [recvLoginQueue](const std::string& msg) {
         recvLoginQueue->enqueue(msg);
     };
-    ws->on_error = [](const std::string& err) {};
-    ws->on_close = []() {};
+    ws->on_error = [](const std::string& err) {
+        Logger::instance().error("Multiplayer game socket error: {}", err);
+    };
+    ws->on_close = []() {
+        Logger::instance().error("Multiplayer game socket closed");
+    };
 
     ws->connect();
 

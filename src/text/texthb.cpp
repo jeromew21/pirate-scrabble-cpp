@@ -22,7 +22,6 @@ struct Glyph {
 // Font cache
 // -------------------------
 struct HBFont::Impl {
-public:
     FT_Face face;
     int pixelSize;
     std::unordered_map<unsigned int, Glyph> glyphs;
@@ -76,6 +75,7 @@ HBFont::HBFont(FT_Face f, int size) : impl_(std::make_unique<Impl>(f, size)) {}
 HBFont::~HBFont() = default;
 
 HBFont::HBFont(HBFont&&) noexcept = default;
+
 HBFont& HBFont::operator=(HBFont&&) noexcept = default;
 
 void DrawTextHB(HBFont &font, const std::string &text, float x, float y, Color tint) {

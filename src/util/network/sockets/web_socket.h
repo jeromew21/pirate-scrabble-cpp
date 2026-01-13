@@ -4,6 +4,9 @@
 #include <string>
 #include <memory>
 
+/**
+ * Abstract base class for web socket connection
+ */
 struct WebSocketImpl {
     using Ptr = std::shared_ptr<WebSocketImpl>;
 

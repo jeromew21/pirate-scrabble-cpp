@@ -42,6 +42,8 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
     if (const auto persistent_data_opt = load_persistent_data(persistent_data_path);
         persistent_data_opt.has_value()) {
         persistent_data = persistent_data_opt.value();
+    } else {
+        Logger::instance().info("Failed to read persistent data from disk. Falling back to defaults");
     }
 
     AddChild(login_context.get());
@@ -50,17 +52,15 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
     multiplayer_context->main_menu = this;
     if (std::string token; read_file(token_path, token)) {
         std::erase_if(token, ::isspace);
-        Logger::instance().info("Read token from disk");
         login_context->AttemptTokenAuth(token);
     } else {
         login_context->state = LoginContext::State::Active;
+        Logger::instance().info("Failed to read token from disk. User must provide credentials");
     }
 }
 
 MainMenuContext::~MainMenuContext() {
     Logger::instance().info("Shutting down main context");
-    persistent_data.window_width = GetScreenWidth();
-    persistent_data.window_height = GetScreenHeight();
     if (!write_persistent_data(persistent_data_path, persistent_data)) {
         Logger::instance().info("Failed to write persistent data to disk");
     }

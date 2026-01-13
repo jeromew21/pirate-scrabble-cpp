@@ -80,65 +80,18 @@ void InitCrossPlatformWindow(int logical_width, int logical_height, const char *
     SetWindowSize(logical_width, logical_height);
 #ifdef __EMSCRIPTEN__
     // Get the actual canvas size set by JavaScript
-    int canvasWidth = EM_ASM_INT({
-        return Module.canvas.width;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    });
-    int canvasHeight = EM_ASM_INT({
-        return Module.canvas.height;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    });
+    int canvasWidth = EM_ASM_INT({return Module.canvas.width;});
+    int canvasHeight = EM_ASM_INT({return Module.canvas.height;});
 
     // Tell raylib about the real size
     SetWindowSize(canvasWidth, canvasHeight);
-
-    std::cout << "Synced raylib to canvas size: " << canvasWidth << "x" << canvasHeight << std::endl;
-#endif
-
-#ifdef __APPLE__
-    auto dpi_scale = GetWindowScaleDPI();
-    logical_width = logical_width / dpi_scale.x;
-    logical_height = logical_height / dpi_scale.y;
-    SetWindowSize(logical_width, logical_height);
 #endif
 }
 
 FT_Face ft_load_font(const FT_Library &ft, const fs::path &path) {
     FT_Face face;
     if (FT_New_Face(ft, path.c_str(), 0, &face)) {
-        std::cerr << "Failed to load font\n";
+        Logger::instance().error("Failed to load font");
         exit(1);
     }
     return face;
@@ -147,7 +100,7 @@ FT_Face ft_load_font(const FT_Library &ft, const fs::path &path) {
 FT_Library ft_init() {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
-        std::cerr << "Failed to init FreeType\n";
+        Logger::instance().error("Failed to init FreeType");
         exit(1);
     }
     return ft;
@@ -177,7 +130,6 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
         label->text = i;
         tile->UpdateRec(0.016f);
         compute_layout(sys.system.get(), tile->node_id_);
-        // can we draw this to a render texture?
         const RenderTexture2D tile_texture = LoadRenderTexture(
             static_cast<int>(tile->GetNode()->minimum_size.x),
             static_cast<int>(tile->GetNode()->minimum_size.y));
@@ -196,15 +148,24 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
     return tile_map;
 }
 
-int main() {
-    SetTraceLogLevel(LOG_NONE);
-    SetExitKey(KEY_NULL);
+float GetLogicalRatio() {
+    return static_cast<float>(GetScreenWidth()) / static_cast<float>(GetRenderWidth());
+}
 
+int main() {
+    // -------------------------
+    // Initialize context
+    // -------------------------
     GameObject root{};
-    TweenManager tween_manager;
+    TweenManager tween_manager{};
     MainMenuContext menu_context{};
     root.AddChild(&menu_context);
 
+    // -------------------------
+    // Initialize raylib
+    // -------------------------
+    SetTraceLogLevel(LOG_NONE);
+    SetExitKey(KEY_NULL);
     InitCrossPlatformWindow(menu_context.persistent_data.window_width,
                             menu_context.persistent_data.window_height,
                             "Pirate Scrabble");
@@ -215,6 +176,9 @@ int main() {
     rlImGuiSetup(true);
     const ImGuiIO &io = ImGui::GetIO();
     io.Fonts->SetFontLoader(ImGuiFreeType::GetFontLoader());
+    const auto ibm_plex_mono = FS_ROOT / "assets" / "IBM_Plex_Mono" / "IBMPlexMono-Light.ttf";
+    ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.c_str(),
+                                                      32.0f*GetLogicalRatio());
 
     // -------------------------
     // Initialize FreeType
@@ -226,12 +190,11 @@ int main() {
 
     HBFont font(face, 48); // pixel size 48
 
-    const auto ibm_plex_mono = FS_ROOT / "assets" / "IBM_Plex_Mono" / "IBMPlexMono-Regular.ttf";
-    ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.c_str(), 32.0f);
-
     auto tile_map = generate_tile_sprites(ft);
 
-
+    // -------------------------
+    // Initialize performance tracker
+    // -------------------------
     Performance perf;
     perf.last_print = std::chrono::high_resolution_clock::now();
 
@@ -241,10 +204,12 @@ int main() {
             int canvas_width = EM_ASM_INT({return Module.canvas.width;});
             int canvas_height = EM_ASM_INT({return Module.canvas.height;});
             SetWindowSize(canvas_width, canvas_height);
-            Logger::instance().info("Resized to: {}x{}", canvas_width, canvas_height);
+            Logger::instance().info("Resized to: {}, {}", canvas_width, canvas_height);
 #else
             //SetWindowSize(, 800);
 #endif
+            menu_context.persistent_data.window_width = GetScreenWidth();
+            menu_context.persistent_data.window_height = GetScreenHeight();
         }
 
         // Update
@@ -280,7 +245,7 @@ int main() {
             if (menu_context.persistent_data.show_debug_window) {
                 ImGui::Begin("Debug", &menu_context.persistent_data.show_debug_window);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-                ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
+                ImGui::Checkbox("Draw debug borders", &Control::DrawDebugBorders);
                 ImGui::Text("UpdateRec average: %f ms", perf.update_avg);
                 ImGui::Text("DrawRec average: %f ms", perf.draw_avg);
                 ImGui::Separator();
