@@ -241,7 +241,7 @@ int main() {
             int canvas_width = EM_ASM_INT({return Module.canvas.width;});
             int canvas_height = EM_ASM_INT({return Module.canvas.height;});
             SetWindowSize(canvas_width, canvas_height);
-            Logger::instance().info("Resized to: {}x{}", canvas_width, canvas_height)
+            Logger::instance().info("Resized to: {}x{}", canvas_width, canvas_height);
 #else
             //SetWindowSize(, 800);
 #endif
