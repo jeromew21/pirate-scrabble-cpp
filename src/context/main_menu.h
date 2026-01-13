@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../serialization/types.h"
+#include "serialization/types.h"
 #include "game_object/game_object.h"
 
 struct LoginContext;

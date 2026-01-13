@@ -10,7 +10,7 @@ class LayoutSystem;
 
 class Control : public GameObject {
 public:
-    static bool DrawDebugBorders;
+    static inline bool DrawDebugBorders = true;
 
     LayoutSystem *layout_system_{nullptr};
 
@@ -20,7 +20,7 @@ public:
 
     frameflow::NodeId node_id_{frameflow::NullNode};
 
-    frameflow::Node *GetNode() const;
+    [[nodiscard]] frameflow::Node *GetNode() const;
 
     void Draw() override;
 

@@ -6,16 +6,26 @@
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
-#include "fmt/core.h"
-
 #include "login.h"
+#include "util/logging/logging.h"
 #include "main_menu.h"
 #include "sockets.h"
+#include "serialization/types_inspector.h"
 
 static MultiplayerAction start_action(const int player_id) {
     const auto action = MultiplayerAction{
         .playerId = player_id,
         .actionType = "START",
+        .action = std::nullopt,
+        .data = ""
+    };
+    return action;
+}
+
+static MultiplayerAction poll_action(const int player_id) {
+    const auto action = MultiplayerAction{
+        .playerId = player_id,
+        .actionType = "POLL",
         .action = std::nullopt,
         .data = ""
     };
@@ -30,23 +40,28 @@ void MultiplayerContext::Update(float delta_time) {
             // join or create
             std::string msg;
             while (recv_create_queue.try_dequeue(msg)) {
-                fmt::println("{}", msg);
+                Logger::instance().info("{}", msg);
                 if (auto response = deserialize<MultiplayerActionResponse>(msg); response.ok) {
-                    std::cout << "NEW GAME CREATED!" << std::endl;
+                    Logger::instance().info("New game created");
                     EnterLobby(response.game->id);
                 } else {
-                    std::cerr << response.errorMessage << std::endl;
+                    Logger::instance().error("{}", response.errorMessage);
                 }
             }
             /*
             while (recv_join_queue.try_dequeue(msg)) {
-                std::cout << msg;
             }
             */
             break;
         }
         case State::Playing:
         case State::Lobby: {
+            time_since_last_poll += delta_time;
+            if (time_since_last_poll > 0.100) {
+                assert(game_socket != nullptr);
+                game_socket->send(serialize(poll_action(main_menu->user->id)));
+                time_since_last_poll = 0;
+            }
             std::string msg;
             while (recv_game_queue.try_dequeue(msg)) {
                 if (auto response = deserialize<MultiplayerActionResponse>(msg); response.ok) {
@@ -62,7 +77,7 @@ void MultiplayerContext::Update(float delta_time) {
                     }
                     game_opt = response.game;
                 } else {
-                    std::cerr << response.errorMessage << std::endl;
+                    Logger::instance().error("{}", response.errorMessage);
                 }
                 break;
             }
@@ -79,21 +94,28 @@ void MultiplayerContext::Draw() {
             RenderGateway();
             break;
         case State::Playing:
-            RenderPlaying();
+        case State::Lobby: {
+            ImGui::Begin("Multiplayer Debug");
+            if (state == State::Lobby) {
+                RenderLobby();
+            } else {
+                RenderPlaying();
+            }
+            ImGui::End();
             break;
-        case State::Lobby:
-            RenderLobby();
-            break;
+        }
     }
 }
 
 void MultiplayerContext::RenderGateway() {
-    ImGui::Begin("Multiplayer");
+    ImGui::Begin("Multiplayer Gateway");
     if (ImGui::Button("New Game")) {
         // do new game socket thread
         std::thread t(NewGameSocket, std::ref(recv_create_queue), main_menu->user->token);
         t.detach();
     }
+    static std::string foo;
+    ImGui::InputText("", &foo);
     if (ImGui::Button("Join Game")) {
         // do new game socket thread
     }
@@ -105,19 +127,16 @@ void MultiplayerContext::RenderGateway() {
 
 void MultiplayerContext::RenderLobby() const {
     assert(game_socket != nullptr);
-    ImGui::Begin("Game Lobby");
     if (ImGui::Button("Start Game")) {
         game_socket->send(serialize(start_action(main_menu->user->id)));
     }
-    ImGui::End();
 }
 
 void MultiplayerContext::RenderPlaying() const {
     assert(game_opt.has_value());
     const MultiplayerGame game = *game_opt;
-    ImGui::Begin("Gameplay Debug");
     ImGui::Text("%s", game.phase.c_str());
-    ImGui::End();
+    InspectStruct("game", game);
 }
 
 void MultiplayerContext::EnterGateway() {
@@ -132,10 +151,16 @@ void MultiplayerContext::EnterGateway() {
 
 void MultiplayerContext::EnterLobby(const std::string &game_id) {
     state = State::Lobby;
-    // check game socket, reconnect
+    if (game_socket != nullptr) {
+        Logger::instance().info("Closing and resetting socket");
+        game_socket->close();
+        delete game_socket;
+        game_socket = nullptr;
+    }
     game_socket = create_multiplayer_game_socket(&recv_game_queue,
                                                  main_menu->user->token,
                                                  game_id);
+    time_since_last_poll = 0;
 }
 
 void MultiplayerContext::EnterPlaying() {

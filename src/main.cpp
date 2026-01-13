@@ -6,8 +6,6 @@
 #include "raylib.h"
 #include "rlImGui.h"
 
-#include "fmt/core.h"
-
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
@@ -17,11 +15,14 @@
 #include "text/texthb.h"
 #include "serialization/types.h"
 #include "context/main_menu.h"
+#include "context/multiplayer.h"
 #include "game_object/entity/entity.h"
+#include "game_object/entity/sprite.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 #include "game_object/tween/tween.h"
 #include "util/filesystem.h"
+#include "util/logging/logging.h"
 #include "scrabble/tile.h"
 
 #ifdef __EMSCRIPTEN__
@@ -36,6 +37,15 @@ extern "C" void loop_wrapper() {
 
 using namespace frameflow;
 
+struct Performance {
+    double update_time = 0.0;
+    int update_count = 0;
+    double draw_time = 0.0;
+    int draw_count = 0;
+    double update_avg = 0;
+    double draw_avg = 0;
+    std::chrono::high_resolution_clock::time_point last_print;
+};
 
 struct Profiler {
     const char *name;
@@ -43,8 +53,10 @@ struct Profiler {
     int &count;
     std::chrono::high_resolution_clock::time_point start;
 
-    Profiler(const char *n, double &acc, int &c)
-        : name(n), accumulator(acc), count(c), start(std::chrono::high_resolution_clock::now()) {
+    Profiler(const char *n, double &acc, int &c) : name(n),
+                                                   accumulator(acc),
+                                                   count(c),
+                                                   start(std::chrono::high_resolution_clock::now()) {
     }
 
     ~Profiler() {
@@ -63,13 +75,28 @@ void InitCrossPlatformWindow(int logical_width, int logical_height, const char *
 
     // Initialize with logical dimensions - raylib handles DPI internally
     InitWindow(logical_width, logical_height, title);
+    SetWindowSize(logical_width, logical_height);
 #ifdef __EMSCRIPTEN__
     // Get the actual canvas size set by JavaScript
     int canvasWidth = EM_ASM_INT({
         return Module.canvas.width;
+
+
+
+
+
+
+
     });
     int canvasHeight = EM_ASM_INT({
         return Module.canvas.height;
+
+
+
+
+
+
+
     });
 
     // Tell raylib about the real size
@@ -86,11 +113,7 @@ void InitCrossPlatformWindow(int logical_width, int logical_height, const char *
 #endif
 }
 
-bool Control::DrawDebugBorders = true;
-
-float Tile::dim = 256.0;
-
-std::unordered_map<char, RenderTexture2D> generate_tile_sprites(const FT_Library ft) {
+std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
     // consider this just being an array...
     std::unordered_map<char, RenderTexture2D> tile_map;
 
@@ -123,8 +146,8 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(const FT_Library
         compute_layout(sys.system.get(), tile->node_id_);
         // can we draw this to a render texture?
         const RenderTexture2D tile_texture = LoadRenderTexture(
-            tile->GetNode()->minimum_size.x,
-            tile->GetNode()->minimum_size.y);
+            static_cast<int>(tile->GetNode()->minimum_size.x),
+            static_cast<int>(tile->GetNode()->minimum_size.y));
         const bool temp = Control::DrawDebugBorders;
         Control::DrawDebugBorders = false;
         BeginTextureMode(tile_texture);
@@ -174,36 +197,15 @@ int main() {
     MainMenuContext menu_context{};
     root.AddChild(&menu_context);
 
-    auto black = BLACK;
+    //auto black = BLACK;
 
     LayoutSystem sys{};
     root.AddChild(&sys);
-    {
-        auto *login_screen = new CenterContainer();
-        sys.AddChild(login_screen);
-        login_screen->GetNode()->anchors = {0, 0, 1, 1};
-        auto *login_box = new BoxContainer(BoxData{Direction::Horizontal, Align::Start});
-        login_screen->AddChild(login_box);
-        login_box->GetNode()->minimum_size = {500, 500};
-        auto *label = new LineInput();
-        login_box->AddChild(label);
-        label->font = &font;
-        label->text = "Hello world";
-        label->color = &black;
-    }
 
-    auto *sprite = new Sprite();
-    sprite->SetTexture(&tile_map['C'].texture);
-    root.AddChild(sprite);
-    sprite->transform.local_position = {500, 500};
+    bool show_debug_window = true;
 
-    double updateTime = 0.0;
-    int updateCount = 0;
-    double drawTime = 0.0;
-    int drawCount = 0;
-    auto lastPrint = std::chrono::high_resolution_clock::now();
-    double updateAvg = 0;
-    double drawAvg = 0;
+    Performance perf;
+    perf.last_print = std::chrono::high_resolution_clock::now();
 
     main_loop_function = [&]() {
         if (IsWindowResized()) {
@@ -211,9 +213,17 @@ int main() {
             // Sync raylib with the new canvas size
             int canvasWidth = EM_ASM_INT({
                 return Module.canvas.width;
+
+
+
+
             });
             int canvasHeight = EM_ASM_INT({
                 return Module.canvas.height;
+
+
+
+
             });
 
             SetWindowSize(canvasWidth, canvasHeight);
@@ -225,7 +235,7 @@ int main() {
 
         // Update
         {
-            Profiler p("UpdateRec", updateTime, updateCount);
+            Profiler p("UpdateRec", perf.update_time, perf.update_count);
             const float dt = GetFrameTime();
             root.UpdateRec(dt);
             tween_manager.Update(dt);
@@ -237,45 +247,40 @@ int main() {
             ClearBackground(DARKGRAY);
             rlImGuiBegin();
             {
-                Profiler p("DrawRec", drawTime, drawCount);
+                Profiler p("DrawRec", perf.draw_time, perf.draw_count);
                 root.DrawRec();
             }
             {
-                auto now = std::chrono::high_resolution_clock::now();
-                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastPrint).count();
+                const auto now = std::chrono::high_resolution_clock::now();
+                const auto elapsed =
+                        std::chrono::duration_cast<std::chrono::seconds>(now - perf.last_print).count();
                 if (elapsed >= 1) {
-                    updateAvg = (updateTime / updateCount);
-                    drawAvg = (drawTime / drawCount);
-
-                    // reset counters
-                    updateTime = 0.0;
-                    updateCount = 0;
-                    drawTime = 0.0;
-                    drawCount = 0;
-                    lastPrint = now;
+                    perf.update_avg = (perf.update_time / perf.update_count);
+                    perf.draw_avg = (perf.draw_time / perf.draw_count);
+                    perf.update_time = 0.0;
+                    perf.update_count = 0;
+                    perf.draw_time = 0.0;
+                    perf.draw_count = 0;
+                    perf.last_print = now;
                 }
-                const ImGuiIO& io = ImGui::GetIO();
-                ImGui::Begin("Debug");
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                            ImGui::GetIO().Framerate);
-                ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
-                ImGui::Text("UpdateRec average: %f ms", updateAvg);
-                ImGui::Text("DrawRec average: %f ms", drawAvg);
-                ImGui::Text("Mouse position %i, %i", (int)GetMousePosition().x,(int) GetMousePosition().y);
-                ImGui::Text("Window size %i, %i", (int)GetScreenWidth(),(int) GetScreenHeight());
-                ImGui::Text("Render size %i, %i", (int)GetRenderWidth(),(int) GetRenderHeight());
-                ImGui::Text("DPI scale %i, %i", (int)GetWindowScaleDPI().x,(int) GetWindowScaleDPI().y);
-                ImGui::Text("ImGui display size %f, %f", io.DisplaySize.x, io.DisplaySize.y);
-                ImGui::Text("ImGui IO framebuffer scale %f, %f", io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-                if (ImGui::Button("Spin")) {
-                    tween_manager.CreateTweenFromTo(
-                        &sprite->transform.rotation,
-                        0,
-                        360,
-                        1,
-                        Easing::EaseInOutSine);
+                if (show_debug_window) {
+                    const ImGuiIO &io = ImGui::GetIO();
+                    ImGui::Begin("Debug", &show_debug_window);
+                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+                    ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
+                    ImGui::Text("UpdateRec average: %f ms", perf.update_avg);
+                    ImGui::Text("DrawRec average: %f ms", perf.draw_avg);
+                    ImGui::Separator();
+                    ImGui::Text("Mouse position %f, %f", GetMousePosition().x, GetMousePosition().y);
+                    ImGui::Text("Window size %i, %i", GetScreenWidth(), GetScreenHeight());
+                    ImGui::Text("Render size %i, %i", GetRenderWidth(), GetRenderHeight());
+                    ImGui::Text("DPI scale %f, %f", GetWindowScaleDPI().x, GetWindowScaleDPI().y);
+                    ImGui::Text("ImGui IO display size %f, %f", io.DisplaySize.x, io.DisplaySize.y);
+                    ImGui::Text("ImGui IO framebuffer scale %f, %f",
+                                io.DisplayFramebufferScale.x,
+                                io.DisplayFramebufferScale.y);
+                    ImGui::End();
                 }
-                ImGui::End();
             }
             rlImGuiEnd();
         }
@@ -290,8 +295,7 @@ int main() {
 #endif
 
     // todo: shutdown harfbuzz/freetype
-    std::cout << "Shutting down." << std::endl;
-
+    Logger::instance().info("Shutting down");
     rlImGuiShutdown();
     CloseWindow();
     return 0;

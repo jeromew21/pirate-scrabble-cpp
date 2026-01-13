@@ -17,6 +17,7 @@ void LayoutSystem::Update(float delta_time) {
         node.bounds.size = {static_cast<float>(win_width), static_cast<float>(win_height)};
         node.minimum_size = {static_cast<float>(win_width), static_cast<float>(win_height)};
     }
+    // could we have other resizing methods?
     frameflow::compute_layout(system.get(), root_node_id);
 }
 

@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include "fmt/core.h"
-
 #include "frameflow/layout.hpp"
 
 #include "imgui.h"
@@ -13,6 +11,7 @@
 #include "multiplayer.h"
 #include "text/texthb.h"
 #include "util/filesystem.h"
+#include "util/logging/logging.h"
 #include "serialization/types.h"
 
 static bool write_persistent_data(const std::string &persistent_data_path, const PersistentData &data) {
@@ -24,10 +23,9 @@ static bool write_token(const std::string &token_path, const std::string &token)
 }
 
 static std::optional<PersistentData> load_persistent_data(const std::string &persistent_data_path) {
-    std::string outContents;
-    if (read_file(persistent_data_path, outContents)) {
+    if (std::string contents; read_file(persistent_data_path, contents)) {
         try {
-            return deserialize_or_throw<PersistentData>(outContents);
+            return deserialize_or_throw<PersistentData>(contents);
         } catch (const std::exception &e) {
             std::cerr << e.what() << "\n";
             return std::nullopt;
@@ -38,7 +36,7 @@ static std::optional<PersistentData> load_persistent_data(const std::string &per
 
 MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext>()),
                                      multiplayer_context(std::make_unique<MultiplayerContext>()) {
-    fmt::println("Initializing main context");
+    Logger::instance().info("Initializing main context");
     if (const auto persistent_data_opt = load_persistent_data(persistent_data_path);
         persistent_data_opt.has_value()) {
         persistent_data = persistent_data_opt.value();
@@ -49,7 +47,7 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
     multiplayer_context->main_menu = this;
     if (std::string token; read_file(token_path, token)) {
         std::erase_if(token, ::isspace);
-        fmt::println("Read token from disk.");
+        Logger::instance().info("Read token from disk");
         login_context->AttemptTokenAuth(token);
     } else {
         login_context->state = LoginContext::State::Active;
@@ -58,11 +56,11 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
 
 MainMenuContext::~MainMenuContext() {
     if (!write_persistent_data(persistent_data_path, persistent_data)) {
-        fmt::println("Failed to write persistent data to disk.");
+        Logger::instance().info("Failed to write persistent data to disk.");
     }
     if (user.has_value()) {
         if (!write_token(token_path, user->token)) {
-            fmt::println("Failed to write token to disk.");
+            Logger::instance().info("Failed to write token to disk.");
         }
     }
 }

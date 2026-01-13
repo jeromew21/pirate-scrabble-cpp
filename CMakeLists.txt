@@ -66,6 +66,10 @@ set(SOURCES
         src/util/queue.h
         src/util/math.h
         src/util/filesystem.cpp
+        src/game_object/entity/sprite.cpp
+        src/game_object/entity/sprite.h
+        src/serialization/types_inspector.h
+        src/util/logging/logging.h
 )
 
 if (EMSCRIPTEN)

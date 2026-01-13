@@ -3,8 +3,6 @@
 #include "game_object/game_object.h"
 #include "util/math.h"
 
-#include <raylib.h>
-
 class Entity : public GameObject {
 public:
     struct Transform {
@@ -16,13 +14,4 @@ public:
     Transform transform;
 
     float2 GlobalPosition();
-};
-
-class Sprite : public Entity {
-public:
-    Texture2D *texture{nullptr};
-
-    void Draw() override;
-
-    void SetTexture(Texture2D *new_texture);
 };

@@ -2,6 +2,7 @@
 cmake-build-debug
 build
 *.json
+*.log
 imgui.ini
 token.txt
 external/frameflow

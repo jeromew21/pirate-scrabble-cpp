@@ -16,9 +16,13 @@ struct LoginContext : GameObject {
     };
 
     MainMenuContext *main_menu;
+
     Queue recv_login_queue;
+
     State state = State::PreLogin;
+
     std::string username_label;
+
     std::string password_label;
 
     void Update(float delta_time) override;

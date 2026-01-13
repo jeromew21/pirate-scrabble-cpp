@@ -1,8 +1,10 @@
 #include "tween.h"
 
-Tween::Tween(float *ptr, float start, float end, float dur, EasingFunc ease): target(ptr), startValue(start), endValue(end), duration(dur),
-                                                                              elapsed(0.0f), easing(ease), finished(false) {
-    *target = startValue;
+Tween::Tween(float *ptr, float start, float end, float dur, EasingFunc ease) : target(ptr), start_value(start),
+                                                                               end_value(end), duration(dur),
+                                                                               elapsed(0.0f), easing(ease),
+                                                                               finished(false) {
+    *target = start_value;
 }
 
 void Tween::Update(float dt) {
@@ -14,14 +16,44 @@ void Tween::Update(float dt) {
     if (t >= 1.0f) {
         t = 1.0f;
         finished = true;
-        *target = endValue;
-        if (onComplete) onComplete();
+        *target = end_value;
+        if (on_complete) on_complete();
     } else {
         float easedT = easing(t);
-        *target = startValue + (endValue - startValue) * easedT;
+        *target = start_value + (end_value - start_value) * easedT;
     }
 }
 
 void Tween::SetOnComplete(std::function<void()> callback) {
-    onComplete = callback;
+    on_complete = callback;
+}
+
+Tween *TweenManager::CreateTween(float *target, float end_value, float duration, EasingFunc easing) {
+    tweens.emplace_back(target, *target, end_value, duration, easing);
+    return &tweens.back();
+}
+
+Tween *TweenManager::CreateTweenFromTo(float *target, float start_value, float end_value, float duration,
+                                       EasingFunc easing) {
+    tweens.emplace_back(target, start_value, end_value, duration, easing);
+    return &tweens.back();
+}
+
+void TweenManager::Update(float delta_time) {
+    tweens.erase(
+        std::remove_if(tweens.begin(), tweens.end(),
+                       [delta_time](Tween &tween) {
+                           tween.Update(delta_time);
+                           return tween.finished;
+                       }),
+        tweens.end()
+    );
+}
+
+void TweenManager::Clear() {
+    tweens.clear();
+}
+
+size_t TweenManager::GetActiveTweenCount() const {
+    return tweens.size();
 }

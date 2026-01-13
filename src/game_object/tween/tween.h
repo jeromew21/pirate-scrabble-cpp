@@ -7,27 +7,31 @@
 
 // Easing functions
 namespace Easing {
-    inline float Linear(float t) { return t; }
-    inline float EaseInQuad(float t) { return t * t; }
-    inline float EaseOutQuad(float t) { return t * (2.0f - t); }
+    inline float Linear(const float t) { return t; }
 
-    inline float EaseInOutQuad(float t) {
+    inline float EaseInQuad(const float t) { return t * t; }
+
+    inline float EaseOutQuad(const float t) { return t * (2.0f - t); }
+
+    inline float EaseInOutQuad(const float t) {
         return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
     }
 
-    inline float EaseInCubic(float t) { return t * t * t; }
+    inline float EaseInCubic(const float t) { return t * t * t; }
 
-    inline float EaseOutCubic(float t) {
+    inline float EaseOutCubic(const float t) {
         return 1.0f + (t - 1.0f) * (t - 1.0f) * (t - 1.0f);;
     }
 
-    inline float EaseInOutCubic(float t) {
+    inline float EaseInOutCubic(const float t) {
         return t < 0.5f ? 4.0f * t * t * t : (t - 1.0f) * (2.0f * t - 2.0f) * (2.0f * t - 2.0f) + 1.0f;
     }
 
-    inline float EaseInSine(float t) { return 1.0f - cosf(t * 1.57079632679f); }
-    inline float EaseOutSine(float t) { return sinf(t * 1.57079632679f); }
-    inline float EaseInOutSine(float t) { return -(cosf(3.14159265359f * t) - 1.0f) / 2.0f; }
+    inline float EaseInSine(const float t) { return 1.0f - cosf(t * 1.57079632679f); }
+
+    inline float EaseOutSine(const float t) { return sinf(t * 1.57079632679f); }
+
+    inline float EaseInOutSine(const float t) { return -(cosf(3.14159265359f * t) - 1.0f) / 2.0f; }
 }
 
 using EasingFunc = std::function<float(float)>;
@@ -35,12 +39,12 @@ using EasingFunc = std::function<float(float)>;
 class Tween {
 public:
     float *target;
-    float startValue;
-    float endValue;
+    float start_value;
+    float end_value;
     float duration;
     float elapsed;
     EasingFunc easing;
-    std::function<void()> onComplete;
+    std::function<void()> on_complete;
     bool finished;
 
     Tween(float *ptr, float start, float end, float dur, EasingFunc ease = Easing::Linear);
@@ -55,36 +59,17 @@ private:
     std::vector<Tween> tweens;
 
 public:
-    Tween *CreateTween(float *target, float endValue, float duration,
-                       EasingFunc easing = Easing::Linear) {
-        tweens.emplace_back(target, *target, endValue, duration, easing);
-        return &tweens.back();
-    }
+    Tween *CreateTween(float *target, float end_value, float duration,
+                       EasingFunc easing = Easing::Linear);
 
-    Tween *CreateTweenFromTo(float *target, float startValue, float endValue,
-                             float duration, EasingFunc easing = Easing::Linear) {
-        tweens.emplace_back(target, startValue, endValue, duration, easing);
-        return &tweens.back();
-    }
+    Tween *CreateTweenFromTo(float *target, float start_value, float end_value,
+                             float duration, EasingFunc easing = Easing::Linear);
 
-    void Update(float deltaTime) {
-        tweens.erase(
-            std::remove_if(tweens.begin(), tweens.end(),
-                           [deltaTime](Tween &tween) {
-                               tween.Update(deltaTime);
-                               return tween.finished;
-                           }),
-            tweens.end()
-        );
-    }
+    void Update(float delta_time);
 
-    void Clear() {
-        tweens.clear();
-    }
+    void Clear();
 
-    [[nodiscard]] size_t GetActiveTweenCount() const {
-        return tweens.size();
-    }
+    [[nodiscard]] size_t GetActiveTweenCount() const;
 };
 
 // Example usage:
