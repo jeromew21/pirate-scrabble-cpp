@@ -57,3 +57,8 @@ void TweenManager::Clear() {
 size_t TweenManager::GetActiveTweenCount() const {
     return tween_list.size();
 }
+
+TweenManager &TweenManager::instance() {
+    static TweenManager inst;
+    return inst;
+}

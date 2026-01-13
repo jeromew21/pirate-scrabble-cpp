@@ -26,7 +26,7 @@ struct MainMenuContext : GameObject {
 
     std::string token_path{"./token.txt"};
 
-    std::string persistent_data_path{"./gamedata.json"};
+    std::string persistent_data_path{"./pirate_scrabble_data.json"};
 
     float loading_counter{0};
 

@@ -12,7 +12,7 @@
 #include "login.h"
 #include "multiplayer.h"
 #include "text/texthb.h"
-#include "util/filesystem.h"
+#include "../util/filesystem/filesystem.h"
 #include "util/logging/logging.h"
 #include "serialization/types.h"
 

@@ -9,11 +9,9 @@
 #include "imgui.h"
 #include "misc/freetype/imgui_freetype.h"
 
-#include "ft2build.h"
-#include FT_FREETYPE_H
-
 #include "frameflow/layout.hpp"
 
+#include "text/freetype.h"
 #include "text/texthb.h"
 #include "serialization/types.h"
 #include "context/main_menu.h"
@@ -23,7 +21,7 @@
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 #include "game_object/tween/tween.h"
-#include "util/filesystem.h"
+#include "util/filesystem/filesystem.h"
 #include "util/logging/logging.h"
 #include "scrabble/tile.h"
 
@@ -69,7 +67,7 @@ struct Profiler {
     }
 };
 
-void InitCrossPlatformWindow(int logical_width, int logical_height, const char *title) {
+void InitCrossPlatformWindow(const int logical_width, const int logical_height, const char *title) {
     constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
                                    | FLAG_MSAA_4X_HINT
                                    | FLAG_VSYNC_HINT;
@@ -86,24 +84,6 @@ void InitCrossPlatformWindow(int logical_width, int logical_height, const char *
     // Tell raylib about the real size
     SetWindowSize(canvasWidth, canvasHeight);
 #endif
-}
-
-FT_Face ft_load_font(const FT_Library &ft, const fs::path &path) {
-    FT_Face face;
-    if (FT_New_Face(ft, path.c_str(), 0, &face)) {
-        Logger::instance().error("Failed to load font");
-        exit(1);
-    }
-    return face;
-}
-
-FT_Library ft_init() {
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft)) {
-        Logger::instance().error("Failed to init FreeType");
-        exit(1);
-    }
-    return ft;
 }
 
 std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
@@ -154,21 +134,24 @@ float GetLogicalRatio() {
 
 int main() {
     // -------------------------
+    // Initialize logging
+    // -------------------------
+    Logger::Initialize("pirate_scrabble.log");
+
+    // -------------------------
     // Initialize context
     // -------------------------
-    GameObject root{};
-    TweenManager tween_manager{};
     MainMenuContext menu_context{};
-    root.AddChild(&menu_context);
 
     // -------------------------
     // Initialize raylib
     // -------------------------
     SetTraceLogLevel(LOG_NONE);
-    SetExitKey(KEY_NULL);
     InitCrossPlatformWindow(menu_context.persistent_data.window_width,
                             menu_context.persistent_data.window_height,
                             "Pirate Scrabble");
+    SetExitKey(KEY_NULL);
+    Logger::instance().info("Raylib initialized");
 
     // -------------------------
     // Initialize ImGui
@@ -191,6 +174,13 @@ int main() {
     HBFont font(face, 48); // pixel size 48
 
     auto tile_map = generate_tile_sprites(ft);
+    GameObject root{};
+    root.AddChild(&menu_context);
+
+    /*
+    fmt::println("Exe path: {}", executable_path().string());
+    fmt::println("Exe dir: {}", executable_dir().string());
+    */
 
     // -------------------------
     // Initialize performance tracker
@@ -217,7 +207,7 @@ int main() {
             Profiler p("UpdateRec", perf.update_time, perf.update_count);
             const float dt = GetFrameTime();
             root.UpdateRec(dt);
-            tween_manager.Update(dt);
+            TweenManager::instance().Update(dt);
         }
 
         // Draw
@@ -298,6 +288,7 @@ int main() {
 #endif
 
     // todo: shutdown harfbuzz/freetype
+    // todo: recursively delete root
     Logger::instance().info("Shutting down");
     rlImGuiShutdown();
     CloseWindow();

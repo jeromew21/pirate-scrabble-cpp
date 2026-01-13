@@ -39,12 +39,19 @@ using EasingFunc = std::function<float(float)>;
 class Tween {
 public:
     float *target;
+
     float start_value;
+
     float end_value;
+
     float duration;
+
     float elapsed;
+
     EasingFunc easing;
+
     std::function<void()> on_complete;
+
     bool finished;
 
     Tween(float *ptr, float start, float end, float dur, EasingFunc ease = Easing::Linear);
@@ -55,7 +62,6 @@ public:
 };
 
 class TweenManager {
-private:
     std::vector<Tween> tween_list;
 
 public:
@@ -70,6 +76,8 @@ public:
     void Clear();
 
     [[nodiscard]] size_t GetActiveTweenCount() const;
+
+    static TweenManager& instance();
 };
 
 // Example usage:

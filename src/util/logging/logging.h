@@ -15,10 +15,9 @@ public:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    static Logger& instance() {
-        static Logger instance;
-        return instance;
-    }
+    static void Initialize(const char* output_file);
+
+    static Logger& instance();
 
     template<typename... Args>
     void info(fmt::format_string<Args...> fmt_str, Args&&... args) {
@@ -39,15 +38,16 @@ public:
         return entries_;
     }
 
-private:
-    Logger() {
-        file_.open("game.log", std::ios::out | std::ios::app);
+    explicit Logger(const char* output_file) : output_file(output_file) {
+        file_.open(output_file, std::ios::out | std::ios::app);
     }
 
     ~Logger() {
-        if (file_.is_open())
-            file_.close();
+        if (file_.is_open()) file_.close();
     }
+
+private:
+    const char* output_file;
 
     std::mutex mutex_;
     std::vector<std::string> entries_;
@@ -84,7 +84,7 @@ private:
         entries_.push_back(line);
 
         if (level == std::string("ERROR")) {
-            fmt::print(fmt::fg(color), "{}\n", line);
+            fmt::print(stderr, fmt::fg(color), "{}\n", line);
         } else {
             fmt::print("{}\n", line);
         }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(game LANGUAGES CXX)
+project(pirate-scrabble-executable LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,8 +41,8 @@ set(SOURCES
         external/rlImGui/rlImGui.cpp
         src/text/texthb.h
         src/text/texthb.cpp
-        src/context/sockets.h
-        src/context/sockets.cpp
+        src/context/socket_client.h
+        src/context/socket_client.cpp
         src/context/main_menu.h
         src/context/main_menu.cpp
         src/context/login.cpp
@@ -66,14 +66,17 @@ set(SOURCES
         src/util/network/sockets/web_socket.h
         src/util/network/sockets/web_socket_desktop.h
         src/util/network/sockets/web_socket_web.h
-        src/util/filesystem.h
+        src/util/filesystem/filesystem.h
         src/util/queue.h
         src/util/math.h
-        src/util/filesystem.cpp
+        src/util/filesystem/filesystem.cpp
         src/game_object/entity/sprite.cpp
         src/game_object/entity/sprite.h
         src/serialization/types_inspector.h
         src/util/logging/logging.h
+        src/text/freetype.cpp
+        src/text/freetype.h
+        src/util/logging/logging.cpp
 )
 
 if (EMSCRIPTEN)
@@ -82,9 +85,9 @@ else ()
     list(APPEND SOURCES src/util/network/sockets/web_socket_desktop.cpp)
 endif ()
 
-add_executable(game ${SOURCES})
+add_executable(pirate-scrabble ${SOURCES})
 
-target_include_directories(game
+target_include_directories(pirate-scrabble
         PRIVATE
         src
         external/imgui
@@ -94,7 +97,7 @@ target_include_directories(game
         external/json
 )
 
-target_link_libraries(game
+target_link_libraries(pirate-scrabble
         PRIVATE
         raylib
         frameflow::frameflow
@@ -105,7 +108,7 @@ target_link_libraries(game
 )
 
 if (NOT EMSCRIPTEN)
-    target_link_libraries(game
+    target_link_libraries(pirate-scrabble
             PRIVATE
         ixwebsocket::ixwebsocket
     )
@@ -134,7 +137,7 @@ if(EMSCRIPTEN)
             --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets
     )
 
-    set_target_properties(game PROPERTIES
+    set_target_properties(pirate-scrabble PROPERTIES
             SUFFIX ".html"
     )
 endif()

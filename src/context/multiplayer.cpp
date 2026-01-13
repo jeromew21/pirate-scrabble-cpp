@@ -9,7 +9,7 @@
 #include "login.h"
 #include "util/logging/logging.h"
 #include "main_menu.h"
-#include "sockets.h"
+#include "socket_client.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 #include "scrabble/tile.h"

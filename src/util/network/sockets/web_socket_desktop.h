@@ -8,7 +8,7 @@ struct WebSocketDesktop : WebSocketImpl {
     ix::WebSocket ws;
     std::string url;
 
-    explicit WebSocketDesktop(const std::string& url_);
+    explicit WebSocketDesktop(std::string);
 
     void connect() override;
 

@@ -1,12 +1,23 @@
 #include "web_socket_desktop.h"
 
-WebSocketDesktop::WebSocketDesktop(const std::string &url_): url(url_) {}
+#include <utility>
+
+#include "ixwebsocket/IXNetSystem.h"
+
+
+WebSocketDesktop::WebSocketDesktop(std::string url_): url(std::move(url_)) {
+#if _WIN32
+    static bool is_initialized = false;
+    if (!is_initialized) {
+        ix::initNetSystem();
+        is_initialized = true;
+    }
+#endif
+}
 
 void WebSocketDesktop::connect() {
     ws.setUrl(url);
-
     ws.disableAutomaticReconnection();
-
     ws.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
         switch(msg->type) {
             case ix::WebSocketMessageType::Open:

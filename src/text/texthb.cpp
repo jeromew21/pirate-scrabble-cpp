@@ -7,6 +7,8 @@
 #include "hb.h"
 #include "hb-ft.h"
 
+#include "freetype.h"
+
 // -------------------------
 // Glyph struct for caching
 // -------------------------
