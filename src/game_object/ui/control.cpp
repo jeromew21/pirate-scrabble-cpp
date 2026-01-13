@@ -30,6 +30,7 @@ static Color color_for(frameflow::NodeType type) {
         case NodeType::Box: return GREEN;
         case NodeType::Flow: return ORANGE;
         case NodeType::Generic: return RAYWHITE;
+        case NodeType::Margin: return YELLOW;
         default: return MAGENTA;
     }
 }
@@ -41,6 +42,7 @@ static const char *node_type_name(frameflow::NodeType type) {
         case NodeType::Box: return "Box";
         case NodeType::Flow: return "Flow";
         case NodeType::Generic: return "Generic";
+        case NodeType::Margin: return "Margin";
         default: return "Unknown";
     }
 }
@@ -101,32 +103,53 @@ void Control::InitializeLayout(LayoutSystem *system) {
 void BoxContainer::InitializeLayout(LayoutSystem *system) {
     if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
         node_id_ = frameflow::add_box(system->system.get(),
-                           parent_node.value(),
-                           box_data);
+                                      parent_node.value(),
+                                      box_data);
+    }
+}
+
+FlowContainer::FlowContainer(const frameflow::FlowData &data) : flow_data(data) {
+}
+
+void FlowContainer::InitializeLayout(LayoutSystem *system) {
+    if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
+        node_id_ = frameflow::add_flow(system->system.get(),
+                                         parent_node.value(),
+                                         flow_data);
     }
 }
 
 void CenterContainer::InitializeLayout(LayoutSystem *system) {
     if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
         node_id_ = frameflow::add_center(system->system.get(),
-                              parent_node.value());
+                                         parent_node.value());
+    }
+}
+
+MarginContainer::MarginContainer(const frameflow::MarginData &data) : margin_data(data) {
+}
+
+void MarginContainer::InitializeLayout(LayoutSystem *system) {
+    if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
+        node_id_ = frameflow::add_margin(system->system.get(),
+                                         parent_node.value(),
+                                         margin_data);
     }
 }
 
 void LineInput::Draw() {
     Control::Draw();
-    //fallback color and font!
-    auto measure = MeasureTextHB(*font, text);
+    const auto measure = MeasureTextHB(*font, text);
     DrawTextHB(*font,
-        text,
-        GetNode()->bounds.origin.x,
-        GetNode()->bounds.origin.y + measure.ascent,
-        *color);
+               text,
+               GetNode()->bounds.origin.x,
+               GetNode()->bounds.origin.y + measure.ascent,
+               color);
     GetNode()->minimum_size = {measure.width, measure.height};
 }
 
 // move to util
-static void utf8_pop_back(std::string& s) {
+static void utf8_pop_back(std::string &s) {
     while (!s.empty() && ((s.back() & 0xC0) == 0x80)) {
         s.pop_back();
     }
@@ -141,7 +164,7 @@ void LineInput::Update(float /*delta_time*/) {
     while ((codepoint = GetCharPressed()) != 0) {
         if (codepoint >= 32) {
             int utf8Size = 0;
-            const char* utf8 = CodepointToUTF8(codepoint, &utf8Size);
+            const char *utf8 = CodepointToUTF8(codepoint, &utf8Size);
             if (utf8 && utf8Size > 0) {
                 text.append(utf8, utf8Size);
             }
@@ -158,10 +181,10 @@ void Label::Draw() {
     Control::Draw();
     //fallback color and font!
     DrawTextHB(*font,
-        text,
-        GetNode()->bounds.origin.x,
-        GetNode()->bounds.origin.y + ascent,
-        *color);
+               text,
+               GetNode()->bounds.origin.x,
+               GetNode()->bounds.origin.y + ascent,
+               color);
 }
 
 void Label::Update(float delta_time) {

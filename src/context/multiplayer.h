@@ -9,6 +9,8 @@ struct MainMenuContext;
 
 struct BoxContainer;
 
+struct LayoutSystem;
+
 struct MultiplayerContext : GameObject {
     enum class State {
         PreInit, Gateway, Lobby, Playing
@@ -18,11 +20,9 @@ private:
     State state = State::PreInit;
 
 public:
-    std::optional<MultiplayerGame> game_opt;
+    std::optional<MultiplayerGame> game_opt{std::nullopt};
 
-    BoxContainer *node;
-
-    MainMenuContext *main_menu;
+    MainMenuContext *main_menu{nullptr};
 
     WebSocketImpl *game_socket{nullptr};
 
@@ -33,11 +33,17 @@ public:
 
     float time_since_last_poll{0};
 
+    LayoutSystem *canvas;
+
+    MultiplayerContext();
+
     void Update(float delta_time) override;
 
     void Draw() override;
 
     void RenderGateway();
+
+    void RenderChat() const;
 
     void RenderLobby() const;
 

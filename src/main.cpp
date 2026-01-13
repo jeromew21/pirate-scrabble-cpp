@@ -6,12 +6,14 @@
 #include "raylib.h"
 #include "rlImGui.h"
 
+#include "imgui.h"
+#include "misc/freetype/imgui_freetype.h"
+
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
 #include "frameflow/layout.hpp"
 
-#include "imgui.h"
 #include "text/texthb.h"
 #include "serialization/types.h"
 #include "context/main_menu.h"
@@ -60,8 +62,8 @@ struct Profiler {
     }
 
     ~Profiler() {
-        auto end = std::chrono::high_resolution_clock::now();
-        auto ms = std::chrono::duration<double, std::milli>(end - start).count();
+        const auto end = std::chrono::high_resolution_clock::now();
+        const auto ms = std::chrono::duration<double, std::milli>(end - start).count();
         accumulator += ms;
         count++;
     }
@@ -87,9 +89,29 @@ void InitCrossPlatformWindow(int logical_width, int logical_height, const char *
 
 
 
+
+
+
+
+
+
+
+
+
+
     });
     int canvasHeight = EM_ASM_INT({
         return Module.canvas.height;
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -113,18 +135,29 @@ void InitCrossPlatformWindow(int logical_width, int logical_height, const char *
 #endif
 }
 
+FT_Face ft_load_font(const FT_Library &ft, const fs::path &path) {
+    FT_Face face;
+    if (FT_New_Face(ft, path.c_str(), 0, &face)) {
+        std::cerr << "Failed to load font\n";
+        exit(1);
+    }
+    return face;
+}
+
+FT_Library ft_init() {
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft)) {
+        std::cerr << "Failed to init FreeType\n";
+        exit(1);
+    }
+    return ft;
+}
+
 std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
     // consider this just being an array...
     std::unordered_map<char, RenderTexture2D> tile_map;
 
-    const auto arial = FS_ROOT / "assets" / "arial.ttf";
-    FT_Face face;
-    if (FT_New_Face(ft, arial.c_str(), 0, &face)) {
-        std::cerr << "Failed to load font\n";
-        exit(67);
-    }
-
-    auto black = BLACK;
+    const auto face = ft_load_font(ft, FS_ROOT / "assets" / "arial.ttf");
 
     HBFont font(face, static_cast<int>(Tile::dim)); // pixel size 48
 
@@ -133,15 +166,15 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
     auto *tile = new Tile();
     sys.AddChild(tile);
     tile->Initialize();
-    auto *c = new Label();
-    tile->AddChild(c);
-    c->font = &font,
-            c->text = "A";
-    c->color = &black;
+    auto *label = new Label();
+    tile->AddChild(label);
+    label->font = &font;
+    label->text = "A";
+    label->color = BLACK;
     tile->GetNode()->bounds.origin = {0, 0};
     tile->GetNode()->bounds.size = tile->GetNode()->minimum_size;
     for (char i = 0; i < 127; i++) {
-        c->text = i;
+        label->text = i;
         tile->UpdateRec(0.016f);
         compute_layout(sys.system.get(), tile->node_id_);
         // can we draw this to a render texture?
@@ -165,44 +198,39 @@ std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
 
 int main() {
     SetTraceLogLevel(LOG_NONE);
-    InitCrossPlatformWindow(1920, 1080, "Pirate Scrabble");
+    SetExitKey(KEY_NULL);
 
-    rlImGuiSetup(true); // sets up ImGui with either a dark or light default theme
+    GameObject root{};
+    TweenManager tween_manager;
+    MainMenuContext menu_context{};
+    root.AddChild(&menu_context);
+
+    InitCrossPlatformWindow(menu_context.persistent_data.window_width,
+                            menu_context.persistent_data.window_height,
+                            "Pirate Scrabble");
+
+    // -------------------------
+    // Initialize ImGui
+    // -------------------------
+    rlImGuiSetup(true);
+    const ImGuiIO &io = ImGui::GetIO();
+    io.Fonts->SetFontLoader(ImGuiFreeType::GetFontLoader());
 
     // -------------------------
     // Initialize FreeType
     // -------------------------
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft)) {
-        std::cerr << "Failed to init FreeType\n";
-        return 1;
-    }
+    auto *ft = ft_init();
 
     const auto arial = FS_ROOT / "assets" / "arial.ttf";
-    FT_Face face;
-    if (FT_New_Face(ft, arial.c_str(), 0, &face)) {
-        std::cerr << "Failed to load font\n";
-        return 1;
-    }
+    const auto face = ft_load_font(ft, arial);
 
     HBFont font(face, 48); // pixel size 48
 
-    TweenManager tween_manager;
-
-    GameObject root{};
+    const auto ibm_plex_mono = FS_ROOT / "assets" / "IBM_Plex_Mono" / "IBMPlexMono-Regular.ttf";
+    ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.c_str(), 32.0f);
 
     auto tile_map = generate_tile_sprites(ft);
 
-    // set up contexts
-    MainMenuContext menu_context{};
-    root.AddChild(&menu_context);
-
-    //auto black = BLACK;
-
-    LayoutSystem sys{};
-    root.AddChild(&sys);
-
-    bool show_debug_window = true;
 
     Performance perf;
     perf.last_print = std::chrono::high_resolution_clock::now();
@@ -210,24 +238,10 @@ int main() {
     main_loop_function = [&]() {
         if (IsWindowResized()) {
 #ifdef __EMSCRIPTEN__
-            // Sync raylib with the new canvas size
-            int canvasWidth = EM_ASM_INT({
-                return Module.canvas.width;
-
-
-
-
-            });
-            int canvasHeight = EM_ASM_INT({
-                return Module.canvas.height;
-
-
-
-
-            });
-
-            SetWindowSize(canvasWidth, canvasHeight);
-            std::cout << "Resized to: " << canvasWidth << "x" << canvasHeight << std::endl;
+            int canvas_width = EM_ASM_INT({return Module.canvas.width;});
+            int canvas_height = EM_ASM_INT({return Module.canvas.height;});
+            SetWindowSize(canvas_width, canvas_height);
+            Logger::instance().info("Resized to: {}x{}", canvas_width, canvas_height)
 #else
             //SetWindowSize(, 800);
 #endif
@@ -246,42 +260,66 @@ int main() {
         {
             ClearBackground(DARKGRAY);
             rlImGuiBegin();
+            ImGui::PushFont(imgui_font);
             {
                 Profiler p("DrawRec", perf.draw_time, perf.draw_count);
                 root.DrawRec();
             }
-            {
-                const auto now = std::chrono::high_resolution_clock::now();
-                const auto elapsed =
-                        std::chrono::duration_cast<std::chrono::seconds>(now - perf.last_print).count();
-                if (elapsed >= 1) {
-                    perf.update_avg = (perf.update_time / perf.update_count);
-                    perf.draw_avg = (perf.draw_time / perf.draw_count);
-                    perf.update_time = 0.0;
-                    perf.update_count = 0;
-                    perf.draw_time = 0.0;
-                    perf.draw_count = 0;
-                    perf.last_print = now;
-                }
-                if (show_debug_window) {
-                    const ImGuiIO &io = ImGui::GetIO();
-                    ImGui::Begin("Debug", &show_debug_window);
-                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-                    ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
-                    ImGui::Text("UpdateRec average: %f ms", perf.update_avg);
-                    ImGui::Text("DrawRec average: %f ms", perf.draw_avg);
-                    ImGui::Separator();
-                    ImGui::Text("Mouse position %f, %f", GetMousePosition().x, GetMousePosition().y);
-                    ImGui::Text("Window size %i, %i", GetScreenWidth(), GetScreenHeight());
-                    ImGui::Text("Render size %i, %i", GetRenderWidth(), GetRenderHeight());
-                    ImGui::Text("DPI scale %f, %f", GetWindowScaleDPI().x, GetWindowScaleDPI().y);
-                    ImGui::Text("ImGui IO display size %f, %f", io.DisplaySize.x, io.DisplaySize.y);
-                    ImGui::Text("ImGui IO framebuffer scale %f, %f",
-                                io.DisplayFramebufferScale.x,
-                                io.DisplayFramebufferScale.y);
-                    ImGui::End();
-                }
+            const auto now = std::chrono::high_resolution_clock::now();
+            const auto elapsed =
+                    std::chrono::duration_cast<std::chrono::seconds>(now - perf.last_print).count();
+            if (elapsed >= 1) {
+                perf.update_avg = (perf.update_time / perf.update_count);
+                perf.draw_avg = (perf.draw_time / perf.draw_count);
+                perf.update_time = 0.0;
+                perf.update_count = 0;
+                perf.draw_time = 0.0;
+                perf.draw_count = 0;
+                perf.last_print = now;
             }
+            if (menu_context.persistent_data.show_debug_window) {
+                ImGui::Begin("Debug", &menu_context.persistent_data.show_debug_window);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+                ImGui::Checkbox("Draw Debug Borders", &Control::DrawDebugBorders);
+                ImGui::Text("UpdateRec average: %f ms", perf.update_avg);
+                ImGui::Text("DrawRec average: %f ms", perf.draw_avg);
+                ImGui::Separator();
+                ImGui::Text("Mouse position %f, %f", GetMousePosition().x, GetMousePosition().y);
+                ImGui::Text("Window size %i, %i", GetScreenWidth(), GetScreenHeight());
+                ImGui::Text("Render size %i, %i", GetRenderWidth(), GetRenderHeight());
+                ImGui::Text("DPI scale %f, %f", GetWindowScaleDPI().x, GetWindowScaleDPI().y);
+                ImGui::Text("ImGui IO display size %f, %f", io.DisplaySize.x, io.DisplaySize.y);
+                ImGui::Text("ImGui IO framebuffer scale %f, %f",
+                            io.DisplayFramebufferScale.x,
+                            io.DisplayFramebufferScale.y);
+                const auto &logs = Logger::instance().entries();
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.07f, 0.07f, 0.07f, 1.0f));
+                ImGui::BeginChild("LogScroll",
+                                  ImVec2(0, 0),
+                                  true,
+                                  ImGuiWindowFlags_HorizontalScrollbar);
+                {
+                    for (const std::string &line: logs) {
+                        if (line.find("[ERROR]") != std::string::npos) {
+                            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 80, 80, 255));
+                            ImGui::TextUnformatted(line.c_str());
+                            ImGui::PopStyleColor();
+                        } else if (line.find("[WARN]") != std::string::npos) {
+                            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 200, 80, 255));
+                            ImGui::TextUnformatted(line.c_str());
+                            ImGui::PopStyleColor();
+                        } else {
+                            ImGui::TextUnformatted(line.c_str());
+                        }
+                    }
+                    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+                        ImGui::SetScrollHereY(1.0f);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+                ImGui::End();
+            }
+            ImGui::PopFont();
             rlImGuiEnd();
         }
         EndDrawing();

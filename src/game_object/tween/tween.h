@@ -56,7 +56,7 @@ public:
 
 class TweenManager {
 private:
-    std::vector<Tween> tweens;
+    std::vector<Tween> tween_list;
 
 public:
     Tween *CreateTween(float *target, float end_value, float duration,

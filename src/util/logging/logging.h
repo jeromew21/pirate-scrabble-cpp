@@ -55,7 +55,7 @@ private:
 
     static std::string timestamp() {
         using clock = std::chrono::system_clock;
-        auto now = clock::now();
+        const auto now = clock::now();
         std::time_t t = clock::to_time_t(now);
 
         std::tm tm{};
@@ -72,7 +72,7 @@ private:
 
     template<typename... Args>
     void log(const char* level,
-             fmt::terminal_color color,
+             const fmt::terminal_color color,
              fmt::format_string<Args...> fmt_str,
              Args&&... args)
     {

@@ -20,6 +20,7 @@ void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const s
 
     ws->connect();
 
+    // todo refactor to not use thread
     std::this_thread::sleep_for(std::chrono::seconds(4));
 }
 
@@ -38,6 +39,7 @@ void TokenAuthSocket(Queue &recvLoginQueue, std::string token) {
 
     ws->connect();
 
+    // todo refactor to not use thread
     std::this_thread::sleep_for(std::chrono::seconds(4));
 }
 
@@ -56,6 +58,7 @@ void NewGameSocket(Queue &recvLoginQueue, std::string token) {
 
     ws->connect();
 
+    // todo refactor to not use thread
     std::this_thread::sleep_for(std::chrono::seconds(4));
 }
 

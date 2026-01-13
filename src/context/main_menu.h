@@ -8,7 +8,6 @@ struct LoginContext;
 struct MultiplayerContext;
 
 struct MainMenuContext : GameObject {
-public:
     enum class State {
         InitialLoading,
         Menu,
@@ -17,9 +16,9 @@ public:
 
     State state{State::InitialLoading};
 
-    PersistentData persistent_data;
+    PersistentData persistent_data{};
 
-    std::optional<User> user{std::nullopt};
+    std::optional<User> user_opt{std::nullopt};
 
     std::unique_ptr<LoginContext> login_context;
 
@@ -36,8 +35,6 @@ public:
     MainMenuContext();
 
     ~MainMenuContext() override;
-
-    void AuthenticateUser(const User& new_user);
 
     void Draw() override;
 

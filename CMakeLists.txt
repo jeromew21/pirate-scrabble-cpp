@@ -28,12 +28,16 @@ endif()
 
 set(SOURCES
         src/main.cpp
+        external/imgui/imgui.h
         external/imgui/imgui.cpp
         external/imgui/imgui_widgets.cpp
         external/imgui/imgui_tables.cpp
         external/imgui/imgui_draw.cpp
         external/imgui/imgui_demo.cpp
+        external/imgui/misc/cpp/imgui_stdlib.h
         external/imgui/misc/cpp/imgui_stdlib.cpp
+        external/imgui/misc/freetype/imgui_freetype.h
+        external/imgui/misc/freetype/imgui_freetype.cpp
         external/rlImGui/rlImGui.cpp
         src/text/texthb.h
         src/text/texthb.cpp

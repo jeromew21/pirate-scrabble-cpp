@@ -29,31 +29,31 @@ void Tween::SetOnComplete(std::function<void()> callback) {
 }
 
 Tween *TweenManager::CreateTween(float *target, float end_value, float duration, EasingFunc easing) {
-    tweens.emplace_back(target, *target, end_value, duration, easing);
-    return &tweens.back();
+    tween_list.emplace_back(target, *target, end_value, duration, easing);
+    return &tween_list.back();
 }
 
 Tween *TweenManager::CreateTweenFromTo(float *target, float start_value, float end_value, float duration,
                                        EasingFunc easing) {
-    tweens.emplace_back(target, start_value, end_value, duration, easing);
-    return &tweens.back();
+    tween_list.emplace_back(target, start_value, end_value, duration, easing);
+    return &tween_list.back();
 }
 
 void TweenManager::Update(float delta_time) {
-    tweens.erase(
-        std::remove_if(tweens.begin(), tweens.end(),
+    tween_list.erase(
+        std::remove_if(tween_list.begin(), tween_list.end(),
                        [delta_time](Tween &tween) {
                            tween.Update(delta_time);
                            return tween.finished;
                        }),
-        tweens.end()
+        tween_list.end()
     );
 }
 
 void TweenManager::Clear() {
-    tweens.clear();
+    tween_list.clear();
 }
 
 size_t TweenManager::GetActiveTweenCount() const {
-    return tweens.size();
+    return tween_list.size();
 }

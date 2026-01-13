@@ -1,8 +1,6 @@
 #include "login.h"
 
 #include <functional>
-#include <iostream>
-#include <ostream>
 #include <string>
 #include <thread>
 
@@ -13,7 +11,7 @@
 #include "main_menu.h"
 #include "sockets.h"
 #include "serialization/types.h"
-#include "util/math.h"
+#include "util/logging/logging.h"
 
 void LoginContext::Update(float delta_time) {
     std::string msg;
@@ -23,8 +21,8 @@ void LoginContext::Update(float delta_time) {
             main_menu->state = MainMenuContext::State::Menu;
         }
         if (response.ok) {
-            // some callback, maybe
-            main_menu->AuthenticateUser(response.user.value());
+            Logger::instance().info("Authenticated as {}", response.user->username);
+            main_menu->user_opt = response.user.value();
             state = State::Bypassed;
         } else {
             state = State::Active;
@@ -33,14 +31,15 @@ void LoginContext::Update(float delta_time) {
 }
 
 void LoginContext::Draw() {
-    if (state == State::Active || state == State::Loading) {
+    if (state == State::Active) {
         ImGui::Begin("Log in");
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-        bool b1 = ImGui::InputText("Username", &username_label, flags);
-        bool b2 = ImGui::InputText("Password", &password_label, flags);
-        bool b3 = ImGui::Button("Log in");
+        constexpr ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+        const bool b1 = ImGui::InputText("Username", &username_label, flags);
+        const bool b2 = ImGui::InputText("Password", &password_label, flags | ImGuiInputTextFlags_Password);
+        const bool b3 = ImGui::Button("Log in");
         if (b1 || b2 || b3) {
             // todo: loading state
+            // do we even need a thread, we can use main thread to release the socket...
             std::thread t(UserLoginSocket, std::ref(recv_login_queue), username_label, password_label);
             t.detach();
         }

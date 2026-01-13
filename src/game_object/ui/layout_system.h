@@ -17,7 +17,7 @@ public:
 
     bool fill_screen{true};
 
-    explicit LayoutSystem();
+    LayoutSystem();
 
     void Update(float delta_time) override;
 

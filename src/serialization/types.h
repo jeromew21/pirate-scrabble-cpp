@@ -6,10 +6,19 @@
 #include "json.hpp"
 
 struct PersistentData {
-    int dummy = 0;
+    int window_width{1920};
+    int window_height{1080};
+    bool show_debug_window{true};
+    int dummy{0};
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PersistentData, dummy)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    PersistentData,
+    window_width,
+    window_height,
+    show_debug_window,
+    dummy
+)
 
 struct TileProps {
     std::string letter;

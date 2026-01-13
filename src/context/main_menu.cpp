@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "raylib.h"
+
 #include "frameflow/layout.hpp"
 
 #include "imgui.h"
@@ -41,6 +43,7 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
         persistent_data_opt.has_value()) {
         persistent_data = persistent_data_opt.value();
     }
+
     AddChild(login_context.get());
     AddChild(multiplayer_context.get());
     login_context->main_menu = this;
@@ -55,18 +58,17 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
 }
 
 MainMenuContext::~MainMenuContext() {
+    Logger::instance().info("Shutting down main context");
+    persistent_data.window_width = GetScreenWidth();
+    persistent_data.window_height = GetScreenHeight();
     if (!write_persistent_data(persistent_data_path, persistent_data)) {
-        Logger::instance().info("Failed to write persistent data to disk.");
+        Logger::instance().info("Failed to write persistent data to disk");
     }
-    if (user.has_value()) {
-        if (!write_token(token_path, user->token)) {
-            Logger::instance().info("Failed to write token to disk.");
+    if (user_opt.has_value()) {
+        if (!write_token(token_path, user_opt->token)) {
+            Logger::instance().info("Failed to write token to disk");
         }
     }
-}
-
-void MainMenuContext::AuthenticateUser(const User& new_user) {
-    user = new_user;
 }
 
 void MainMenuContext::Draw() {
@@ -137,7 +139,7 @@ void MainMenuContext::RenderMainMenu() {
 
     if (ImGui::CollapsingHeader("Profile")) {
         ImGui::Text("User profile and statistics.");
-        ImGui::Text("Username: %s", user->username.c_str());
+        ImGui::Text("Username: %s", user_opt->username.c_str());
     }
 
     if (ImGui::CollapsingHeader("About")) {
@@ -150,7 +152,7 @@ void MainMenuContext::RenderMainMenu() {
 
 void MainMenuContext::EnterMainMenu() {
     state = State::Menu;
-    if (user.has_value()) {
-        login_context->AttemptTokenAuth(user->token);
+    if (user_opt.has_value()) {
+        login_context->AttemptTokenAuth(user_opt->token);
     }
 }

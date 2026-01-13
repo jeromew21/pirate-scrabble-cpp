@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include <string>
 
+#include "raylib.h"
 #include "frameflow/layout.hpp"
 #include "game_object/game_object.h"
 
@@ -14,11 +14,11 @@ public:
 
     LayoutSystem *layout_system_{nullptr};
 
-    explicit Control() = default;
+    frameflow::NodeId node_id_{frameflow::NullNode};
+
+    Control() = default;
 
     virtual void InitializeLayout(LayoutSystem *system);
-
-    frameflow::NodeId node_id_{frameflow::NullNode};
 
     [[nodiscard]] frameflow::Node *GetNode() const;
 
@@ -31,39 +31,65 @@ private:
 class BoxContainer : public Control {
 public:
     frameflow::BoxData box_data;
+
     explicit BoxContainer(const frameflow::BoxData &data);
+
+    void InitializeLayout(LayoutSystem *system) override;
+};
+
+class FlowContainer : public Control {
+public:
+    frameflow::FlowData flow_data;
+
+    explicit FlowContainer(const frameflow::FlowData &data);
+
     void InitializeLayout(LayoutSystem *system) override;
 };
 
 class CenterContainer : public Control {
 public:
     explicit CenterContainer() = default;
+
     void InitializeLayout(LayoutSystem *system) override;
 };
 
+class MarginContainer : public Control {
+public:
+    frameflow::MarginData margin_data;
+
+    explicit MarginContainer(const frameflow::MarginData &data);
+
+    void InitializeLayout(LayoutSystem *system) override;
+};
 
 class HBFont;
-struct Color;
 
 class Label : public Control {
 public:
     std::string text;
     HBFont *font{nullptr};
-    Color *color;
+    Color color{BLACK};
+
     explicit Label() = default;
+
     void Draw() override;
+
     void Update(float delta_time) override;
+
 private:
-    float ascent;
+    float ascent{};
 };
 
 class LineInput : public Control {
 public:
     std::string text;
     HBFont *font{nullptr};
-    Color *color;
-    bool has_focus; // focusGroup?
+    Color color{BLACK};
+    bool has_focus{false}; // focusGroup?
+
     explicit LineInput() = default;
+
     void Draw() override;
+
     void Update(float delta_time) override;;
 };
