@@ -4,7 +4,7 @@
 
 class Tile : public CenterContainer {
 public:
-    static constexpr float dim = 64;
+    static float dim;
     void Initialize() const;
     void Draw() override;
 };

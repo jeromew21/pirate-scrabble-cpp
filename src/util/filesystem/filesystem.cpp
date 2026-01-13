@@ -47,7 +47,7 @@ bool write_file(const std::string &path, const std::string &contents) {
 }
 
 fs::path executable_path() {
-#ifdef __linux_
+#ifdef __linux__
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len != -1) {

@@ -19,9 +19,7 @@ void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const s
     ws->on_error = [](const std::string& err) {
         Logger::instance().error("Credential auth socket error: {}", err);
     };
-    ws->on_close = []() {
-        Logger::instance().error("Credential auth socket closed");
-    };
+    ws->on_close = []() {};
 
     ws->connect();
 
@@ -42,9 +40,7 @@ void TokenAuthSocket(Queue &recvLoginQueue, std::string token) {
     ws->on_error = [](const std::string& err) {
         Logger::instance().error("Token auth socket error: {}", err);
     };
-    ws->on_close = []() {
-        Logger::instance().error("Token auth socket closed");
-    };
+    ws->on_close = []() {};
 
     ws->connect();
 
@@ -65,9 +61,7 @@ void NewGameSocket(Queue &recvLoginQueue, std::string token) {
     ws->on_error = [](const std::string& err) {
         Logger::instance().error("New game socket error: {}", err);
     };
-    ws->on_close = []() {
-        Logger::instance().error("New game socket closed");
-    };
+    ws->on_close = []() {};
 
     ws->connect();
 
@@ -89,7 +83,7 @@ WebSocketImpl *create_multiplayer_game_socket(Queue *recvLoginQueue, const std::
         Logger::instance().error("Multiplayer game socket error: {}", err);
     };
     ws->on_close = []() {
-        Logger::instance().error("Multiplayer game socket closed");
+        Logger::instance().info("Multiplayer game socket closed");
     };
 
     ws->connect();

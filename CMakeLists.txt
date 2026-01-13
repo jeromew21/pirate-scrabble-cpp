@@ -7,26 +7,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(TARGET_NAME pirate-scrabble)
 
 # Detect Emscripten and set flags BEFORE adding subdirectories
-if(EMSCRIPTEN)
+if (EMSCRIPTEN)
     message(STATUS "Building for Emscripten with pthreads")
 
     # IMPORTANT: Must be BEFORE adding Raylib
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -sUSE_PTHREADS=1")
-endif()
+endif ()
 
 add_subdirectory(external/raylib)
-add_subdirectory(external/frameflow)
 add_subdirectory(external/freetype)
 add_subdirectory(external/harfbuzz)
 add_subdirectory(external/concurrentqueue)
 add_subdirectory(external/fmt)
+add_subdirectory(external/frameflow)
 
 if (NOT EMSCRIPTEN)
     set(USE_TLS 1 CACHE INTERNAL "Force TLS")
     add_subdirectory(external/IXWebSocket)
-endif()
+endif ()
 
 set(SOURCES
         src/main.cpp
@@ -112,12 +112,12 @@ target_link_libraries(${TARGET_NAME}
 if (NOT EMSCRIPTEN)
     target_link_libraries(${TARGET_NAME}
             PRIVATE
-        ixwebsocket::ixwebsocket
+            ixwebsocket::ixwebsocket
     )
-endif()
+endif ()
 
 # Detect Emscripten
-if(EMSCRIPTEN)
+if (EMSCRIPTEN)
     message(STATUS "Building for Emscripten")
 
     # Compile flags
@@ -142,4 +142,12 @@ if(EMSCRIPTEN)
     set_target_properties(${TARGET_NAME} PROPERTIES
             SUFFIX ".html"
     )
-endif()
+endif ()
+
+if (NOT EMSCRIPTEN)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/assets
+            $<TARGET_FILE_DIR:${TARGET_NAME}>/assets
+    )
+endif ()

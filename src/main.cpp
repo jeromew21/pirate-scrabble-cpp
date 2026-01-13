@@ -128,6 +128,8 @@ float GetLogicalRatio() {
     return static_cast<float>(GetScreenWidth()) / static_cast<float>(GetRenderWidth());
 }
 
+float Tile::dim = 48;
+
 int main() {
     // -------------------------
     // Initialize logging
@@ -147,7 +149,6 @@ int main() {
                             menu_context.persistent_data.window_height,
                             "Pirate Scrabble");
     SetExitKey(KEY_NULL);
-    Logger::instance().info("Raylib window initialized");
 
     // -------------------------
     // Initialize ImGui
@@ -163,7 +164,6 @@ int main() {
     // Initialize FreeType
     // -------------------------
     auto *ft = ft_init();
-    Logger::instance().info("FreeType initialized");
 
     const auto arial = FS_ROOT / "assets" / "arial.ttf";
     const auto face = ft_load_font(ft, arial);
@@ -173,11 +173,6 @@ int main() {
     auto tile_map = generate_tile_sprites(ft);
     GameObject root{};
     root.AddChild(&menu_context);
-
-    /*
-    fmt::println("Exe path: {}", executable_path().string());
-    fmt::println("Exe dir: {}", executable_dir().string());
-    */
 
     // -------------------------
     // Initialize performance tracker
@@ -197,6 +192,8 @@ int main() {
 #endif
             menu_context.persistent_data.window_width = GetScreenWidth();
             menu_context.persistent_data.window_height = GetScreenHeight();
+            //fix this!
+            Tile::dim =  (48.0f/1080.0f) * (float)menu_context.persistent_data.window_height;
         }
 
         // Update
