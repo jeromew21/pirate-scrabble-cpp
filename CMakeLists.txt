@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
-project(pirate-scrabble-executable LANGUAGES CXX)
+project(${TARGET_NAME}-executable LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(TARGET_NAME pirate-scrabble)
 
 # Detect Emscripten and set flags BEFORE adding subdirectories
 if(EMSCRIPTEN)
@@ -85,9 +87,9 @@ else ()
     list(APPEND SOURCES src/util/network/sockets/web_socket_desktop.cpp)
 endif ()
 
-add_executable(pirate-scrabble ${SOURCES})
+add_executable(${TARGET_NAME} ${SOURCES})
 
-target_include_directories(pirate-scrabble
+target_include_directories(${TARGET_NAME}
         PRIVATE
         src
         external/imgui
@@ -97,7 +99,7 @@ target_include_directories(pirate-scrabble
         external/json
 )
 
-target_link_libraries(pirate-scrabble
+target_link_libraries(${TARGET_NAME}
         PRIVATE
         raylib
         frameflow::frameflow
@@ -108,7 +110,7 @@ target_link_libraries(pirate-scrabble
 )
 
 if (NOT EMSCRIPTEN)
-    target_link_libraries(pirate-scrabble
+    target_link_libraries(${TARGET_NAME}
             PRIVATE
         ixwebsocket::ixwebsocket
     )
@@ -132,12 +134,12 @@ if(EMSCRIPTEN)
             -sTOTAL_MEMORY=512MB
             #-sALLOW_MEMORY_GROWTH=1
             -sNO_DISABLE_EXCEPTION_CATCHING
-            -lwebsocket.js  # This is what you were missing!
+            -lwebsocket.js
             --shell-file ${CMAKE_SOURCE_DIR}/shell.html
             --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets
     )
 
-    set_target_properties(pirate-scrabble PROPERTIES
+    set_target_properties(${TARGET_NAME} PROPERTIES
             SUFFIX ".html"
     )
 endif()

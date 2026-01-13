@@ -1,7 +1,5 @@
 #include <string>
 #include <chrono>
-#include <iostream>
-#include <algorithm>
 
 #include "raylib.h"
 #include "rlImGui.h"
@@ -16,8 +14,6 @@
 #include "serialization/types.h"
 #include "context/main_menu.h"
 #include "context/multiplayer.h"
-#include "game_object/entity/entity.h"
-#include "game_object/entity/sprite.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 #include "game_object/tween/tween.h"
@@ -151,7 +147,7 @@ int main() {
                             menu_context.persistent_data.window_height,
                             "Pirate Scrabble");
     SetExitKey(KEY_NULL);
-    Logger::instance().info("Raylib initialized");
+    Logger::instance().info("Raylib window initialized");
 
     // -------------------------
     // Initialize ImGui
@@ -167,6 +163,7 @@ int main() {
     // Initialize FreeType
     // -------------------------
     auto *ft = ft_init();
+    Logger::instance().info("FreeType initialized");
 
     const auto arial = FS_ROOT / "assets" / "arial.ttf";
     const auto face = ft_load_font(ft, arial);

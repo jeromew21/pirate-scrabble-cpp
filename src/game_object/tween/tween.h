@@ -58,7 +58,7 @@ public:
 
     void Update(float dt);
 
-    void SetOnComplete(std::function<void()> callback);
+    void SetOnComplete(const std::function<void()> &callback);
 };
 
 class TweenManager {

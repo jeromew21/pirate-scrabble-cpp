@@ -4,10 +4,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <chrono>
-#include <ctime>
 
-#include <fmt/core.h>
 #include <fmt/color.h>
 
 class Logger {
@@ -34,17 +31,11 @@ public:
         log("ERROR", fmt::terminal_color::red, fmt_str, std::forward<Args>(args)...);
     }
 
-    const std::vector<std::string>& entries() const {
-        return entries_;
-    }
+    const std::vector<std::string>& entries() const;
 
-    explicit Logger(const char* output_file) : output_file(output_file) {
-        file_.open(output_file, std::ios::out | std::ios::app);
-    }
+    explicit Logger(const char* output_file);
 
-    ~Logger() {
-        if (file_.is_open()) file_.close();
-    }
+    ~Logger();
 
 private:
     const char* output_file;
@@ -53,22 +44,7 @@ private:
     std::vector<std::string> entries_;
     std::ofstream file_;
 
-    static std::string timestamp() {
-        using clock = std::chrono::system_clock;
-        const auto now = clock::now();
-        std::time_t t = clock::to_time_t(now);
-
-        std::tm tm{};
-    #if defined(_WIN32)
-        localtime_s(&tm, &t);
-    #else
-        localtime_r(&t, &tm);
-    #endif
-
-        char buf[32];
-        std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
-        return buf;
-    }
+    static std::string timestamp();
 
     template<typename... Args>
     void log(const char* level,

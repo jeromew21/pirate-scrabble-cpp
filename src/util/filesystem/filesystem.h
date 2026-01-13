@@ -5,6 +5,7 @@
 
 namespace fs = std::filesystem;
 
+// todo: move this into function?
 #ifdef __EMSCRIPTEN__
 inline const fs::path FS_ROOT = "/";
 #else

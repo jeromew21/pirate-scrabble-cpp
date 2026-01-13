@@ -8,7 +8,6 @@
 #include <climits>
 #elif __APPLE__
 #include <mach-o/dyld.h>
-#include <climits>
 #elif _WIN32
 #include <windows.h>
 #endif

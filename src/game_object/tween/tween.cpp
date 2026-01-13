@@ -1,8 +1,10 @@
 #include "tween.h"
 
+#include <utility>
+
 Tween::Tween(float *ptr, float start, float end, float dur, EasingFunc ease) : target(ptr), start_value(start),
                                                                                end_value(end), duration(dur),
-                                                                               elapsed(0.0f), easing(ease),
+                                                                               elapsed(0.0f), easing(std::move(ease)),
                                                                                finished(false) {
     *target = start_value;
 }
@@ -14,7 +16,7 @@ void Tween::Update(float dt) {
     float t = elapsed / duration;
 
     if (t >= 1.0f) {
-        t = 1.0f;
+        //t = 1.0f;
         finished = true;
         *target = end_value;
         if (on_complete) on_complete();
@@ -24,7 +26,7 @@ void Tween::Update(float dt) {
     }
 }
 
-void Tween::SetOnComplete(std::function<void()> callback) {
+void Tween::SetOnComplete(const std::function<void()> &callback) {
     on_complete = callback;
 }
 
