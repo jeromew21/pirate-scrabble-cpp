@@ -10,6 +10,9 @@
 #include "util/logging/logging.h"
 #include "main_menu.h"
 #include "socket_client.h"
+#include "external/cgltf.h"
+#include "game_object/entity/sprite.h"
+#include "game_object/tween/tween.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 #include "scrabble/tile.h"
@@ -45,51 +48,79 @@ static MultiplayerAction chat_action(const int player_id, const std::string &mes
     return action;
 }
 
+static FlowContainer *horizontal_flow() {
+    using namespace frameflow;
+    return new FlowContainer(FlowData{
+        Direction::Horizontal, Align::Start
+    });
+}
+
+static BoxContainer *horizontal_box() {
+    using namespace frameflow;
+    return new BoxContainer(BoxData{
+        Direction::Horizontal, Align::Start
+    });
+}
+
+static BoxContainer *vertical_box() {
+    using namespace frameflow;
+    return new BoxContainer(BoxData{
+        Direction::Vertical, Align::Start
+    });
+}
+
+static MarginContainer *margin_all(const float margin) {
+    using namespace frameflow;
+    return new MarginContainer(MarginData{margin, margin, margin, margin});
+}
+
 MultiplayerContext::MultiplayerContext() {
     using namespace frameflow;
     canvas = new LayoutSystem();
     canvas->Hide();
+    /*
     // do stuff
     AddChild(canvas);
-    auto hbox = new BoxContainer(frameflow::BoxData{Direction::Horizontal, Align::Start});
+    auto *hbox = horizontal_box();
     canvas->AddChild(hbox);
-    hbox->GetNode()->anchors = {0,0, 1, 1};
+    hbox->GetNode()->anchors = {0, 0, 1, 1};
 
-    auto left = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
+    auto *left = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
     hbox->AddChild(left);
     left->GetNode()->anchors = {0, 0, 0, 1};
     left->GetNode()->minimum_size = {100, 0};
-    left->GetNode()->expand.x  = 1;
+    left->GetNode()->expand.x = 1;
 
-    auto center_container = new MarginContainer(MarginData{8, 8, 8, 8});
+    auto *center_container = margin_all(8);
     hbox->AddChild(center_container);
-    center_container->GetNode()->anchors = {0, 0, 1 , 1};
-    center_container->GetNode()->minimum_size = {Tile::dim*10, 0};
+    center_container->GetNode()->anchors = {0, 0, 1, 1};
+    center_container->GetNode()->minimum_size = {Tile::dim * 10, 0};
 
-    auto center = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
-    center_container->AddChild(center);
+    auto *center = dynamic_cast<BoxContainer *>(center_container->AddChild(vertical_box()));
     center->GetNode()->anchors = {0, 0, 1, 1};
 
-    auto public_tiles = new FlowContainer(FlowData{Direction::Horizontal, Align::Start});
-    center_container->AddChild(public_tiles);
+    auto *public_tiles = dynamic_cast<FlowContainer *>(center_container->AddChild(horizontal_flow()));
     public_tiles->GetNode()->anchors = {0, 0, 1, 1};
     public_tiles->GetNode()->expand.y = 1;
     for (int i = 0; i < 144; i++) {
-        auto outer = new MarginContainer(MarginData{8, 8, 8 , 8});
+        auto *outer = new MarginContainer(MarginData{8, 8, 8, 8});
         public_tiles->AddChild(outer);
-        outer->GetNode()->minimum_size = {48+8*2, 48+8*2};
+        outer->GetNode()->minimum_size = {Tile::dim + 8 * 2, Tile::dim + 8 * 2};
 
-        auto inner = new Control();
+        auto *inner = new Control();
         outer->AddChild(inner);
-        inner->GetNode()->minimum_size = {48, 48};
+        inner->GetNode()->minimum_size = {Tile::dim, Tile::dim};
         inner->GetNode()->anchors = {0, 0, 1, 1};
     }
 
-    auto right = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
+    auto *right = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
     hbox->AddChild(right);
-    right->GetNode()->anchors = {0, 0, 1 , 1};
+    right->GetNode()->anchors = {0, 0, 1, 1};
     right->GetNode()->minimum_size = {100, 0};
-    right->GetNode()->expand.x  = 1;
+    right->GetNode()->expand.x = 1;
+    */
+
+    auto *sprite = new Sprite();
 }
 
 void MultiplayerContext::Update(float delta_time) {
@@ -301,6 +332,12 @@ void MultiplayerContext::EnterLobby(const std::string &game_id) {
                                                  main_menu->user_opt->token,
                                                  game_id);
     time_since_last_poll = 0;
+
+    auto *sprite = new Sprite();
+    sprite->SetTexture(Tile::GetTileTexture('X').texture);
+    sprite->transform.local_position = {100, 100};
+    AddChild(sprite);
+    TweenManager::instance().CreateTween(&sprite->transform.local_position.x, 200, 1.0f, Easing::EaseInOutSine);
 }
 
 void MultiplayerContext::EnterPlaying() {

@@ -9,7 +9,7 @@
 
 #include "frameflow/layout.hpp"
 
-#include "text/freetype.h"
+#include "text/freetype_library.h"
 #include "text/texthb.h"
 #include "serialization/types.h"
 #include "context/main_menu.h"
@@ -82,53 +82,11 @@ void InitCrossPlatformWindow(const int logical_width, const int logical_height, 
 #endif
 }
 
-std::unordered_map<char, RenderTexture2D> generate_tile_sprites(FT_Library ft) {
-    // consider this just being an array...
-    std::unordered_map<char, RenderTexture2D> tile_map;
-
-    const auto face = ft_load_font(ft, FS_ROOT / "assets" / "arial.ttf");
-
-    HBFont font(face, static_cast<int>(Tile::dim)); // pixel size 48
-
-    LayoutSystem sys{};
-
-    auto *tile = new Tile();
-    sys.AddChild(tile);
-    tile->Initialize();
-    auto *label = new Label();
-    tile->AddChild(label);
-    label->font = &font;
-    label->text = "A";
-    label->color = BLACK;
-    tile->GetNode()->bounds.origin = {0, 0};
-    tile->GetNode()->bounds.size = tile->GetNode()->minimum_size;
-    for (char i = 0; i < 127; i++) {
-        label->text = i;
-        tile->UpdateRec(0.016f);
-        compute_layout(sys.system.get(), tile->node_id_);
-        const RenderTexture2D tile_texture = LoadRenderTexture(
-            static_cast<int>(tile->GetNode()->minimum_size.x),
-            static_cast<int>(tile->GetNode()->minimum_size.y));
-        const bool temp = Control::DrawDebugBorders;
-        Control::DrawDebugBorders = false;
-        BeginTextureMode(tile_texture);
-        {
-            ClearBackground({0, 0, 0, 0}); // IMPORTANT: alpha = 0dd
-            tile->DrawRec();
-        }
-        EndTextureMode();
-        tile_map[i] = tile_texture;
-        Control::DrawDebugBorders = temp;
-    }
-
-    return tile_map;
-}
-
 float GetLogicalRatio() {
     return static_cast<float>(GetScreenWidth()) / static_cast<float>(GetRenderWidth());
 }
 
-float Tile::dim = 48;
+float Tile::dim = 81;
 
 int main() {
     // -------------------------
@@ -137,7 +95,8 @@ int main() {
     Logger::Initialize("pirate_scrabble.log");
 
     // -------------------------
-    // Initialize context
+    // Initialize context. We have to be careful that this doesn't initialize any sprites.
+    // We want to read previous window size here though. Maybe move out of menu context?
     // -------------------------
     MainMenuContext menu_context{};
 
@@ -151,6 +110,16 @@ int main() {
     SetExitKey(KEY_NULL);
 
     // -------------------------
+    // Initialize FreeType
+    // -------------------------
+    auto *ft = ft_init();
+
+    // -------------------------
+    // Initialize tile textures
+    // -------------------------
+    Tile::InitializeTextures(ft);
+
+    // -------------------------
     // Initialize ImGui
     // -------------------------
     rlImGuiSetup(true);
@@ -160,17 +129,11 @@ int main() {
     ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.c_str(),
                                                       32.0f*GetLogicalRatio());
 
-    // -------------------------
-    // Initialize FreeType
-    // -------------------------
-    auto *ft = ft_init();
-
     const auto arial = FS_ROOT / "assets" / "arial.ttf";
     const auto face = ft_load_font(ft, arial);
 
     HBFont font(face, 48); // pixel size 48
 
-    auto tile_map = generate_tile_sprites(ft);
     GameObject root{};
     root.AddChild(&menu_context);
 
@@ -193,7 +156,6 @@ int main() {
             menu_context.persistent_data.window_width = GetScreenWidth();
             menu_context.persistent_data.window_height = GetScreenHeight();
             //fix this!
-            Tile::dim =  (48.0f/1080.0f) * (float)menu_context.persistent_data.window_height;
         }
 
         // Update

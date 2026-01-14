@@ -17,10 +17,11 @@ void GameObject::DrawRec() {
     }
 }
 
-void GameObject::AddChild(GameObject* child) {
+GameObject* GameObject::AddChild(GameObject* child) {
     child->parent = this;
     children.push_back(child);
     AddChildHook(child);
+    return child;
 }
 
 void GameObject::Show() {

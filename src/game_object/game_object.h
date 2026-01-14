@@ -10,7 +10,7 @@ public:
 
     void DrawRec();
 
-    void AddChild(GameObject *child);
+    GameObject* AddChild(GameObject *child);
 
     void Show();
 

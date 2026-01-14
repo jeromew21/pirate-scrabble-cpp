@@ -1,13 +1,16 @@
 #pragma once
 
-#include "entity.h"
+#include <optional>
+
 #include "raylib.h"
+
+#include "entity.h"
 
 class Sprite : public Entity {
 public:
-    Texture2D *texture{nullptr};
+    std::optional<Texture2D> texture;
 
     void Draw() override;
 
-    void SetTexture(Texture2D *new_texture);
+    void SetTexture(Texture2D new_texture);
 };

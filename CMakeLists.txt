@@ -76,8 +76,8 @@ set(SOURCES
         src/game_object/entity/sprite.h
         src/serialization/types_inspector.h
         src/util/logging/logging.h
-        src/text/freetype.cpp
-        src/text/freetype.h
+        src/text/freetype_library.cpp
+        src/text/freetype_library.h
         src/util/logging/logging.cpp
 )
 

@@ -5,7 +5,7 @@
 
 #include "raylib.h"
 
-#include "freetype.h"
+#include "freetype_library.h"
 
 // -------------------------
 // TextMetrics struct

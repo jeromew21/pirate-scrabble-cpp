@@ -1,15 +1,15 @@
 #include "sprite.h"
 
 void Sprite::Draw() {
-    if (texture == nullptr) return;
+    if (!texture.has_value()) return;
 
-    auto gp = GlobalPosition();
+    const auto gp = GlobalPosition();
 
-    float width = (float)texture->width;
-    float height = (float)texture->height;
+    const auto width = static_cast<float>(texture->width);
+    const auto height = static_cast<float>(texture->height);
 
     Rectangle src = {
-        0, 0,width, height
+        0, 0, width, -height
     };
 
     Rectangle dst = {gp.x, gp.y, width, height};
@@ -17,6 +17,6 @@ void Sprite::Draw() {
     DrawTexturePro(*texture, src, dst, {width/2, height/2}, transform.rotation, WHITE);
 }
 
-void Sprite::SetTexture(Texture2D *new_texture) {
+void Sprite::SetTexture(Texture2D new_texture) {
     texture = new_texture;
 }
