@@ -2,8 +2,10 @@
 
 #include <unordered_map>
 #include <memory>
+#include <tuple>
 
 #include "raylib.h"
+#include "fmt/color.h"
 
 #include "game_object/ui/drawing.h"
 #include "text/freetype_library.h"
@@ -12,12 +14,16 @@
 #include "game_object/ui/layout_system.h"
 
 namespace {
-    std::unique_ptr<std::unordered_map<char, RenderTexture2D> > map_;
+    constexpr float render_size = 256.f;
+    float2 map_[128];
+    RenderTexture2D tile_texture_map;
 
-    void generate_tile_sprites(FT_Library ft, std::unordered_map<char, RenderTexture2D> &tile_map) {
+    void generate_tile_sprites(FT_Library ft) {
+        const float prev_dim = Tile::dim;
+        Tile::dim = render_size;
         const auto face = ft_load_font(ft, FS_ROOT / "assets" / "arial.ttf");
 
-        HBFont font(face, static_cast<int>(Tile::dim)); // pixel size 48
+        HBFont font(face, static_cast<int>(Tile::dim * 0.85f)); // pixel size 48
 
         auto *sys = new LayoutSystem();
 
@@ -30,57 +36,174 @@ namespace {
         label->text = "A";
         label->color = BLACK;
         tile->GetNode()->bounds.origin = {0, 0};
-        tile->GetNode()->bounds.size = tile->GetNode()->minimum_size;
-        for (char i = 0; i < 127; i++) {
-            label->text = i;
-            tile->UpdateRec(0.016f);
-            compute_layout(sys->system.get(), tile->node_id_);
-            const RenderTexture2D tile_texture = LoadRenderTexture(
-                static_cast<int>(tile->GetNode()->minimum_size.x),
-                static_cast<int>(tile->GetNode()->minimum_size.y));
-            const bool temp = Control::DrawDebugBorders;
-            Control::DrawDebugBorders = false;
-            BeginTextureMode(tile_texture);
-            {
-                ClearBackground({0, 0, 0, 0}); // IMPORTANT: alpha = 0dd
-                tile->DrawRec();
+        tile->GetNode()->bounds.size = {Tile::dim, Tile::dim};
+        tile->GetNode()->minimum_size = {Tile::dim, Tile::dim};
+        BeginTextureMode(tile_texture_map);
+        ClearBackground({0, 0, 0, 0}); // IMPORTANT: alpha = 0dd
+        EndTextureMode();
+        const bool temp = Control::DrawDebugBorders;
+        Control::DrawDebugBorders = false;
+        for (int row = 0; row < 16; row++) {
+            for (int col = 0; col < 8; col++) {
+                char code = row * 8 + col;
+                tile->GetNode()->bounds.origin = {Tile::dim * col, Tile::dim * (15 - row)};
+                label->text = std::string(1, code);
+                tile->UpdateRec(0.016f);
+                compute_layout(sys->system.get(), tile->node_id_);
+                BeginTextureMode(tile_texture_map);
+                {
+                    tile->DrawRec();
+                }
+                EndTextureMode();
+                map_[code] = {Tile::dim * col, Tile::dim * row};
             }
-            EndTextureMode();
-            tile_map[i] = tile_texture;
-            Control::DrawDebugBorders = temp;
         }
+        Control::DrawDebugBorders = temp;
         ft_face_de_init(face);
         sys->Delete();
+        Tile::dim = prev_dim;
     }
+
+    class RoundedRectShader {
+        Shader shader;
+        Texture2D blankTex; // Add this
+        int sizeLoc, radiusLoc, colorLoc;
+
+    public:
+        RoundedRectShader() {
+            const char *fragment_shader_code =
+#if defined(PLATFORM_WEB)
+                    R"(#version 100
+precision mediump float;
+
+varying vec2 fragTexCoord;
+
+uniform vec2 size;
+uniform float radius;
+uniform vec4 rectColor;
+
+float sdRoundedRect(vec2 p, vec2 b, float r) {
+    vec2 q = abs(p) - b + r;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+}
+
+void main() {
+    vec2 pixelPos = fragTexCoord * size;
+    vec2 centerPos = pixelPos - size * 0.5;
+
+    float dist = sdRoundedRect(centerPos, size * 0.5, radius);
+    float alpha = smoothstep(1.0, -1.0, dist);
+
+    gl_FragColor = vec4(rectColor.rgb, rectColor.a * alpha);
+}
+)"
+#else
+                    R"(#version 330
+
+in vec2 fragTexCoord;
+out vec4 finalColor;
+
+uniform vec2 size;
+uniform float radius;
+uniform vec4 rectColor;
+
+float sdRoundedRect(vec2 p, vec2 b, float r) {
+    vec2 q = abs(p) - b + r;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+}
+
+void main() {
+    vec2 pixelPos = fragTexCoord * size;
+    vec2 centerPos = pixelPos - size * 0.5;
+
+    float dist = sdRoundedRect(centerPos, size * 0.5, radius);
+    float alpha = smoothstep(1.0, -1.0, dist);
+
+    finalColor = vec4(rectColor.rgb, rectColor.a * alpha);
+}
+)"
+#endif
+            ;
+            SetTraceLogLevel(LOG_DEBUG);
+            shader = LoadShaderFromMemory(nullptr, fragment_shader_code);
+            // Check if shader loaded
+            if (shader.id == 0) {
+                Logger::instance().info("Failed to compile shader");
+                // Check browser console for WebGL shader compilation errors
+            }
+            SetTraceLogLevel(LOG_NONE);
+            sizeLoc = GetShaderLocation(shader, "size");
+            radiusLoc = GetShaderLocation(shader, "radius");
+            colorLoc = GetShaderLocation(shader, "rectColor");
+
+            // Create a 1x1 white texture
+            Image img = GenImageColor(1, 1, WHITE);
+            blankTex = LoadTextureFromImage(img);
+            UnloadImage(img);
+        }
+
+        void Draw(float x, float y, float width, float height, float radius, Color color) {
+            BeginShaderMode(shader);
+
+            float size[2] = {width, height};
+            SetShaderValue(shader, sizeLoc, size, SHADER_UNIFORM_VEC2);
+            SetShaderValue(shader, radiusLoc, &radius, SHADER_UNIFORM_FLOAT);
+            float col[4] = {color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f};
+            SetShaderValue(shader, colorLoc, col, SHADER_UNIFORM_VEC4);
+
+            // Use DrawTexturePro to ensure proper UVs
+            DrawTexturePro(
+                blankTex,
+                {0, 0, 1, 1}, // Source (whole 1x1 texture)
+                {x, y, width, height}, // Destination
+                {0, 0},
+                0,
+                WHITE
+            );
+
+            EndShaderMode();
+        }
+
+        ~RoundedRectShader() {
+            UnloadShader(shader);
+            UnloadTexture(blankTex);
+        }
+    };
+
+    std::unique_ptr<RoundedRectShader> rounded_rect_shader;
 }
 
 void Tile::Initialize() const {
-    GetNode()->minimum_size = {dim, dim};
+    //GetNode()->minimum_size = {dim, dim};
+    rounded_rect_shader = std::make_unique<RoundedRectShader>();
 }
 
 void Tile::DeInitializeTextures() {
-    for (auto &pair: *map_) {
-        UnloadRenderTexture(pair.second);
-    }
+    UnloadRenderTexture(tile_texture_map);
 }
 
 void Tile::Draw() {
     const Color color = {243, 237, 166, 255};
     const auto node = *GetNode();
-    DrawRoundedRectangle(
+    rounded_rect_shader->Draw(
         node.bounds.origin.x,
         node.bounds.origin.y,
         node.bounds.size.x,
         node.bounds.size.y,
-        (3.0f / 48.0f) * dim, color);
+        (4.0f / 48.0f) * dim, color);
 }
 
-// TODO: make this a spritesheet, single texturew
+// TODO: make this a spritesheet, single texture
 void Tile::InitializeTextures(FT_Library ft) {
-    map_ = std::make_unique<std::unordered_map<char, RenderTexture2D> >();
-    generate_tile_sprites(ft, *map_);
+    tile_texture_map = LoadRenderTexture(render_size * 8, render_size * 16);
+    SetTextureFilter(tile_texture_map.texture, TEXTURE_FILTER_BILINEAR);
+    generate_tile_sprites(ft);
 }
 
-RenderTexture2D Tile::GetTileTexture(const char c) {
-    return (*map_)[c];
+RenderTexture2D Tile::GetTileTexture() {
+    return tile_texture_map;
+}
+
+float2 Tile::GetTileTextureRegion(const char c) {
+    return map_[c];
 }

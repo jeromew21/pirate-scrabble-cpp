@@ -145,6 +145,8 @@ if (EMSCRIPTEN)
             -sTOTAL_MEMORY=512MB
             #-sALLOW_MEMORY_GROWTH=1
             -sNO_DISABLE_EXCEPTION_CATCHING
+            -sUSE_WEBGL2=1
+            #-sFULL_ES3=1
             -lwebsocket.js
             --shell-file ${CMAKE_SOURCE_DIR}/shell.html
             --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets
@@ -156,9 +158,15 @@ if (EMSCRIPTEN)
 endif ()
 
 if (NOT EMSCRIPTEN)
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+    # Create a custom target that always runs
+    add_custom_target(copy_assets_target ALL
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/assets
             $<TARGET_FILE_DIR:${TARGET_NAME}>/assets
+            COMMENT "Copying assets..."
+            VERBATIM
     )
+
+    # Make sure it runs before your target links
+    add_dependencies(${TARGET_NAME} copy_assets_target)
 endif ()

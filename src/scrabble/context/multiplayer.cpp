@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
+#include "types.h"
 #include "login.h"
 #include "util/logging/logging.h"
 #include "main_menu.h"
@@ -15,7 +16,7 @@
 #include "game_object/tween/tween.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
-#include "../sprites/tile.h"
+#include "scrabble/sprites/tile.h"
 #include "types_inspector.h"
 #include "util/queue.h"
 #include "util/network/sockets/web_socket.h"
@@ -23,6 +24,30 @@
 namespace {
     WebSocketImpl *game_socket{nullptr};
 
+    std::optional<MultiplayerGame> game{std::nullopt};
+
+
+    struct TileDrawData {
+        float2 dimensions;
+        float2 position;
+        Rectangle region;
+    };
+
+    std::vector<TileDrawData> tile_draw_data;
+
+    void DrawTiles() {
+        const auto texture = Tile::GetTileTexture();
+        for (const auto &data: tile_draw_data) {
+            DrawTexturePro(texture.texture,
+                           data.region,
+                           {data.position.x, data.position.y, data.dimensions.x, data.dimensions.y},
+                           {0, 0},
+                           0,
+                           WHITE);
+        }
+    }
+
+    constexpr float margin = 8.0f;
 
     MultiplayerAction start_action(const int player_id) {
         const auto action = MultiplayerAction{
@@ -86,6 +111,67 @@ MultiplayerContext::MultiplayerContext() {
     canvas = new LayoutSystem();
     canvas->Hide();
     AddChild(canvas);
+
+    layout_.left = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
+    layout_.right = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
+
+    auto *hbox = horizontal_box();
+    canvas->AddChild(hbox);
+    hbox->GetNode()->anchors = {0, 0, 1, 1};
+
+    hbox->AddChild(layout_.left);
+    layout_.left->GetNode()->anchors = {0, 0, 0, 1};
+    layout_.left->GetNode()->minimum_size = {100, 0};
+    layout_.left->GetNode()->expand.x = 1;
+
+    layout_.middle = dynamic_cast<BoxContainer *>(hbox->AddChild(vertical_box()));
+    hbox->AddChild(layout_.middle);
+    layout_.middle->GetNode()->anchors = {0, 0, 1, 1};
+
+    layout_.public_tiles = dynamic_cast<FlowContainer *>(layout_.middle->AddChild(horizontal_flow()));
+    layout_.public_tiles->GetNode()->anchors = {0, 0, 1, 1};
+    layout_.public_tiles->GetNode()->expand.y = 1;
+
+    hbox->AddChild(layout_.right);
+    layout_.right->GetNode()->anchors = {0, 0, 1, 1};
+    layout_.right->GetNode()->minimum_size = {100, 0};
+    layout_.right->GetNode()->expand.x = 1;
+
+    auto *p0 = margin_all(margin);
+    layout_.left->AddChild(p0);
+    p0->GetNode()->anchors = {0, 0, 1, 0};
+    p0->GetNode()->expand.y = 1;
+
+    auto *p1 = margin_all(margin);
+    layout_.right->AddChild(p1);
+    p1->GetNode()->anchors = {0, 0, 1, 0};
+    p1->GetNode()->expand.y = 1;
+
+    auto *p2 = margin_all(margin);
+    layout_.left->AddChild(p2);
+    p2->GetNode()->anchors = {0, 0, 1, 0};
+    p2->GetNode()->expand.y = 1;
+
+    auto *p3 = margin_all(margin);
+    layout_.right->AddChild(p3);
+    p3->GetNode()->anchors = {0, 0, 1, 0};
+    p3->GetNode()->expand.y = 1;
+
+    std::vector<Control *> players = {p0, p1, p2, p3};
+    for (auto *player: players) {
+        auto *vbox = vertical_box();
+        player->AddChild(vbox);
+        vbox->GetNode()->anchors = {0, 0, 1, 1};
+
+
+        auto *flow = horizontal_flow();
+        vbox->AddChild(flow);
+        flow->GetNode()->anchors = {0, 0, 1, 1};
+        flow->GetNode()->expand.y = 1;
+        layout_.player_flows.push_back(flow);
+    }
+
+    RedrawLayout();
 }
 
 void MultiplayerContext::Update(const float delta_time) {
@@ -132,6 +218,7 @@ void MultiplayerContext::Update(const float delta_time) {
                         state = State::Playing;
                     }
                     game = response.game;
+                    RedrawGame(); //force redraw after every update
                 } else {
                     Logger::instance().error("{}", response.errorMessage);
                 }
@@ -155,11 +242,12 @@ void MultiplayerContext::Draw() {
         }
         case State::Playing:
         case State::Lobby: {
+            if (should_redraw_layout) {
+                RedrawLayout();
+                should_redraw_layout = false;
+            }
             canvas->Show();
             ImGui::Begin("Multiplayer Debug");
-            if (ImGui::Button("Redraw")) {
-                Redraw();
-            }
             RenderChat();
             if (state == State::Lobby) {
                 RenderLobby();
@@ -167,58 +255,101 @@ void MultiplayerContext::Draw() {
                 RenderPlaying();
             }
             ImGui::End();
+            DrawTiles();
             break;
         }
     }
 }
 
-void MultiplayerContext::Redraw() {
-    return;
+void MultiplayerContext::RedrawLayout() {
     using namespace frameflow;
-    {
-        auto children = canvas->GetChildren();
-        for (auto *child: children) {
-            child->Delete();
-        }
+
+    layout_.middle->GetNode()->minimum_size = {(2 * margin + Tile::dim) * 10, 0};
+
+    for (auto *child: layout_.public_tiles->GetChildren()) {
+        child->Delete();
     }
-
-    auto *hbox = horizontal_box();
-    canvas->AddChild(hbox);
-    hbox->GetNode()->anchors = {0, 0, 1, 1};
-
-    auto *left = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
-    hbox->AddChild(left);
-    left->GetNode()->anchors = {0, 0, 0, 1};
-    left->GetNode()->minimum_size = {100, 0};
-    left->GetNode()->expand.x = 1;
-
-    auto *center_container = margin_all(8);
-    hbox->AddChild(center_container);
-    center_container->GetNode()->anchors = {0, 0, 1, 1};
-    center_container->GetNode()->minimum_size = {Tile::dim * 10, 0};
-
-    auto *center = dynamic_cast<BoxContainer *>(center_container->AddChild(vertical_box()));
-    center->GetNode()->anchors = {0, 0, 1, 1};
-
-    auto *public_tiles = dynamic_cast<FlowContainer *>(center_container->AddChild(horizontal_flow()));
-    public_tiles->GetNode()->anchors = {0, 0, 1, 1};
-    public_tiles->GetNode()->expand.y = 1;
-    for (int i = 0; i < 2; i++) {
-        auto *outer = new MarginContainer(MarginData{8, 8, 8, 8});
-        public_tiles->AddChild(outer);
-        outer->GetNode()->minimum_size = {Tile::dim + 8 * 2, Tile::dim + 8 * 2};
+    layout_.tile_slots.clear();
+    for (int i = 0; i < 144; i++) {
+        auto *outer = margin_all(margin);
+        layout_.public_tiles->AddChild(outer);
+        outer->GetNode()->minimum_size = {Tile::dim + margin * 2, Tile::dim + margin * 2};
 
         auto *inner = new Control();
         outer->AddChild(inner);
         inner->GetNode()->minimum_size = {Tile::dim, Tile::dim};
         inner->GetNode()->anchors = {0, 0, 1, 1};
+        layout_.tile_slots.push_back(inner);
+    }
+}
+
+void MultiplayerContext::RedrawGame() {
+    if (state == State::Gateway || state == State::PreInit) return;
+    if (!game.has_value()) return;
+
+    tile_draw_data.clear();
+
+    {
+        int i = 0;
+        for (auto tile_props: game->state.tiles) {
+            const auto *slot = layout_.tile_slots[i];
+
+            auto region = Tile::GetTileTextureRegion(tile_props.letter.front());
+            tile_draw_data.push_back({
+                {Tile::dim, Tile::dim},
+                {slot->GetNode()->bounds.origin.x, slot->GetNode()->bounds.origin.y},
+                Rectangle{region.x, region.y, 256, -256}
+            });
+
+            i++;
+        }
     }
 
-    auto *right = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
-    hbox->AddChild(right);
-    right->GetNode()->anchors = {0, 0, 1, 1};
-    right->GetNode()->minimum_size = {100, 0};
-    right->GetNode()->expand.x = 1;
+
+    for (int player_index = 0; player_index < game->state.playerCount; player_index++) {
+        auto *flow = layout_.player_flows[player_index];
+        for (auto *child: flow->GetChildren()) {
+            child->Delete();
+        }
+        for (const auto &[history, id]: game->state.playerWords[player_index]) {
+            const auto &word = history.front();
+            auto *word_margin = margin_all(margin * 2.0f);
+            flow->AddChild(word_margin);
+            word_margin->GetNode()->minimum_size = {
+                margin * 4 + (Tile::dim + 2 * 2) * (float) word.length(), Tile::dim + 2 * 2 + margin * 4
+            };
+            auto *word_box = horizontal_box();
+            word_margin->AddChild(word_box);
+            word_box->GetNode()->anchors = {0, 0, 1, 1};
+            for (const auto c: word) {
+                auto *small_margin = margin_all(2);
+                word_box->AddChild(small_margin);
+                small_margin->GetNode()->minimum_size = {Tile::dim + 2 * 2, Tile::dim + 2 * 2};
+                const auto tile = new Control();
+                small_margin->AddChild(tile);
+                tile->GetNode()->minimum_size = {Tile::dim, Tile::dim};
+                tile->GetNode()->anchors = {0, 0, 1, 1};
+
+                flow->ForceComputeLayout();
+
+                auto region = Tile::GetTileTextureRegion(c);
+                tile_draw_data.push_back({
+                    {Tile::dim, Tile::dim},
+                    {tile->GetNode()->bounds.origin.x, tile->GetNode()->bounds.origin.y},
+                    Rectangle{region.x, region.y, 256, -256}
+                });
+
+                /*
+                auto *sprite = new Sprite();
+                sprite->SetTexture(Tile::GetTileTexture().texture, ::float2{Tile::dim, Tile::dim});
+                auto region = Tile::GetTileTextureRegion(c);
+                sprite->SetTextureRegion({region.x, region.y, 256, -256});
+                sprite->transform.local_position = {tile->GetNode()->bounds.origin.x, tile->GetNode()->bounds.origin.y};
+                tile->AddChild(sprite);
+                */
+            }
+        }
+    }
 }
 
 
@@ -348,18 +479,6 @@ void MultiplayerContext::EnterLobby(const std::string &game_id) {
                                                  main_menu->user_opt->token,
                                                  game_id);
     time_since_last_poll = 0;
-
-    auto *sprite = new Sprite();
-    sprite->SetTexture(Tile::GetTileTexture('X').texture);
-    sprite->transform.local_position = {100, 100};
-    AddChild(sprite);
-    auto *tween = TweenManager::instance().CreateTween(&sprite->transform.local_position.x,
-                                                       200,
-                                                       1.0f,
-                                                       Easing::EaseInOutSine);
-    tween->SetOnComplete([=] { sprite->Delete(); });
-
-    Redraw();
 }
 
 void MultiplayerContext::EnterPlaying() {

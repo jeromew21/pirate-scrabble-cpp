@@ -20,6 +20,8 @@ public:
 
     virtual void InitializeLayout(LayoutSystem *system);
 
+    void ForceComputeLayout() const;
+
     [[nodiscard]] frameflow::Node *GetNode() const;
 
     void Draw() override;

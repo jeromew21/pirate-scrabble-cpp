@@ -1,7 +1,13 @@
 #pragma once
 
+#include <cassert>
+
 #include "game_object/ui/control.h"
 #include "text/freetype_library.h"
+#include "util/math.h"
+#include "util/logging/logging.h"
+
+
 
 class Tile : public CenterContainer {
 public:
@@ -11,7 +17,9 @@ public:
 
     static void DeInitializeTextures();
 
-    static RenderTexture2D GetTileTexture(char c);
+    static RenderTexture2D GetTileTexture();
+
+    static float2 GetTileTextureRegion(char c);
 
     void Initialize() const;
 

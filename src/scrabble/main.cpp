@@ -10,17 +10,17 @@
 
 #include "frameflow/layout.hpp"
 
-#include "../text/freetype_library.h"
-#include "../text/texthb.h"
+#include "text/freetype_library.h"
+#include "text/texthb.h"
 #include "context/types.h"
 #include "context/main_menu.h"
 #include "context/multiplayer.h"
-#include "../game_object/ui/control.h"
-#include "../game_object/ui/layout_system.h"
-#include "../game_object/tween/tween.h"
-#include "../util/filesystem/filesystem.h"
-#include "../util/logging/logging.h"
-#include "../util/scope_exit_callback.h"
+#include "game_object/ui/control.h"
+#include "game_object/ui/layout_system.h"
+#include "game_object/tween/tween.h"
+#include "util/filesystem/filesystem.h"
+#include "util/logging/logging.h"
+#include "util/scope_exit_callback.h"
 #include "sprites/tile.h"
 
 #ifdef __EMSCRIPTEN__
@@ -118,7 +118,6 @@ namespace {
         const char* key = path.c_str();
         char* val = get_local_storage(key);
         std::string data(val);
-        fmt::println("TOKEN DATA: {}", data);
         out_token.append(data);
         free(val);  // must free the WASM heap allocation
         const bool result = true;
@@ -251,12 +250,13 @@ int main() {
             persistent_data.window_width = GetScreenWidth();
             persistent_data.window_height = GetScreenHeight();
         }
-#else
+#endif
         if (IsWindowResized()) {
             persistent_data.window_width = GetScreenWidth();
             persistent_data.window_height = GetScreenHeight();
+            menu_context->multiplayer_context->should_redraw_layout = true;
+            Tile::dim = std::min(static_cast<float>(persistent_data.window_width) / 40.f, 64.f);
         }
-#endif
 
         // -------------------------
         // Cleanup
@@ -275,6 +275,7 @@ int main() {
         {
             ClearBackground(DARKGRAY);
             rlImGuiBegin();
+
             ImGui::PushFont(imgui_font);
             {
                 Profiler p("DrawRec", perf.draw_time, perf.draw_count);
@@ -292,6 +293,7 @@ int main() {
                 perf.draw_count = 0;
                 perf.last_print = now;
             }
+            persistent_data.show_debug_window = true;
             if (persistent_data.show_debug_window) {
                 ImGui::Begin("Debug", &persistent_data.show_debug_window);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);

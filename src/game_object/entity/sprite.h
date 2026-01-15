@@ -12,5 +12,10 @@ public:
 
     void Draw() override;
 
-    void SetTexture(Texture2D new_texture);
+    void SetTextureRegion(Rectangle r);
+
+    void SetTexture(Texture2D new_texture, std::optional<float2> target_dimensions = std::nullopt);
+private:
+    float2 target_dimensions_{};
+    std::optional<Rectangle> texture_region;
 };

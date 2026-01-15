@@ -105,6 +105,10 @@ void Control::InitializeLayout(LayoutSystem *system) {
     }
 }
 
+void Control::ForceComputeLayout() const {
+    frameflow::compute_layout(layout_system_->system.get(), node_id_);
+}
+
 void BoxContainer::InitializeLayout(LayoutSystem *system) {
     if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
         node_id_ = frameflow::add_box(system->system.get(),

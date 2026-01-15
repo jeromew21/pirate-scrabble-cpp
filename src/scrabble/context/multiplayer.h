@@ -1,34 +1,51 @@
 #pragma once
 
-#include "types.h"
 #include "game_object/game_object.h"
+#include "util/math.h"
 #include "util/queue.h"
 
 struct MainMenuContext;
 
 struct BoxContainer;
 
+struct Control;
+
 struct LayoutSystem;
+
+struct FlowContainer;
+
+struct MarginContainer;
 
 struct MultiplayerContext : GameObject {
     enum class State {
         PreInit, Gateway, Lobby, Playing
     };
 
+    struct Layout {
+        BoxContainer *left;
+        BoxContainer *middle;
+        BoxContainer *right;
+        FlowContainer *public_tiles;
+        std::vector<Control *> tile_slots;
+        std::vector<FlowContainer *> player_flows;
+    };
+
 private:
     State state = State::PreInit;
 
+    Layout layout_{};
+
 public:
-    std::optional<MultiplayerGame> game{std::nullopt};
-
     MainMenuContext *main_menu{nullptr};
-
 
     Queue recv_create_queue; // Can we combine both of these? Idk why not...
     //Queue recv_join_queue;
+
     Queue recv_game_queue; // Active game
 
     float time_since_last_poll{0};
+
+    bool should_redraw_layout{false};
 
     LayoutSystem *canvas;
 
@@ -38,7 +55,9 @@ public:
 
     void Draw() override;
 
-    void Redraw();
+    void RedrawLayout();
+
+    void RedrawGame();
 
     void RenderGateway();
 
