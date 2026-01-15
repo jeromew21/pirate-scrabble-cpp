@@ -79,6 +79,7 @@ set(SOURCES
         src/text/freetype_library.cpp
         src/text/freetype_library.h
         src/util/logging/logging.cpp
+        src/util/scope_exit_callback.h
 )
 
 if (EMSCRIPTEN)

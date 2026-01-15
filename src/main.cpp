@@ -19,6 +19,7 @@
 #include "game_object/tween/tween.h"
 #include "util/filesystem/filesystem.h"
 #include "util/logging/logging.h"
+#include "util/scope_exit_callback.h"
 #include "scrabble/tile.h"
 
 #ifdef __EMSCRIPTEN__
@@ -41,6 +42,9 @@ struct Performance {
     double update_avg = 0;
     double draw_avg = 0;
     std::chrono::high_resolution_clock::time_point last_print;
+
+    Performance() : last_print(std::chrono::high_resolution_clock::now()) {
+    }
 };
 
 struct Profiler {
@@ -64,6 +68,7 @@ struct Profiler {
 };
 
 void InitCrossPlatformWindow(const int logical_width, const int logical_height, const char *title) {
+    SetTraceLogLevel(LOG_NONE);
     constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
                                    | FLAG_MSAA_4X_HINT
                                    | FLAG_VSYNC_HINT;
@@ -71,19 +76,35 @@ void InitCrossPlatformWindow(const int logical_width, const int logical_height, 
 
     // Initialize with logical dimensions - raylib handles DPI internally
     InitWindow(logical_width, logical_height, title);
-    SetWindowSize(logical_width, logical_height);
+    SetExitKey(KEY_NULL);
 #ifdef __EMSCRIPTEN__
     // Get the actual canvas size set by JavaScript
-    int canvasWidth = EM_ASM_INT({return Module.canvas.width;});
-    int canvasHeight = EM_ASM_INT({return Module.canvas.height;});
-
-    // Tell raylib about the real size
-    SetWindowSize(canvasWidth, canvasHeight);
+    // Somehow this isn't working quite properly, you have to manual resize before it works
+    int canvas_width = EM_ASM_INT({return Module.canvas.width;});
+    int canvas_height = EM_ASM_INT({return Module.canvas.height;});
 #endif
+    SetWindowSize(logical_width, logical_height);
 }
 
 float GetLogicalRatio() {
     return static_cast<float>(GetScreenWidth()) / static_cast<float>(GetRenderWidth());
+}
+
+static PersistentData load_persistent_data(const std::string &persistent_data_path) {
+    if (std::string contents; read_file(persistent_data_path, contents)) {
+        try {
+            return deserialize_or_throw<PersistentData>(contents);
+        } catch (const std::exception &e) {
+            Logger::instance().info("Falling back to default persistent data: {}", e.what());
+            return PersistentData{};
+        }
+    }
+    Logger::instance().info("Falling back to default persistent data");
+    return PersistentData{};
+}
+
+static bool write_persistent_data_to_disk(const std::string &persistent_data_path, const PersistentData &data) {
+    return write_file(persistent_data_path, serialize(data));
 }
 
 float Tile::dim = 81;
@@ -95,19 +116,23 @@ int main() {
     Logger::Initialize("pirate_scrabble.log");
 
     // -------------------------
-    // Initialize context. We have to be careful that this doesn't initialize any sprites.
-    // We want to read previous window size here though. Maybe move out of menu context?
+    // Initialize persistent data
     // -------------------------
-    MainMenuContext menu_context{};
+    const std::string persistent_data_path{"./pirate_scrabble_data.json"};
+    PersistentData persistent_data = load_persistent_data("./pirate_scrabble_data.json");
+    ScopeExitCallback persistent_data_exit([&] {
+        if (!write_persistent_data_to_disk(persistent_data_path, persistent_data)) {
+            Logger::instance().info("Failed to write persistent data to disk");
+        }
+    });
 
     // -------------------------
     // Initialize raylib
     // -------------------------
-    SetTraceLogLevel(LOG_NONE);
-    InitCrossPlatformWindow(menu_context.persistent_data.window_width,
-                            menu_context.persistent_data.window_height,
+    InitCrossPlatformWindow(persistent_data.window_width,
+                            persistent_data.window_height,
                             "Pirate Scrabble");
-    SetExitKey(KEY_NULL);
+    // maybe draw an initial image?
 
     // -------------------------
     // Initialize FreeType
@@ -127,23 +152,38 @@ int main() {
     io.Fonts->SetFontLoader(ImGuiFreeType::GetFontLoader());
     const auto ibm_plex_mono = FS_ROOT / "assets" / "IBM_Plex_Mono" / "IBMPlexMono-Light.ttf";
     ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.c_str(),
-                                                      32.0f*GetLogicalRatio());
+                                                      32.0f * GetLogicalRatio());
 
     const auto arial = FS_ROOT / "assets" / "arial.ttf";
     const auto face = ft_load_font(ft, arial);
 
     HBFont font(face, 48); // pixel size 48
 
+    // -------------------------
+    // Initialize context. We have to be careful that this doesn't initialize any sprites.
+    // We want to read previous window size here though. Maybe move out of menu context?
+    // -------------------------
     GameObject root{};
+    MainMenuContext menu_context{};
     root.AddChild(&menu_context);
 
     // -------------------------
     // Initialize performance tracker
     // -------------------------
-    Performance perf;
-    perf.last_print = std::chrono::high_resolution_clock::now();
+    Performance perf{};
 
-    main_loop_function = [&]() {
+    // -------------------------
+    // Cleanup
+    // -------------------------
+    ScopeExitCallback cleanup_exit([] {
+        // todo: shutdown harfbuzz/freetype
+        // todo: recursively delete root
+        Logger::instance().info("Shutting down");
+        rlImGuiShutdown();
+        CloseWindow();
+    });
+
+    main_loop_function = [&] {
         if (IsWindowResized()) {
 #ifdef __EMSCRIPTEN__
             int canvas_width = EM_ASM_INT({return Module.canvas.width;});
@@ -153,8 +193,8 @@ int main() {
 #else
             //SetWindowSize(, 800);
 #endif
-            menu_context.persistent_data.window_width = GetScreenWidth();
-            menu_context.persistent_data.window_height = GetScreenHeight();
+            persistent_data.window_width = GetScreenWidth();
+            persistent_data.window_height = GetScreenHeight();
             //fix this!
         }
 
@@ -188,8 +228,8 @@ int main() {
                 perf.draw_count = 0;
                 perf.last_print = now;
             }
-            if (menu_context.persistent_data.show_debug_window) {
-                ImGui::Begin("Debug", &menu_context.persistent_data.show_debug_window);
+            if (persistent_data.show_debug_window) {
+                ImGui::Begin("Debug", &persistent_data.show_debug_window);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
                 ImGui::Checkbox("Draw debug borders", &Control::DrawDebugBorders);
                 ImGui::Text("UpdateRec average: %f ms", perf.update_avg);
@@ -235,6 +275,7 @@ int main() {
         }
         EndDrawing();
     };
+
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(loop_wrapper, 0, 1);
 #else
@@ -243,10 +284,5 @@ int main() {
     }
 #endif
 
-    // todo: shutdown harfbuzz/freetype
-    // todo: recursively delete root
-    Logger::instance().info("Shutting down");
-    rlImGuiShutdown();
-    CloseWindow();
     return 0;
 }

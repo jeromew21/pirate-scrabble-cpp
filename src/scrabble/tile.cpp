@@ -65,6 +65,7 @@ void Tile::Draw() {
         (3.0f/48.0f)*dim, color);
 }
 
+// TODO: make this a spritesheet, single texturew
 void Tile::InitializeTextures(FT_Library ft) {
     map_ = std::make_unique<std::unordered_map<char, RenderTexture2D>>();
     generate_tile_sprites(ft, *map_);

@@ -14,19 +14,15 @@ struct MainMenuContext : GameObject {
         Multiplayer,
     };
 
-    State state{State::InitialLoading};
+    static inline std::string token_path{"./pirate_scrabble_token"};
 
-    PersistentData persistent_data{};
+    State state{State::InitialLoading};
 
     std::optional<User> user_opt{std::nullopt};
 
     std::unique_ptr<LoginContext> login_context;
 
     std::unique_ptr<MultiplayerContext> multiplayer_context;
-
-    std::string token_path{"./token.txt"};
-
-    std::string persistent_data_path{"./pirate_scrabble_data.json"};
 
     float loading_counter{0};
 

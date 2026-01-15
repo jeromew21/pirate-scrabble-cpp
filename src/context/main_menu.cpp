@@ -16,35 +16,13 @@
 #include "util/logging/logging.h"
 #include "serialization/types.h"
 
-static bool write_persistent_data(const std::string &persistent_data_path, const PersistentData &data) {
-    return write_file(persistent_data_path, serialize(data));
-}
-
 static bool write_token(const std::string &token_path, const std::string &token) {
     return write_file(token_path, token);
-}
-
-static std::optional<PersistentData> load_persistent_data(const std::string &persistent_data_path) {
-    if (std::string contents; read_file(persistent_data_path, contents)) {
-        try {
-            return deserialize_or_throw<PersistentData>(contents);
-        } catch (const std::exception &e) {
-            std::cerr << e.what() << "\n";
-            return std::nullopt;
-        }
-    }
-    return std::nullopt;
 }
 
 MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext>()),
                                      multiplayer_context(std::make_unique<MultiplayerContext>()) {
     Logger::instance().info("Initializing main context");
-    if (const auto persistent_data_opt = load_persistent_data(persistent_data_path);
-        persistent_data_opt.has_value()) {
-        persistent_data = persistent_data_opt.value();
-    } else {
-        Logger::instance().info("Failed to read persistent data from disk. Falling back to defaults");
-    }
 
     AddChild(login_context.get());
     AddChild(multiplayer_context.get());
@@ -61,9 +39,6 @@ MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext
 
 MainMenuContext::~MainMenuContext() {
     Logger::instance().info("Shutting down main context");
-    if (!write_persistent_data(persistent_data_path, persistent_data)) {
-        Logger::instance().info("Failed to write persistent data to disk");
-    }
     if (user_opt.has_value()) {
         if (!write_token(token_path, user_opt->token)) {
             Logger::instance().info("Failed to write token to disk");
