@@ -80,52 +80,10 @@ MultiplayerContext::MultiplayerContext() {
     using namespace frameflow;
     canvas = new LayoutSystem();
     canvas->Hide();
-    /*
-    // do stuff
     AddChild(canvas);
-    auto *hbox = horizontal_box();
-    canvas->AddChild(hbox);
-    hbox->GetNode()->anchors = {0, 0, 1, 1};
-
-    auto *left = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
-    hbox->AddChild(left);
-    left->GetNode()->anchors = {0, 0, 0, 1};
-    left->GetNode()->minimum_size = {100, 0};
-    left->GetNode()->expand.x = 1;
-
-    auto *center_container = margin_all(8);
-    hbox->AddChild(center_container);
-    center_container->GetNode()->anchors = {0, 0, 1, 1};
-    center_container->GetNode()->minimum_size = {Tile::dim * 10, 0};
-
-    auto *center = dynamic_cast<BoxContainer *>(center_container->AddChild(vertical_box()));
-    center->GetNode()->anchors = {0, 0, 1, 1};
-
-    auto *public_tiles = dynamic_cast<FlowContainer *>(center_container->AddChild(horizontal_flow()));
-    public_tiles->GetNode()->anchors = {0, 0, 1, 1};
-    public_tiles->GetNode()->expand.y = 1;
-    for (int i = 0; i < 144; i++) {
-        auto *outer = new MarginContainer(MarginData{8, 8, 8, 8});
-        public_tiles->AddChild(outer);
-        outer->GetNode()->minimum_size = {Tile::dim + 8 * 2, Tile::dim + 8 * 2};
-
-        auto *inner = new Control();
-        outer->AddChild(inner);
-        inner->GetNode()->minimum_size = {Tile::dim, Tile::dim};
-        inner->GetNode()->anchors = {0, 0, 1, 1};
-    }
-
-    auto *right = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
-    hbox->AddChild(right);
-    right->GetNode()->anchors = {0, 0, 1, 1};
-    right->GetNode()->minimum_size = {100, 0};
-    right->GetNode()->expand.x = 1;
-    */
-
-    auto *sprite = new Sprite();
 }
 
-void MultiplayerContext::Update(float delta_time) {
+void MultiplayerContext::Update(const float delta_time) {
     switch (state) {
         case State::PreInit:
             break;
@@ -158,7 +116,7 @@ void MultiplayerContext::Update(float delta_time) {
             std::string msg;
             while (recv_game_queue.try_dequeue(msg)) {
                 if (auto response = deserialize<MultiplayerActionResponse>(msg); response.ok) {
-                    if (game_opt.has_value()) {
+                    if (game) {
                         if (state == State::Lobby && response.game->phase != "CREATED") {
                             EnterPlaying();
                         }
@@ -168,7 +126,8 @@ void MultiplayerContext::Update(float delta_time) {
                     } else {
                         state = State::Playing;
                     }
-                    game_opt = response.game;
+                    game = response.game;
+                    Redraw();
                 } else {
                     Logger::instance().error("{}", response.errorMessage);
                 }
@@ -206,6 +165,55 @@ void MultiplayerContext::Draw() {
     }
 }
 
+void MultiplayerContext::Redraw() {
+    using namespace frameflow;
+    {
+        auto children = canvas->GetChildren();
+        for (auto *child: children) {
+            child->Delete();
+        }
+    }
+
+    auto *hbox = horizontal_box();
+    canvas->AddChild(hbox);
+    hbox->GetNode()->anchors = {0, 0, 1, 1};
+
+    auto *left = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
+    hbox->AddChild(left);
+    left->GetNode()->anchors = {0, 0, 0, 1};
+    left->GetNode()->minimum_size = {100, 0};
+    left->GetNode()->expand.x = 1;
+
+    auto *center_container = margin_all(8);
+    hbox->AddChild(center_container);
+    center_container->GetNode()->anchors = {0, 0, 1, 1};
+    center_container->GetNode()->minimum_size = {Tile::dim * 10, 0};
+
+    auto *center = dynamic_cast<BoxContainer *>(center_container->AddChild(vertical_box()));
+    center->GetNode()->anchors = {0, 0, 1, 1};
+
+    auto *public_tiles = dynamic_cast<FlowContainer *>(center_container->AddChild(horizontal_flow()));
+    public_tiles->GetNode()->anchors = {0, 0, 1, 1};
+    public_tiles->GetNode()->expand.y = 1;
+    for (int i = 0; i < 144; i++) {
+        auto *outer = new MarginContainer(MarginData{8, 8, 8, 8});
+        public_tiles->AddChild(outer);
+        outer->GetNode()->minimum_size = {Tile::dim + 8 * 2, Tile::dim + 8 * 2};
+
+        auto *inner = new Control();
+        outer->AddChild(inner);
+        inner->GetNode()->minimum_size = {Tile::dim, Tile::dim};
+        inner->GetNode()->anchors = {0, 0, 1, 1};
+    }
+
+    auto *right = new BoxContainer(BoxData{Direction::Vertical, Align::Start});
+    hbox->AddChild(right);
+    right->GetNode()->anchors = {0, 0, 1, 1};
+    right->GetNode()->minimum_size = {100, 0};
+    right->GetNode()->expand.x = 1;
+
+}
+
 
 void MultiplayerContext::RenderGateway() {
     ImGui::Begin("Multiplayer Gateway");
@@ -226,7 +234,7 @@ void MultiplayerContext::RenderGateway() {
 }
 
 void MultiplayerContext::RenderChat() const {
-    if (!game_opt.has_value()) return;
+    if (!game) return;
     assert(game_socket != nullptr);
 
     ImGui::Begin("Chat", nullptr, ImGuiWindowFlags_NoScrollbar);
@@ -242,13 +250,13 @@ void MultiplayerContext::RenderChat() const {
                           ImVec2(0, -reservedHeight), // Reserve space for separator + input
                           ImGuiChildFlags_Borders);
 
-        for (const auto &msg: game_opt->chat) {
+        for (const auto &msg: game->chat) {
             // Timestamp
             ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "[%s]", msg.timestamp.c_str());
             ImGui::SameLine();
 
             // Sender
-            if (msg.sender.has_value()) {
+            if (msg.sender) {
                 ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s:", msg.sender->c_str());
                 ImGui::SameLine();
             } else {
@@ -306,10 +314,9 @@ void MultiplayerContext::RenderLobby() const {
 }
 
 void MultiplayerContext::RenderPlaying() const {
-    assert(game_opt.has_value());
-    const MultiplayerGame game = *game_opt;
-    ImGui::Text("%s", game.phase.c_str());
-    InspectStruct("game", game);
+    assert(game.has_value());
+    ImGui::Text("%s", game->phase.c_str());
+    InspectStruct("game", *game);
 }
 
 void MultiplayerContext::EnterGateway() {
@@ -317,7 +324,7 @@ void MultiplayerContext::EnterGateway() {
     main_menu->login_context->AttemptTokenAuth(main_menu->user_opt->token);
     // re authenticate in parallel?
     // re authenticate every X seconds?
-    if (main_menu->user_opt->currentGame.has_value()) {
+    if (main_menu->user_opt->currentGame) {
         EnterLobby(main_menu->user_opt->currentGame.value());
     }
 }
@@ -339,7 +346,11 @@ void MultiplayerContext::EnterLobby(const std::string &game_id) {
     sprite->SetTexture(Tile::GetTileTexture('X').texture);
     sprite->transform.local_position = {100, 100};
     AddChild(sprite);
-    TweenManager::instance().CreateTween(&sprite->transform.local_position.x, 200, 1.0f, Easing::EaseInOutSine);
+    auto *tween = TweenManager::instance().CreateTween(&sprite->transform.local_position.x,
+                                                       200,
+                                                       1.0f,
+                                                       Easing::EaseInOutSine);
+    tween->SetOnComplete([=] { sprite->Delete(); });
 }
 
 void MultiplayerContext::EnterPlaying() {

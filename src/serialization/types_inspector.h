@@ -21,7 +21,7 @@ namespace ImGuiInspect {
 
     template<typename T>
     inline void Field(const char* label, const std::optional<T>& opt) {
-        if (opt.has_value()) {
+        if (opt) {
             Field(label, *opt);
         } else {
             ImGui::TextDisabled("%s: None", label);
@@ -152,7 +152,7 @@ inline void InspectStruct(const char* label, const MultiplayerAction& action) {
     if (ImGui::TreeNode(label)) {
         IMGUI_INSPECT_FIELD(action, playerId);
         IMGUI_INSPECT_FIELD(action, actionType);
-        if (action.action.has_value()) {
+        if (action.action) {
             InspectStruct("action", *action.action);
         } else {
             ImGui::TextDisabled("action: None");
@@ -171,7 +171,7 @@ inline void InspectStruct(const char* label, const MultiplayerGame& game) {
         ImGuiInspect::VectorField("playerNames", game.playerNames);
         IMGUI_INSPECT_FIELD(game, buzzHolder);
         IMGUI_INSPECT_FIELD(game, buzzElapsed);
-        if (game.lastAction.has_value()) {
+        if (game.lastAction) {
             InspectStruct("lastAction", *game.lastAction);
         } else {
             ImGui::TextDisabled("lastAction: None");
@@ -184,7 +184,7 @@ inline void InspectStruct(const char* label, const MultiplayerGame& game) {
 inline void InspectStruct(const char* label, const MultiplayerActionResponse& response) {
     if (ImGui::TreeNode(label)) {
         IMGUI_INSPECT_FIELD(response, ok);
-        if (response.game.has_value()) {
+        if (response.game) {
             InspectStruct("game", *response.game);
         } else {
             ImGui::TextDisabled("game: None");
@@ -219,7 +219,7 @@ inline void InspectStruct(const char* label, const UserResponse& response) {
     if (ImGui::TreeNode(label)) {
         IMGUI_INSPECT_FIELD(response, ok);
         IMGUI_INSPECT_FIELD(response, error);
-        if (response.user.has_value()) {
+        if (response.user) {
             InspectStruct("user", *response.user);
         } else {
             ImGui::TextDisabled("user: None");

@@ -58,7 +58,7 @@ frameflow::Node *Control::GetNode() const {
 }
 
 void Control::Draw() {
-    if (!Control::DrawDebugBorders) return;
+    if (!DrawDebugBorders) return;
     using namespace frameflow;
     const auto node = *GetNode();
 
@@ -90,6 +90,10 @@ void Control::AddChildHook(GameObject *child) {
         child_control->layout_system_ = layout_system_;
         child_control->InitializeLayout(layout_system_);
     }
+}
+
+void Control::DeleteHook() {
+    frameflow::delete_node(layout_system_->system.get(), node_id_);
 }
 
 BoxContainer::BoxContainer(const frameflow::BoxData &data) : box_data(data) {

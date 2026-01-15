@@ -31,7 +31,7 @@ public:
         active = false;
     }
 
-private:
     F callback;
+private:
     bool active;
 };

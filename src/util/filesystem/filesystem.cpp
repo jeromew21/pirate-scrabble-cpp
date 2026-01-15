@@ -55,7 +55,6 @@ fs::path executable_path() {
         auto path = fs::path{buffer};
         return path;
     }
-    return "";
 #elif __APPLE__
     char buffer[PATH_MAX];
     uint32_t size = sizeof(buffer);
@@ -63,13 +62,13 @@ fs::path executable_path() {
         auto path = fs::path{buffer};
         return path;
     }
-    return "";
 #elif _WIN32
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
     auto path = fs::path{buffer};
     return path;
 #endif
+    return "";
 }
 
 fs::path executable_dir() {

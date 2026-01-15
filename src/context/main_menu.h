@@ -14,8 +14,6 @@ struct MainMenuContext : GameObject {
         Multiplayer,
     };
 
-    static inline std::string token_path{"./pirate_scrabble_token"};
-
     State state{State::InitialLoading};
 
     std::optional<User> user_opt{std::nullopt};
@@ -28,7 +26,9 @@ struct MainMenuContext : GameObject {
 
     float loading_time{2.0f};
 
-    MainMenuContext();
+    std::optional<std::function<void()>> request_exit_hook;
+
+    explicit MainMenuContext(std::function<void()> request_exit);
 
     ~MainMenuContext() override;
 

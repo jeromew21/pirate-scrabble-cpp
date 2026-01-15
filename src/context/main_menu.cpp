@@ -1,8 +1,6 @@
 #include "main_menu.h"
 
-#include <iostream>
-
-#include "raylib.h"
+#include <utility>
 
 #include "frameflow/layout.hpp"
 
@@ -11,42 +9,25 @@
 
 #include "login.h"
 #include "multiplayer.h"
-#include "text/texthb.h"
 #include "../util/filesystem/filesystem.h"
 #include "util/logging/logging.h"
 #include "serialization/types.h"
 
 namespace {
-    bool write_token(const std::string &token_path, const std::string &token) {
-        return write_file(token_path, token);
-    }
 }
 
-MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext>()),
-                                     multiplayer_context(std::make_unique<MultiplayerContext>()) {
+MainMenuContext::MainMenuContext(std::function<void()> request_exit)
+    : login_context(std::make_unique<LoginContext>()),
+      multiplayer_context(std::make_unique<MultiplayerContext>()),
+      request_exit_hook(std::move(request_exit)) {
     Logger::instance().info("Initializing main context");
-
     AddChild(login_context.get());
     AddChild(multiplayer_context.get());
     login_context->main_menu = this;
     multiplayer_context->main_menu = this;
-    if (std::string token; read_file(token_path, token)) {
-        std::erase_if(token, ::isspace);
-        login_context->AttemptTokenAuth(token);
-    } else {
-        login_context->state = LoginContext::State::Active;
-        Logger::instance().info("Failed to read token from disk. User must provide credentials");
-    }
 }
 
-MainMenuContext::~MainMenuContext() {
-    Logger::instance().info("Shutting down main context");
-    if (user_opt.has_value()) {
-        if (!write_token(token_path, user_opt->token)) {
-            Logger::instance().info("Failed to write token to disk");
-        }
-    }
-}
+MainMenuContext::~MainMenuContext() = default;
 
 void MainMenuContext::Draw() {
     using namespace frameflow;
@@ -85,7 +66,7 @@ void MainMenuContext::Update(const float delta_time) {
             loading_counter += delta_time;
             if (loading_counter > loading_time) {
                 state = State::Menu;
-                if (!user.has_value()) {
+                if (!user) {
                     login_context->state = LoginContext::State::Active;
                 }
             }
@@ -105,6 +86,12 @@ void MainMenuContext::RenderMainMenu() {
         // set state to multiplayer gateway
         state = State::Multiplayer;
         multiplayer_context->EnterGateway();
+    }
+
+    if (ImGui::Button("Exit")) {
+        if (request_exit_hook) {
+            (*request_exit_hook)();
+        }
     }
 
     if (ImGui::CollapsingHeader("Settings")) {
@@ -129,7 +116,7 @@ void MainMenuContext::RenderMainMenu() {
 
 void MainMenuContext::EnterMainMenu() {
     state = State::Menu;
-    if (user_opt.has_value()) {
+    if (user_opt) {
         login_context->AttemptTokenAuth(user_opt->token);
     }
 }

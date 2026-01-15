@@ -5,6 +5,7 @@
 #include "rlImGui.h"
 
 #include "imgui.h"
+#include "context/login.h"
 #include "misc/freetype/imgui_freetype.h"
 
 #include "frameflow/layout.hpp"
@@ -72,17 +73,8 @@ namespace {
                                        | FLAG_MSAA_4X_HINT
                                        | FLAG_VSYNC_HINT;
         SetConfigFlags(flags);
-
-        // Initialize with logical dimensions - raylib handles DPI internally
         InitWindow(logical_width, logical_height, title);
         SetExitKey(KEY_NULL);
-#ifdef __EMSCRIPTEN__
-        // Get the actual canvas size set by JavaScript
-        // Somehow this isn't working quite properly, you have to manual resize before it works
-        int canvas_width = EM_ASM_INT({return Module.canvas.width;});
-        int canvas_height = EM_ASM_INT({return Module.canvas.height;});
-#endif
-        SetWindowSize(logical_width, logical_height);
     }
 
     float GetLogicalRatio() {
@@ -105,8 +97,51 @@ namespace {
     bool write_persistent_data_to_disk(const std::string &persistent_data_path, const PersistentData &data) {
         return write_file(persistent_data_path, serialize(data));
     }
+
+#ifdef __EMSCRIPTEN__
+    EM_JS(char *, get_local_storage, (const char *key),  {
+        var k = UTF8ToString(key);
+        var value = localStorage.getItem(k) || "";
+        var lengthBytes = lengthBytesUTF8(value) + 1;
+        var stringOnWasmHeap = _malloc(lengthBytes);
+        stringToUTF8(value, stringOnWasmHeap, lengthBytes);
+        return stringOnWasmHeap;
+    });
+
+    EM_JS(void, set_local_storage, (const char *key, const char *value),  {
+        localStorage.setItem(UTF8ToString(key), UTF8ToString(value));
+    });
+#endif
+
+    bool read_token(const fs::path &path, std::string &out_token) {
+#ifdef __EMSCRIPTEN__
+        const char* key = path.c_str();
+        char* val = get_local_storage(key);
+        std::string data(val);
+        fmt::println("TOKEN DATA: {}", data);
+        out_token.append(data);
+        free(val);  // must free the WASM heap allocation
+        const bool result = true;
+#else
+        const bool result = read_file(path, out_token);
+#endif
+        std::erase_if(out_token, isspace); // this is necessary for some reason
+        return result;
+    }
+
+    bool write_token(const std::string &token_path, const std::string &token) {
+#ifdef __EMSCRIPTEN__
+        set_local_storage(token_path.c_str(), token.c_str());
+        return true;
+#else
+        return write_file(token_path, token);
+#endif
+    }
 }
 
+
+// Emscripten note: either scope exit doesn't work, or local storage doesn't work.
+// Either way I give up and will fix later.
 int main() {
     // -------------------------
     // Initialize logging
@@ -116,9 +151,9 @@ int main() {
     // -------------------------
     // Initialize persistent data
     // -------------------------
-    const std::string persistent_data_path{"./pirate_scrabble_data.json"};
-    PersistentData persistent_data = load_persistent_data("./pirate_scrabble_data.json");
-    ScopeExitCallback persistent_data_exit([&] {
+    const std::string persistent_data_path{"pirate_scrabble_data.json"};
+    PersistentData persistent_data = load_persistent_data("pirate_scrabble_data.json");
+    ScopeExitCallback persistent_data_write_on_exit([&] {
         if (!write_persistent_data_to_disk(persistent_data_path, persistent_data)) {
             Logger::instance().info("Failed to write persistent data to disk");
         }
@@ -163,10 +198,30 @@ int main() {
 
     // -------------------------
     // Initialize context
+    // Exit won't work on emscripten
     // -------------------------
+    bool request_exit = false;
     GameObject root{};
-    MainMenuContext menu_context{};
+    MainMenuContext menu_context{[&request_exit] { request_exit = true; }};
     root.AddChild(&menu_context);
+
+    // -------------------------
+    // Read token from disk
+    // -------------------------
+    const fs::path token_path{"pirate_scrabble_token"};
+    if (std::string token; read_token(token_path, token)) {
+        menu_context.login_context->AttemptTokenAuth(token);
+    } else {
+        menu_context.login_context->state = LoginContext::State::Active;
+        Logger::instance().info("Failed to read token from disk. User must provide credentials");
+    }
+    ScopeExitCallback token_write_on_exit([&] {
+        if (menu_context.user_opt) {
+            if (!write_token(token_path, menu_context.user_opt->token)) {
+                Logger::instance().info("Failed to write token to disk");
+            }
+        }
+    });
 
     // -------------------------
     // Initialize performance tracker
@@ -185,19 +240,22 @@ int main() {
     });
 
     main_loop_function = [&] {
-        if (IsWindowResized()) {
 #ifdef __EMSCRIPTEN__
+        static bool first_frame = true;
+        if (IsWindowResized() || first_frame) {
+            first_frame = false;
             int canvas_width = EM_ASM_INT({return Module.canvas.width;});
             int canvas_height = EM_ASM_INT({return Module.canvas.height;});
             SetWindowSize(canvas_width, canvas_height);
-            Logger::instance().info("Resized to: {}, {}", canvas_width, canvas_height);
-#else
-            //SetWindowSize(, 800);
-#endif
             persistent_data.window_width = GetScreenWidth();
             persistent_data.window_height = GetScreenHeight();
-            //fix this!
         }
+#else
+        if (IsWindowResized()) {
+            persistent_data.window_width = GetScreenWidth();
+            persistent_data.window_height = GetScreenHeight();
+        }
+#endif
 
         // -------------------------
         // Cleanup
@@ -284,7 +342,10 @@ int main() {
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(loop_wrapper, 0, 1);
 #else
-    while (!WindowShouldClose()) {
+    while (!request_exit) {
+        if (WindowShouldClose()) {
+            request_exit = true;
+        }
         loop_wrapper();
     }
 #endif

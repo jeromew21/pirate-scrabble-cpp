@@ -1,10 +1,12 @@
 #include "game_object.h"
 
+#include <algorithm>
+
 GameObject::~GameObject() = default;
 
 void GameObject::UpdateRec(const float delta_time) {
     Update(delta_time);
-    for (auto& child : children) {
+    for (const auto &child: children) {
         child->UpdateRec(delta_time);
     }
 }
@@ -12,12 +14,12 @@ void GameObject::UpdateRec(const float delta_time) {
 void GameObject::DrawRec() {
     if (!visible_in_tree) return;
     Draw();
-    for (auto& child : children) {
+    for (const auto &child: children) {
         child->DrawRec();
     }
 }
 
-GameObject* GameObject::AddChild(GameObject* child) {
+GameObject *GameObject::AddChild(GameObject *child) {
     child->parent = this;
     children.push_back(child);
     AddChildHook(child);
@@ -38,13 +40,39 @@ bool GameObject::IsVisible() const {
     return visible_in_tree;
 }
 
-// Default impl, does nothing
-void GameObject::Draw() {}
+void GameObject::Delete() {
+    if (parent) {
+        auto& siblings = parent->children;
+        std::erase(siblings, this);
+    }
+    DeleteHook();
+    DeleteRec();
+}
+
+void GameObject::DeleteRec() {
+    for (auto *child: children) {
+        if (child) child->DeleteRec();
+    }
+    delete this;
+}
+
+std::vector<GameObject *> GameObject::GetChildren() {
+    return children;
+}
 
 // Default impl, does nothing
-void GameObject::Update(float) {}
+void GameObject::Draw() {
+}
 
-void GameObject::AddChildHook(GameObject *) {}
+// Default impl, does nothing
+void GameObject::Update(float) {
+}
+
+void GameObject::AddChildHook(GameObject *) {
+}
+
+void GameObject::DeleteHook() {
+}
 
 void GameObject::UpdateVisibilityFromParent() {
     const bool parent_visible = parent ? parent->visible_in_tree : true;
@@ -55,6 +83,6 @@ void GameObject::UpdateVisibilityFromParent() {
 
     visible_in_tree = new_visible;
 
-    for (auto* c : children)
+    for (auto *c: children)
         c->UpdateVisibilityFromParent();
 }

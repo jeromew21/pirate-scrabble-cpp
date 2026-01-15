@@ -1,7 +1,7 @@
 #include "sprite.h"
 
 void Sprite::Draw() {
-    if (!texture.has_value()) return;
+    if (!texture) return;
 
     const auto gp = GlobalPosition();
 

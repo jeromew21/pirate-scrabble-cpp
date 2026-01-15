@@ -18,6 +18,10 @@ public:
 
     [[nodiscard]] bool IsVisible() const;
 
+    void Delete();
+
+    std::vector<GameObject *> GetChildren();
+
 protected:
     virtual void Draw();
 
@@ -25,11 +29,15 @@ protected:
 
     virtual void AddChildHook(GameObject *child);
 
+    virtual void DeleteHook();
+
     GameObject *parent{nullptr};
 
     std::vector<GameObject *> children;
 
 private:
+    void DeleteRec();
+
     void UpdateVisibilityFromParent();
 
     bool visible_self{true};

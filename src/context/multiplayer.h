@@ -20,7 +20,7 @@ private:
     State state = State::PreInit;
 
 public:
-    std::optional<MultiplayerGame> game_opt{std::nullopt};
+    std::optional<MultiplayerGame> game{std::nullopt};
 
     MainMenuContext *main_menu{nullptr};
 
@@ -40,6 +40,8 @@ public:
     void Update(float delta_time) override;
 
     void Draw() override;
+
+    void Redraw();
 
     void RenderGateway();
 

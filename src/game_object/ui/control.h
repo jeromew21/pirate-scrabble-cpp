@@ -26,6 +26,8 @@ public:
 
 private:
     void AddChildHook(GameObject *child) override;
+
+    void DeleteHook() override;
 };
 
 class BoxContainer : public Control {

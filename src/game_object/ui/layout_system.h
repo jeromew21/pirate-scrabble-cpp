@@ -5,9 +5,6 @@
 #include "frameflow/layout.hpp"
 #include "game_object/game_object.h"
 
-namespace frameflow {
-    struct System;
-}
 
 class LayoutSystem : public GameObject {
 public:

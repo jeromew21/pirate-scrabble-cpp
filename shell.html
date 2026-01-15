@@ -1,334 +1,203 @@
-<!doctype html>
-<html lang="EN-us">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-    <title>raylib web game</title>
-
-    <meta name="title" content="raylib web game">
-    <meta name="description" content="New raylib web videogame, developed using raylib videogames library">
-    <meta name="keywords" content="raylib, programming, examples, html5, C, C++, library, learn, games, videogames">
-    <meta name="viewport" content="width=device-width">
-
-    <!-- Open Graph metatags for sharing -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="raylib web game">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image" content="https://www.raylib.com/common/raylib_logo.png">
-    <meta property="og:image:alt" content="New raylib web videogame, developed using raylib videogames library" />
-    <meta property="og:site_name" content="raylib - example">
-    <meta property="og:url" content="https://www.raylib.com/games.html">
-    <meta property="og:description" content="New raylib web videogame, developed using raylib videogames library">
-
-    <!-- Twitter metatags for sharing -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@raysan5">
-    <meta name="twitter:title" content="raylib web game">
-    <meta name="twitter:image" content="https://www.raylib.com/common/raylib_logo.png">
-    <meta name="twitter:image:alt" content="New raylib web videogame, developed using raylib videogames library">
-    <meta name="twitter:url" content="https://www.raylib.com/games.html">
-    <meta name="twitter:description" content="New raylib web videogame, developed using raylib videogames library">
-
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="https://www.raylib.com/favicon.ico">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pirate Scrabble</title>
     <style>
-        body { font-family: arial; margin: 0; padding: unset; }
-
-        #header {
-            width: 100%;
-            height: 80px;
-            background-color: #888888;
-        }
-
-        /* NOTE: raylib logo is embedded in the page as base64 png image */
-        #logo {
-            width:64px;
-            height:64px;
-            float:left;
-            position:relative;
-            margin:10px;
-            background-image:url('data:image/png;base64,\
-iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADs\
-MAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjExR/NCNwAAA7JJREFUaEPtk0FyWzEMQ+37X7fZhxX4\
-YY3AD1OKF1nkzTRlSBCCLeVBnvl/AUdaELOunPno1kts1kixdtEZKVs+xIxebBkZsVknn/L5nFGDLR8T4zVC9fX19S/+tTFijr\
-YK4jUjbPUtqBHpnEE6PkZD7jQZV8n5Recw1XQKciZuPaEtR6UjNs5ENVGMsBVqpPtER0ZMOhpyp8m4YL4OjD9yxsyZxnQycfMJ\
-ETNSzsRE1+dihK3YMiJmpHTW3xpmXPC6BXlCHfqnBlsjY5hxf/6EVEOM2BTEi0fYCX4ONSI6Kq3Blg/prIOMq2CsRur4KQ0x64\
-SdjOufEDEdHZGOhmz5RDHCVqhRuQ86YsVskbc+GXchLiHnFyYH+UigQDVGnImbT8hwFkgLg2qiM8JO6Ylx1FNLa3DmYwqCTsZd\
-4BPqGJG7MwKzpeiWKTKxXkLMVE3MSOmsdwxLH6Rd/wCCLSNDx6djeKfJuArGeoYamRHpaEjnCBYZVy8hZqo2GI36qPjsiOiMsB\
-XGcev4Mx9TLGTchbgEjN/uz6jGrBvDjg+LTNx8Qp2CbG2xMKgmOiPslJ4Yxx+eSnSkzlosZNwFPiHl7FRTkLNRJm4+IeVM0ymI\
-H42wE/wcKalQI4MRl4EW3p6VcRWMua8F6WjIlqZDxvVPiHQ6CjVbYkV9ohhhp/Rk1wiYgpyJ78i4CsZbjkb8Qx+ihvzu3RPaKo\
-gZkY6GlEeMsKdPSOFIC8VoOusg44L5c+T8ouOoGhWbdWJ8tMi4egkxo4hoh2yNTGf3iIyr5Lyic4bRENXo+lvDjAt4C1Hk/OKt\
-UaAj0+n4dMSZ2D+hrYJsaYh2SClG2jV9kJKKzhlGQ1SsW299Mq6C8dYZHTExo8fzieI5ivipYnYy7nwJqGKmOYyRwfiUBXITfh\
-5qSHRGWEkfqJqURgvsdHyWYv7Ko8DnYYegk3EB00cxprdrJRzFd7YQzawu8L1GMTYS/KpPaAFTkIn1EmJmspJSs5xBzSyGhlkB\
-mlxfNFiP5mw4wlbMh4F5Ddxp5jNINBdCEz9zPOC1zD7Q0HBdmXndwv0TMtydEdzlWJT4VZ8Qt9Qn4/onxMIwa5ZYGJU5yufBiC\
-jwE50AGjLCVuS8Yt4H7OgZLKK5EKOsLviEWJSL/+0uMi7gLUSBseYwqEbXvSHCec1CJvZPyHCmYQffaBBfOTCGHM2aEbZi1+gO\
-1XTWVXMnzrhAn5DSOZVsiQlHnSITKzGj6DeTcZWc/3oy7h9//PF4PL4BlvsWrb6RE+oAAAAASUVORK5CYII=');
-        }
-
-        .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
-        div.emscripten { text-align: center; }
-        div.emscripten_border { border: 1px solid black; }
-
-        /* NOTE: Canvas *must not* have any border or padding, or mouse coords will be wrong */
-        canvas.emscripten {
-            border: 0px none;
-            background: black;
-            width: 100%;
-        }
-
-        .spinner {
-            height: 30px;
-            width: 30px;
+        * {
             margin: 0;
-            margin-top: 20px;
-            margin-left: 20px;
-            display: inline-block;
-            vertical-align: top;
-            -webkit-animation: rotation .8s linear infinite;
-            -moz-animation: rotation .8s linear infinite;
-            -o-animation: rotation .8s linear infinite;
-            animation: rotation 0.8s linear infinite;
-            border-left: 5px solid black;
-            border-right: 5px solid black;
-            border-bottom: 5px solid black;
-            border-top: 5px solid red;
-            border-radius: 100%;
-            background-color: rgb(245, 245, 245);
-        }
-        @-webkit-keyframes rotation {
-            from {-webkit-transform: rotate(0deg);}
-            to {-webkit-transform: rotate(360deg);}
-        }
-        @-moz-keyframes rotation {
-            from {-moz-transform: rotate(0deg);}
-            to {-moz-transform: rotate(360deg);}
-        }
-        @-o-keyframes rotation {
-            from {-o-transform: rotate(0deg);}
-            to {-o-transform: rotate(360deg);}
-        }
-        @keyframes rotation {
-            from {transform: rotate(0deg);}
-            to {transform: rotate(360deg);}
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        #status {
-            display: inline-block;
-            vertical-align: top;
-            margin-top: 30px;
-            margin-left: 20px;
-            font-weight: bold;
-            color: rgb(40, 40, 40);
-        }
-
-        #progress {
-            height: 0px;
-            width: 0px;
-        }
-
-        #controls {
-            display: inline-block;
-            float: right;
-            vertical-align: top;
-            margin-top: 15px;
-            margin-right: 20px;
-        }
-
-        #output {
-            border-left: 0px none;
-            border-right: 0px none;
-            border-bottom: 0px none;
-            padding-left: 0;
-            padding-right: 0;
+        html, body {
             width: 100%;
-            height: 140px;
-            margin: 0 auto;
-            margin-top: 10px;
+            height: 100%;
+            overflow: hidden;
+            background: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        #canvas {
             display: block;
-            background-color: black;
-            color: rgb(37, 174, 38);
-            font-family: 'Lucida Console', Monaco, monospace;
-            outline: none;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
         }
 
-        input[type=button] {
-            background-color: lightgray;
-            border: 4px solid darkgray;
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-            width: 140px;
-            height: 50px;
-            margin-left: 10px;
+        /* Loading screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease-out;
         }
 
-        input[type=button]:hover {
-            background-color: #f5f5f5ff;
-            border-color: black;
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        /* Simple spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 1rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        /* Error message */
+        #error-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 59, 48, 0.95);
+            color: white;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            max-width: 500px;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        #error-message.show {
+            display: block;
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .error-details {
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
-<div id="header">
-    <a id="logo" href="https://www.raylib.com"></a>
+<canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
 
-    <div class="spinner" id='spinner'></div>
-    <div class="emscripten" id="status">Downloading...</div>
-
-    <span id='controls'>
-          <span><input type="button" value="📜 SOURCE CODE" onclick="location.href='https://github.com/raysan5/raylib';"/></span>
-          <span><input type="button" value="🖵 FULLSCREEN" onclick="Module.canvas.requestFullscreen(false, false)"></span>
-          <span><input type="button" id="btn-audio" value="🔇 MUTE" onclick="toggleAudio()"></span>
-        </span>
-
-    <div class="emscripten">
-        <progress value="0" max="100" id="progress" hidden=1></progress>
+<div id="loading-screen">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-text">Loading...</div>
     </div>
 </div>
 
-<div class="emscripten_border">
-    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+<div id="error-message">
+    <div class="error-title">Error</div>
+    <div class="error-details" id="error-details"></div>
 </div>
 
-<textarea id="output" rows="8"></textarea>
-
-<script type='text/javascript' src="https://cdn.jsdelivr.net/gh/eligrey/FileSaver.js/dist/FileSaver.min.js"> </script>
-<script type='text/javascript'>
-    function saveFileFromMEMFSToDisk(memoryFSname, localFSname)     // This can be called by C/C++ code
-    {
-        var isSafari = false; // Not supported, navigator.userAgent access is being restricted
-        //var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        var data = FS.readFile(memoryFSname);
-        var blob;
-
-        if (isSafari) blob = new Blob([data.buffer], { type: "application/octet-stream" });
-        else blob = new Blob([data.buffer], { type: "application/octet-binary" });
-
-        // NOTE: SaveAsDialog is a browser setting. For example, in Google Chrome,
-        // in Settings/Advanced/Downloads section you have a setting:
-        // 'Ask where to save each file before downloading' - which you can set true/false.
-        // If you enable this setting it would always ask you and bring the SaveAsDialog
-        saveAs(blob, localFSname);
-    }
-</script>
-<script type='text/javascript'>
-    var statusElement = document.querySelector('#status');
-    var progressElement = document.querySelector('#progress');
-    var spinnerElement = document.querySelector('#spinner');
+<script>
     var Module = {
-        preRun: [],
-        postRun: [],
-        print: (function() {
-            var element = document.querySelector('#output');
-
-            if (element) element.value = '';    // Clear browser cache
-
-            return function(text) {
-                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-                // These replacements are necessary if you render to raw HTML
-                //text = text.replace(/&/g, "&amp;");
-                //text = text.replace(/</g, "&lt;");
-                //text = text.replace(/>/g, "&gt;");
-                //text = text.replace('\n', '<br>', 'g');
-                console.log(text);
-
-                if (element) {
-                    element.value += text + "\n";
-                    element.scrollTop = element.scrollHeight; // focus on bottom
-                }
-            };
-        })(),
-        printErr: function(text) {
-            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-
-            console.error(text);
-        },
         canvas: (function() {
-            var canvas = document.querySelector('#canvas');
+            var canvas = document.getElementById('canvas');
 
-            // As a default initial behavior, pop up an alert when webgl context is lost.
-            // To make your application robust, you may want to override this behavior before shipping!
-            // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-            canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                console.log('Canvas resized to:', canvas.width, 'x', canvas.height);
+            }
+
+            // Initial resize
+            resizeCanvas();
+
+            // Resize on window resize
+            window.addEventListener('resize', resizeCanvas);
+
+            canvas.addEventListener("webglcontextlost", function(e) {
+                showError('WebGL context lost. Please reload the page.');
+                e.preventDefault();
+            }, false);
 
             return canvas;
         })(),
+
         setStatus: function(text) {
-            if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
-            if (text === Module.setStatus.last.text) return;
+            var loadingText = document.getElementById('loading-text');
 
-            var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-            var now = Date.now();
-
-            if (m && now - Module.setStatus.last.time < 30) return; // If this is a progress update, skip it if too soon
-
-            Module.setStatus.last.time = now;
-            Module.setStatus.last.text = text;
-
-            if (m) {
-                text = m[1];
-                progressElement.value = parseInt(m[2])*100;
-                progressElement.max = parseInt(m[4])*100;
-                progressElement.hidden = true;
-                spinnerElement.hidden = false;
-            } else {
-                progressElement.value = null;
-                progressElement.max = null;
-                progressElement.hidden = true;
-                if (!text) spinnerElement.style.display = 'none';
+            if (!text) {
+                // Loading complete
+                setTimeout(function() {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                }, 300);
+                return;
             }
 
-            statusElement.innerHTML = text;
+            loadingText.textContent = text;
         },
+
+        print: function(text) {
+            console.log(text);
+        },
+
+        printErr: function(text) {
+            console.error(text);
+        },
+
         totalDependencies: 0,
+
         monitorRunDependencies: function(left) {
             this.totalDependencies = Math.max(this.totalDependencies, left);
-            Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
-        },
-        //noInitialRun: true
+            var status = left ?
+                'Loading (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' :
+                '';
+            Module.setStatus(status);
+        }
     };
 
-    Module.setStatus('Downloading...');
-
-    window.onerror = function() {
-        Module.setStatus('Exception thrown, see JavaScript console');
-        spinnerElement.style.display = 'none';
-        Module.setStatus = function(text) { if (text) Module.printErr('[post-exception status] ' + text); };
-    };
-</script>
-
-<!-- REF: https://developers.google.com/web/updates/2018/11/web-audio-autoplay -->
-<script type='text/javascript'>
-    var audioBtn = document.querySelector('#btn-audio');
-
-    // An array of all contexts to resume on the page
-    const audioContexList = [];
-    (function() {
-        // A proxy object to intercept AudioContexts and
-        // add them to the array for tracking and resuming later
-        self.AudioContext = new Proxy(self.AudioContext, {
-            construct(target, args) {
-                const result = new target(...args);
-                audioContexList.push(result);
-                if (result.state == "suspended") audioBtn.value = "🔈 RESUME";
-                return result;
-            }
-        });
-    })();
-
-    function toggleAudio() {
-        var resumed = false;
-        audioContexList.forEach(ctx => {
-            if (ctx.state == "suspended") { ctx.resume(); resumed = true; }
-            else if (ctx.state == "running") ctx.suspend();
-        });
-
-        if (resumed) audioBtn.value = "🔇 MUTE";
-        else audioBtn.value = "🔈 RESUME";
+    function showError(message) {
+        var errorDiv = document.getElementById('error-message');
+        var errorDetails = document.getElementById('error-details');
+        errorDetails.textContent = message;
+        errorDiv.classList.add('show');
+        document.getElementById('loading-screen').classList.add('hidden');
     }
+
+    Module.setStatus('Loading...');
+
+    window.onerror = function(msg, url, line, col, error) {
+        var errorMsg = 'Error: ' + msg;
+        if (error && error.stack) {
+            errorMsg += '\n' + error.stack;
+        }
+        showError(errorMsg);
+        Module.setStatus = function(text) {
+            if (text) console.error('[post-exception status] ' + text);
+        };
+    };
 </script>
+
 {{{ SCRIPT }}}
 </body>
 </html>

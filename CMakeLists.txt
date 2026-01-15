@@ -122,11 +122,11 @@ if (EMSCRIPTEN)
     message(STATUS "Building for Emscripten")
 
     # Compile flags
-    target_compile_options(${PROJECT_NAME} PRIVATE
+    target_compile_options(${TARGET_NAME} PRIVATE
             -pthread
     )
 
-    target_link_options(${PROJECT_NAME} PRIVATE
+    target_link_options(${TARGET_NAME} PRIVATE
             -pthread
             -sUSE_PTHREADS=1
             -sPTHREAD_POOL_SIZE=4
