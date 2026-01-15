@@ -8,9 +8,13 @@ Goals:
 
 ## Building
 
+Non vendored dependencies: Drop frameflow and emsdk in `./external`
+
 ### Desktop
 ```
+mkdir build
 cmake -S . -B build
+cmake --build build -j8
 ```
 
 ### Web

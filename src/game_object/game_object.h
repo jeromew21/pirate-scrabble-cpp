@@ -36,8 +36,6 @@ protected:
     std::vector<GameObject *> children;
 
 private:
-    void DeleteRec();
-
     void UpdateVisibilityFromParent();
 
     bool visible_self{true};

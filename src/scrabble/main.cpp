@@ -10,18 +10,18 @@
 
 #include "frameflow/layout.hpp"
 
-#include "text/freetype_library.h"
-#include "text/texthb.h"
-#include "serialization/types.h"
+#include "../text/freetype_library.h"
+#include "../text/texthb.h"
+#include "context/types.h"
 #include "context/main_menu.h"
 #include "context/multiplayer.h"
-#include "game_object/ui/control.h"
-#include "game_object/ui/layout_system.h"
-#include "game_object/tween/tween.h"
-#include "util/filesystem/filesystem.h"
-#include "util/logging/logging.h"
-#include "util/scope_exit_callback.h"
-#include "scrabble/tile.h"
+#include "../game_object/ui/control.h"
+#include "../game_object/ui/layout_system.h"
+#include "../game_object/tween/tween.h"
+#include "../util/filesystem/filesystem.h"
+#include "../util/logging/logging.h"
+#include "../util/scope_exit_callback.h"
+#include "sprites/tile.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -201,27 +201,20 @@ int main() {
     // Exit won't work on emscripten
     // -------------------------
     bool request_exit = false;
-    GameObject root{};
-    MainMenuContext menu_context{[&request_exit] { request_exit = true; }};
-    root.AddChild(&menu_context);
+    auto *root = new GameObject();
+    auto *menu_context = new MainMenuContext{[&request_exit] { request_exit = true; }};
+    root->AddChild(menu_context);
 
     // -------------------------
     // Read token from disk
     // -------------------------
     const fs::path token_path{"pirate_scrabble_token"};
     if (std::string token; read_token(token_path, token)) {
-        menu_context.login_context->AttemptTokenAuth(token);
+        menu_context->login_context->AttemptTokenAuth(token);
     } else {
-        menu_context.login_context->state = LoginContext::State::Active;
+        menu_context->login_context->state = LoginContext::State::Active;
         Logger::instance().info("Failed to read token from disk. User must provide credentials");
     }
-    ScopeExitCallback token_write_on_exit([&] {
-        if (menu_context.user_opt) {
-            if (!write_token(token_path, menu_context.user_opt->token)) {
-                Logger::instance().info("Failed to write token to disk");
-            }
-        }
-    });
 
     // -------------------------
     // Initialize performance tracker
@@ -231,10 +224,18 @@ int main() {
     // -------------------------
     // Cleanup
     // -------------------------
-    ScopeExitCallback cleanup_exit([] {
+    ScopeExitCallback cleanup_exit([&] {
         // todo: shutdown harfbuzz/freetype
         // todo: recursively delete root
+        if (menu_context->user_opt) {
+            if (!write_token(token_path, menu_context->user_opt->token)) {
+                Logger::instance().info("Failed to write token to disk");
+            }
+        }
         Logger::instance().info("Shutting down");
+        root->Delete();
+        Tile::DeInitializeTextures();
+        ft_de_init(ft);
         rlImGuiShutdown();
         CloseWindow();
     });
@@ -263,7 +264,7 @@ int main() {
         {
             Profiler p("UpdateRec", perf.update_time, perf.update_count);
             const float dt = GetFrameTime();
-            root.UpdateRec(dt);
+            root->UpdateRec(dt);
             TweenManager::instance().Update(dt);
         }
 
@@ -277,7 +278,7 @@ int main() {
             ImGui::PushFont(imgui_font);
             {
                 Profiler p("DrawRec", perf.draw_time, perf.draw_count);
-                root.DrawRec();
+                root->DrawRec();
             }
             const auto now = std::chrono::high_resolution_clock::now();
             const auto elapsed =

@@ -19,3 +19,11 @@ FT_Library ft_init() {
     }
     return ft;
 }
+
+void ft_de_init(FT_Library ft) {
+    FT_Done_Library(ft);
+}
+
+void ft_face_de_init(FT_Face face) {
+    FT_Done_Face(face);
+}

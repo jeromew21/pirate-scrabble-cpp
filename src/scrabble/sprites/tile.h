@@ -9,6 +9,8 @@ public:
 
     static void InitializeTextures(FT_Library ft);
 
+    static void DeInitializeTextures();
+
     static RenderTexture2D GetTileTexture(char c);
 
     void Initialize() const;

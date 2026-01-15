@@ -10,7 +10,7 @@
 
 #include "main_menu.h"
 #include "socket_client.h"
-#include "serialization/types.h"
+#include "types.h"
 #include "util/logging/logging.h"
 
 void LoginContext::Update(float delta_time) {

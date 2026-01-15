@@ -14,6 +14,15 @@ if (EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -sUSE_PTHREADS=1")
+else ()
+    # Enable AddressSanitizer for debug builds
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message(STATUS "AddressSanitizer enabled")
+        set(SANITIZER_FLAGS "-fsanitize=address -fsanitize=leak -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SANITIZER_FLAGS}")
+    endif()
 endif ()
 
 add_subdirectory(external/raylib)
@@ -29,7 +38,7 @@ if (NOT EMSCRIPTEN)
 endif ()
 
 set(SOURCES
-        src/main.cpp
+        src/scrabble/main.cpp
         external/imgui/imgui.h
         external/imgui/imgui.cpp
         external/imgui/imgui_widgets.cpp
@@ -43,14 +52,15 @@ set(SOURCES
         external/rlImGui/rlImGui.cpp
         src/text/texthb.h
         src/text/texthb.cpp
-        src/context/socket_client.h
-        src/context/socket_client.cpp
-        src/context/main_menu.h
-        src/context/main_menu.cpp
-        src/context/login.cpp
-        src/context/login.h
-        src/context/multiplayer.cpp
-        src/context/multiplayer.h
+        src/scrabble/context/socket_client.h
+        src/scrabble/context/socket_client.cpp
+        src/scrabble/context/main_menu.h
+        src/scrabble/context/main_menu.cpp
+        src/scrabble/context/login.cpp
+        src/scrabble/context/login.h
+        src/scrabble/context/multiplayer.cpp
+        src/scrabble/context/multiplayer.h
+        src/scrabble/context/types_inspector.h
         src/game_object/game_object.h
         src/game_object/game_object.cpp
         src/game_object/ui/control.cpp
@@ -59,8 +69,8 @@ set(SOURCES
         src/game_object/ui/layout_system.h
         src/game_object/ui/drawing.h
         src/game_object/ui/drawing.cpp
-        src/scrabble/tile.cpp
-        src/scrabble/tile.h
+        src/scrabble/sprites/tile.cpp
+        src/scrabble/sprites/tile.h
         src/game_object/entity/entity.cpp
         src/game_object/entity/entity.h
         src/game_object/tween/tween.cpp
@@ -74,12 +84,12 @@ set(SOURCES
         src/util/filesystem/filesystem.cpp
         src/game_object/entity/sprite.cpp
         src/game_object/entity/sprite.h
-        src/serialization/types_inspector.h
         src/util/logging/logging.h
         src/text/freetype_library.cpp
         src/text/freetype_library.h
         src/util/logging/logging.cpp
         src/util/scope_exit_callback.h
+        src/util/serialization/serialization.h
 )
 
 if (EMSCRIPTEN)

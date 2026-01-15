@@ -41,20 +41,24 @@ bool GameObject::IsVisible() const {
 }
 
 void GameObject::Delete() {
+    DeleteHook();
+
+    // Delete children safely
+    while (!children.empty()) {
+        GameObject *child = children.back();
+        children.pop_back(); // remove from vector first
+        if (child) child->Delete();
+    }
+
+    // Remove self from parent's children list
     if (parent) {
-        auto& siblings = parent->children;
+        auto &siblings = parent->children;
         std::erase(siblings, this);
     }
-    DeleteHook();
-    DeleteRec();
+
+    delete this; // finally delete self
 }
 
-void GameObject::DeleteRec() {
-    for (auto *child: children) {
-        if (child) child->DeleteRec();
-    }
-    delete this;
-}
 
 std::vector<GameObject *> GameObject::GetChildren() {
     return children;

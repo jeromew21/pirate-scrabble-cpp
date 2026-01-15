@@ -15,10 +15,15 @@
 #include "game_object/tween/tween.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
-#include "scrabble/tile.h"
-#include "serialization/types_inspector.h"
+#include "../sprites/tile.h"
+#include "types_inspector.h"
+#include "util/queue.h"
+#include "util/network/sockets/web_socket.h"
 
 namespace {
+    WebSocketImpl *game_socket{nullptr};
+
+
     MultiplayerAction start_action(const int player_id) {
         const auto action = MultiplayerAction{
             .playerId = player_id,
@@ -127,7 +132,6 @@ void MultiplayerContext::Update(const float delta_time) {
                         state = State::Playing;
                     }
                     game = response.game;
-                    Redraw();
                 } else {
                     Logger::instance().error("{}", response.errorMessage);
                 }
@@ -153,6 +157,9 @@ void MultiplayerContext::Draw() {
         case State::Lobby: {
             canvas->Show();
             ImGui::Begin("Multiplayer Debug");
+            if (ImGui::Button("Redraw")) {
+                Redraw();
+            }
             RenderChat();
             if (state == State::Lobby) {
                 RenderLobby();
@@ -166,6 +173,7 @@ void MultiplayerContext::Draw() {
 }
 
 void MultiplayerContext::Redraw() {
+    return;
     using namespace frameflow;
     {
         auto children = canvas->GetChildren();
@@ -195,7 +203,7 @@ void MultiplayerContext::Redraw() {
     auto *public_tiles = dynamic_cast<FlowContainer *>(center_container->AddChild(horizontal_flow()));
     public_tiles->GetNode()->anchors = {0, 0, 1, 1};
     public_tiles->GetNode()->expand.y = 1;
-    for (int i = 0; i < 144; i++) {
+    for (int i = 0; i < 2; i++) {
         auto *outer = new MarginContainer(MarginData{8, 8, 8, 8});
         public_tiles->AddChild(outer);
         outer->GetNode()->minimum_size = {Tile::dim + 8 * 2, Tile::dim + 8 * 2};
@@ -211,7 +219,6 @@ void MultiplayerContext::Redraw() {
     right->GetNode()->anchors = {0, 0, 1, 1};
     right->GetNode()->minimum_size = {100, 0};
     right->GetNode()->expand.x = 1;
-
 }
 
 
@@ -351,6 +358,8 @@ void MultiplayerContext::EnterLobby(const std::string &game_id) {
                                                        1.0f,
                                                        Easing::EaseInOutSine);
     tween->SetOnComplete([=] { sprite->Delete(); });
+
+    Redraw();
 }
 
 void MultiplayerContext::EnterPlaying() {

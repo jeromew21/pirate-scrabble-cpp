@@ -1,6 +1,6 @@
 #include "socket_client.h"
 
-#include "serialization/types.h"
+#include "types.h"
 #include "util/logging/logging.h"
 
 void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const std::string &password) {

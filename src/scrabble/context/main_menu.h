@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serialization/types.h"
+#include "types.h"
 #include "game_object/game_object.h"
 
 struct LoginContext;
@@ -18,9 +18,9 @@ struct MainMenuContext : GameObject {
 
     std::optional<User> user_opt{std::nullopt};
 
-    std::unique_ptr<LoginContext> login_context;
+    LoginContext *login_context;
 
-    std::unique_ptr<MultiplayerContext> multiplayer_context;
+    MultiplayerContext *multiplayer_context;
 
     float loading_counter{0};
 
@@ -29,8 +29,6 @@ struct MainMenuContext : GameObject {
     std::optional<std::function<void()>> request_exit_hook;
 
     explicit MainMenuContext(std::function<void()> request_exit);
-
-    ~MainMenuContext() override;
 
     void Draw() override;
 

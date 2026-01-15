@@ -9,25 +9,23 @@
 
 #include "login.h"
 #include "multiplayer.h"
-#include "../util/filesystem/filesystem.h"
+#include "util/filesystem/filesystem.h"
 #include "util/logging/logging.h"
-#include "serialization/types.h"
+#include "types.h"
 
 namespace {
 }
 
 MainMenuContext::MainMenuContext(std::function<void()> request_exit)
-    : login_context(std::make_unique<LoginContext>()),
-      multiplayer_context(std::make_unique<MultiplayerContext>()),
+    : login_context(new LoginContext()),
+      multiplayer_context(new MultiplayerContext()),
       request_exit_hook(std::move(request_exit)) {
     Logger::instance().info("Initializing main context");
-    AddChild(login_context.get());
-    AddChild(multiplayer_context.get());
+    AddChild(login_context);
+    AddChild(multiplayer_context);
     login_context->main_menu = this;
     multiplayer_context->main_menu = this;
 }
-
-MainMenuContext::~MainMenuContext() = default;
 
 void MainMenuContext::Draw() {
     using namespace frameflow;

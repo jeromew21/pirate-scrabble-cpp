@@ -1,9 +1,8 @@
 #pragma once
 
-#include "serialization/types.h"
-#include "util/queue.h"
-#include "util/network/sockets/web_socket.h"
+#include "types.h"
 #include "game_object/game_object.h"
+#include "util/queue.h"
 
 struct MainMenuContext;
 
@@ -24,11 +23,9 @@ public:
 
     MainMenuContext *main_menu{nullptr};
 
-    WebSocketImpl *game_socket{nullptr};
 
     Queue recv_create_queue; // Can we combine both of these? Idk why not...
     //Queue recv_join_queue;
-
     Queue recv_game_queue; // Active game
 
     float time_since_last_poll{0};

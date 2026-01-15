@@ -1,9 +1,10 @@
 .idea
 cmake-build-debug
+cmake-build-release
 build
 *.json
 *.log
 *.ini
-token.txt
 external/frameflow
+external/emsdk
 build-web

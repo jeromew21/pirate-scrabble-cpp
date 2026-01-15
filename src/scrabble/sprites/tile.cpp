@@ -19,10 +19,10 @@ namespace {
 
         HBFont font(face, static_cast<int>(Tile::dim)); // pixel size 48
 
-        LayoutSystem sys{};
+        auto *sys = new LayoutSystem();
 
         auto *tile = new Tile();
-        sys.AddChild(tile);
+        sys->AddChild(tile);
         tile->Initialize();
         auto *label = new Label();
         tile->AddChild(label);
@@ -34,7 +34,7 @@ namespace {
         for (char i = 0; i < 127; i++) {
             label->text = i;
             tile->UpdateRec(0.016f);
-            compute_layout(sys.system.get(), tile->node_id_);
+            compute_layout(sys->system.get(), tile->node_id_);
             const RenderTexture2D tile_texture = LoadRenderTexture(
                 static_cast<int>(tile->GetNode()->minimum_size.x),
                 static_cast<int>(tile->GetNode()->minimum_size.y));
@@ -49,11 +49,19 @@ namespace {
             tile_map[i] = tile_texture;
             Control::DrawDebugBorders = temp;
         }
+        ft_face_de_init(face);
+        sys->Delete();
     }
 }
 
 void Tile::Initialize() const {
     GetNode()->minimum_size = {dim, dim};
+}
+
+void Tile::DeInitializeTextures() {
+    for (auto &pair: *map_) {
+        UnloadRenderTexture(pair.second);
+    }
 }
 
 void Tile::Draw() {
