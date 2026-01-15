@@ -11,42 +11,44 @@
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 
-static std::unique_ptr<std::unordered_map<char, RenderTexture2D>> map_;
+namespace {
+    std::unique_ptr<std::unordered_map<char, RenderTexture2D> > map_;
 
-static void generate_tile_sprites(FT_Library ft, std::unordered_map<char, RenderTexture2D> &tile_map) {
-    const auto face = ft_load_font(ft, FS_ROOT / "assets" / "arial.ttf");
+    void generate_tile_sprites(FT_Library ft, std::unordered_map<char, RenderTexture2D> &tile_map) {
+        const auto face = ft_load_font(ft, FS_ROOT / "assets" / "arial.ttf");
 
-    HBFont font(face, static_cast<int>(Tile::dim)); // pixel size 48
+        HBFont font(face, static_cast<int>(Tile::dim)); // pixel size 48
 
-    LayoutSystem sys{};
+        LayoutSystem sys{};
 
-    auto *tile = new Tile();
-    sys.AddChild(tile);
-    tile->Initialize();
-    auto *label = new Label();
-    tile->AddChild(label);
-    label->font = &font;
-    label->text = "A";
-    label->color = BLACK;
-    tile->GetNode()->bounds.origin = {0, 0};
-    tile->GetNode()->bounds.size = tile->GetNode()->minimum_size;
-    for (char i = 0; i < 127; i++) {
-        label->text = i;
-        tile->UpdateRec(0.016f);
-        compute_layout(sys.system.get(), tile->node_id_);
-        const RenderTexture2D tile_texture = LoadRenderTexture(
-            static_cast<int>(tile->GetNode()->minimum_size.x),
-            static_cast<int>(tile->GetNode()->minimum_size.y));
-        const bool temp = Control::DrawDebugBorders;
-        Control::DrawDebugBorders = false;
-        BeginTextureMode(tile_texture);
-        {
-            ClearBackground({0, 0, 0, 0}); // IMPORTANT: alpha = 0dd
-            tile->DrawRec();
+        auto *tile = new Tile();
+        sys.AddChild(tile);
+        tile->Initialize();
+        auto *label = new Label();
+        tile->AddChild(label);
+        label->font = &font;
+        label->text = "A";
+        label->color = BLACK;
+        tile->GetNode()->bounds.origin = {0, 0};
+        tile->GetNode()->bounds.size = tile->GetNode()->minimum_size;
+        for (char i = 0; i < 127; i++) {
+            label->text = i;
+            tile->UpdateRec(0.016f);
+            compute_layout(sys.system.get(), tile->node_id_);
+            const RenderTexture2D tile_texture = LoadRenderTexture(
+                static_cast<int>(tile->GetNode()->minimum_size.x),
+                static_cast<int>(tile->GetNode()->minimum_size.y));
+            const bool temp = Control::DrawDebugBorders;
+            Control::DrawDebugBorders = false;
+            BeginTextureMode(tile_texture);
+            {
+                ClearBackground({0, 0, 0, 0}); // IMPORTANT: alpha = 0dd
+                tile->DrawRec();
+            }
+            EndTextureMode();
+            tile_map[i] = tile_texture;
+            Control::DrawDebugBorders = temp;
         }
-        EndTextureMode();
-        tile_map[i] = tile_texture;
-        Control::DrawDebugBorders = temp;
     }
 }
 
@@ -62,12 +64,12 @@ void Tile::Draw() {
         node.bounds.origin.y,
         node.bounds.size.x,
         node.bounds.size.y,
-        (3.0f/48.0f)*dim, color);
+        (3.0f / 48.0f) * dim, color);
 }
 
 // TODO: make this a spritesheet, single texturew
 void Tile::InitializeTextures(FT_Library ft) {
-    map_ = std::make_unique<std::unordered_map<char, RenderTexture2D>>();
+    map_ = std::make_unique<std::unordered_map<char, RenderTexture2D> >();
     generate_tile_sprites(ft, *map_);
 }
 

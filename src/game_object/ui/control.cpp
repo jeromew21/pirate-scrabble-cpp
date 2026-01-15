@@ -9,44 +9,45 @@
 #include "text/texthb.h"
 #include "drawing.h"
 
-// Try to convert node to frameflow node.
-// If parent is a LayoutSystem, consider that NullNode.
-// Otherwise, return nullopt.
-static std::optional<frameflow::NodeId> as_frameflow_node(GameObject *node) {
-    if (node == nullptr) return std::nullopt;
-    if (auto *sys = dynamic_cast<LayoutSystem *>(node)) {
-        return sys->root_node_id;
+namespace {
+    // Try to convert node to frameflow node.
+    // If parent is a LayoutSystem, consider that NullNode.
+    // Otherwise, return nullopt.
+    std::optional<frameflow::NodeId> as_frameflow_node(GameObject *node) {
+        if (node == nullptr) return std::nullopt;
+        if (auto *sys = dynamic_cast<LayoutSystem *>(node)) {
+            return sys->root_node_id;
+        }
+        if (auto *control = dynamic_cast<Control *>(node); control != nullptr) {
+            return control->node_id_;
+        }
+        return std::nullopt;
     }
-    if (auto *control = dynamic_cast<Control *>(node); control != nullptr) {
-        return control->node_id_;
-    }
-    return std::nullopt;
-}
 
-static Color color_for(frameflow::NodeType type) {
-    using namespace frameflow;
-    switch (type) {
-        case NodeType::Center: return BLUE;
-        case NodeType::Box: return GREEN;
-        case NodeType::Flow: return ORANGE;
-        case NodeType::Generic: return RAYWHITE;
-        case NodeType::Margin: return YELLOW;
-        default: return MAGENTA;
+    Color color_for(frameflow::NodeType type) {
+        using namespace frameflow;
+        switch (type) {
+            case NodeType::Center: return BLUE;
+            case NodeType::Box: return GREEN;
+            case NodeType::Flow: return ORANGE;
+            case NodeType::Generic: return RAYWHITE;
+            case NodeType::Margin: return YELLOW;
+            default: return MAGENTA;
+        }
+    }
+
+    const char *node_type_name(frameflow::NodeType type) {
+        using namespace frameflow;
+        switch (type) {
+            case NodeType::Center: return "Center";
+            case NodeType::Box: return "Box";
+            case NodeType::Flow: return "Flow";
+            case NodeType::Generic: return "Generic";
+            case NodeType::Margin: return "Margin";
+            default: return "Unknown";
+        }
     }
 }
-
-static const char *node_type_name(frameflow::NodeType type) {
-    using namespace frameflow;
-    switch (type) {
-        case NodeType::Center: return "Center";
-        case NodeType::Box: return "Box";
-        case NodeType::Flow: return "Flow";
-        case NodeType::Generic: return "Generic";
-        case NodeType::Margin: return "Margin";
-        default: return "Unknown";
-    }
-}
-
 
 /**
  * This must be called after AddChild
@@ -114,8 +115,8 @@ FlowContainer::FlowContainer(const frameflow::FlowData &data) : flow_data(data) 
 void FlowContainer::InitializeLayout(LayoutSystem *system) {
     if (const auto parent_node = as_frameflow_node(parent); parent_node.has_value()) {
         node_id_ = frameflow::add_flow(system->system.get(),
-                                         parent_node.value(),
-                                         flow_data);
+                                       parent_node.value(),
+                                       flow_data);
     }
 }
 

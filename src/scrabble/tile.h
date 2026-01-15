@@ -5,7 +5,7 @@
 
 class Tile : public CenterContainer {
 public:
-    static float dim;
+    static inline float dim = 81.0;
 
     static void InitializeTextures(FT_Library ft);
 

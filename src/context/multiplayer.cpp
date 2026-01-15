@@ -18,60 +18,62 @@
 #include "scrabble/tile.h"
 #include "serialization/types_inspector.h"
 
-static MultiplayerAction start_action(const int player_id) {
-    const auto action = MultiplayerAction{
-        .playerId = player_id,
-        .actionType = "START",
-        .action = std::nullopt,
-        .data = ""
-    };
-    return action;
-}
+namespace {
+    MultiplayerAction start_action(const int player_id) {
+        const auto action = MultiplayerAction{
+            .playerId = player_id,
+            .actionType = "START",
+            .action = std::nullopt,
+            .data = ""
+        };
+        return action;
+    }
 
-static MultiplayerAction poll_action(const int player_id) {
-    const auto action = MultiplayerAction{
-        .playerId = player_id,
-        .actionType = "POLL",
-        .action = std::nullopt,
-        .data = ""
-    };
-    return action;
-}
+    MultiplayerAction poll_action(const int player_id) {
+        const auto action = MultiplayerAction{
+            .playerId = player_id,
+            .actionType = "POLL",
+            .action = std::nullopt,
+            .data = ""
+        };
+        return action;
+    }
 
-static MultiplayerAction chat_action(const int player_id, const std::string &message) {
-    const auto action = MultiplayerAction{
-        .playerId = player_id,
-        .actionType = "CHAT",
-        .action = std::nullopt,
-        .data = message
-    };
-    return action;
-}
+    MultiplayerAction chat_action(const int player_id, const std::string &message) {
+        const auto action = MultiplayerAction{
+            .playerId = player_id,
+            .actionType = "CHAT",
+            .action = std::nullopt,
+            .data = message
+        };
+        return action;
+    }
 
-static FlowContainer *horizontal_flow() {
-    using namespace frameflow;
-    return new FlowContainer(FlowData{
-        Direction::Horizontal, Align::Start
-    });
-}
+    FlowContainer *horizontal_flow() {
+        using namespace frameflow;
+        return new FlowContainer(FlowData{
+            Direction::Horizontal, Align::Start
+        });
+    }
 
-static BoxContainer *horizontal_box() {
-    using namespace frameflow;
-    return new BoxContainer(BoxData{
-        Direction::Horizontal, Align::Start
-    });
-}
+    BoxContainer *horizontal_box() {
+        using namespace frameflow;
+        return new BoxContainer(BoxData{
+            Direction::Horizontal, Align::Start
+        });
+    }
 
-static BoxContainer *vertical_box() {
-    using namespace frameflow;
-    return new BoxContainer(BoxData{
-        Direction::Vertical, Align::Start
-    });
-}
+    BoxContainer *vertical_box() {
+        using namespace frameflow;
+        return new BoxContainer(BoxData{
+            Direction::Vertical, Align::Start
+        });
+    }
 
-static MarginContainer *margin_all(const float margin) {
-    using namespace frameflow;
-    return new MarginContainer(MarginData{margin, margin, margin, margin});
+    MarginContainer *margin_all(const float margin) {
+        using namespace frameflow;
+        return new MarginContainer(MarginData{margin, margin, margin, margin});
+    }
 }
 
 MultiplayerContext::MultiplayerContext() {

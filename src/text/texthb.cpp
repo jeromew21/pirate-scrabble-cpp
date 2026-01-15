@@ -9,16 +9,18 @@
 
 #include "freetype_library.h"
 
-// -------------------------
-// Glyph struct for caching
-// -------------------------
-struct Glyph {
-    Texture2D texture;
-    int bitmap_left;
-    int bitmap_top;
-    int width;
-    int height;
-};
+namespace {
+    // -------------------------
+    // Glyph struct for caching
+    // -------------------------
+    struct Glyph {
+        Texture2D texture;
+        int bitmap_left;
+        int bitmap_top;
+        int width;
+        int height;
+    };
+}
 
 // -------------------------
 // Font cache
@@ -70,7 +72,6 @@ struct HBFont::Impl {
         return glyphs[glyphIndex];
     }
 };
-
 
 HBFont::HBFont(FT_Face f, int size) : impl_(std::make_unique<Impl>(f, size)) {}
 

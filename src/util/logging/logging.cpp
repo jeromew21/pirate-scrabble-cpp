@@ -3,9 +3,11 @@
 #include <chrono>
 #include <memory>
 
-std::unique_ptr<Logger> instance_;
+namespace {
+    std::unique_ptr<Logger> instance_;
+}
 
-void Logger::Initialize(const char* output_file) {
+void Logger::Initialize(const char *output_file) {
     instance_ = std::make_unique<Logger>(output_file);
 }
 
@@ -13,11 +15,11 @@ Logger &Logger::instance() {
     return *instance_;
 }
 
-const std::vector<std::string> & Logger::entries() const {
+const std::vector<std::string> &Logger::entries() const {
     return entries_;
 }
 
-Logger::Logger(const char *output_file): output_file(output_file) {
+Logger::Logger(const char *output_file) : output_file(output_file) {
     file_.open(output_file, std::ios::out | std::ios::app);
 }
 

@@ -16,8 +16,10 @@
 #include "util/logging/logging.h"
 #include "serialization/types.h"
 
-static bool write_token(const std::string &token_path, const std::string &token) {
-    return write_file(token_path, token);
+namespace {
+    bool write_token(const std::string &token_path, const std::string &token) {
+        return write_file(token_path, token);
+    }
 }
 
 MainMenuContext::MainMenuContext() : login_context(std::make_unique<LoginContext>()),

@@ -26,88 +26,86 @@
 #include <emscripten.h>
 #endif
 
-static std::function<void()> main_loop_function;
+namespace {
+    std::function<void()> main_loop_function;
 
-extern "C" void loop_wrapper() {
-    main_loop_function();
-}
-
-using namespace frameflow;
-
-struct Performance {
-    double update_time = 0.0;
-    int update_count = 0;
-    double draw_time = 0.0;
-    int draw_count = 0;
-    double update_avg = 0;
-    double draw_avg = 0;
-    std::chrono::high_resolution_clock::time_point last_print;
-
-    Performance() : last_print(std::chrono::high_resolution_clock::now()) {
-    }
-};
-
-struct Profiler {
-    const char *name;
-    double &accumulator;
-    int &count;
-    std::chrono::high_resolution_clock::time_point start;
-
-    Profiler(const char *n, double &acc, int &c) : name(n),
-                                                   accumulator(acc),
-                                                   count(c),
-                                                   start(std::chrono::high_resolution_clock::now()) {
+    extern "C" void loop_wrapper() {
+        main_loop_function();
     }
 
-    ~Profiler() {
-        const auto end = std::chrono::high_resolution_clock::now();
-        const auto ms = std::chrono::duration<double, std::milli>(end - start).count();
-        accumulator += ms;
-        count++;
-    }
-};
+    struct Performance {
+        double update_time = 0.0;
+        int update_count = 0;
+        double draw_time = 0.0;
+        int draw_count = 0;
+        double update_avg = 0;
+        double draw_avg = 0;
+        std::chrono::high_resolution_clock::time_point last_print;
 
-void InitCrossPlatformWindow(const int logical_width, const int logical_height, const char *title) {
-    SetTraceLogLevel(LOG_NONE);
-    constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
-                                   | FLAG_MSAA_4X_HINT
-                                   | FLAG_VSYNC_HINT;
-    SetConfigFlags(flags);
-
-    // Initialize with logical dimensions - raylib handles DPI internally
-    InitWindow(logical_width, logical_height, title);
-    SetExitKey(KEY_NULL);
-#ifdef __EMSCRIPTEN__
-    // Get the actual canvas size set by JavaScript
-    // Somehow this isn't working quite properly, you have to manual resize before it works
-    int canvas_width = EM_ASM_INT({return Module.canvas.width;});
-    int canvas_height = EM_ASM_INT({return Module.canvas.height;});
-#endif
-    SetWindowSize(logical_width, logical_height);
-}
-
-float GetLogicalRatio() {
-    return static_cast<float>(GetScreenWidth()) / static_cast<float>(GetRenderWidth());
-}
-
-static PersistentData load_persistent_data(const std::string &persistent_data_path) {
-    if (std::string contents; read_file(persistent_data_path, contents)) {
-        try {
-            return deserialize_or_throw<PersistentData>(contents);
-        } catch (const std::exception &e) {
-            Logger::instance().info("Falling back to default persistent data: {}", e.what());
-            return PersistentData{};
+        Performance() : last_print(std::chrono::high_resolution_clock::now()) {
         }
+    };
+
+    struct Profiler {
+        const char *name;
+        double &accumulator;
+        int &count;
+        std::chrono::high_resolution_clock::time_point start;
+
+        Profiler(const char *n, double &acc, int &c) : name(n),
+                                                       accumulator(acc),
+                                                       count(c),
+                                                       start(std::chrono::high_resolution_clock::now()) {
+        }
+
+        ~Profiler() {
+            const auto end = std::chrono::high_resolution_clock::now();
+            const auto ms = std::chrono::duration<double, std::milli>(end - start).count();
+            accumulator += ms;
+            count++;
+        }
+    };
+
+    void InitCrossPlatformWindow(const int logical_width, const int logical_height, const char *title) {
+        SetTraceLogLevel(LOG_NONE);
+        constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
+                                       | FLAG_MSAA_4X_HINT
+                                       | FLAG_VSYNC_HINT;
+        SetConfigFlags(flags);
+
+        // Initialize with logical dimensions - raylib handles DPI internally
+        InitWindow(logical_width, logical_height, title);
+        SetExitKey(KEY_NULL);
+#ifdef __EMSCRIPTEN__
+        // Get the actual canvas size set by JavaScript
+        // Somehow this isn't working quite properly, you have to manual resize before it works
+        int canvas_width = EM_ASM_INT({return Module.canvas.width;});
+        int canvas_height = EM_ASM_INT({return Module.canvas.height;});
+#endif
+        SetWindowSize(logical_width, logical_height);
     }
-    Logger::instance().info("Falling back to default persistent data");
-    return PersistentData{};
-}
 
-static bool write_persistent_data_to_disk(const std::string &persistent_data_path, const PersistentData &data) {
-    return write_file(persistent_data_path, serialize(data));
-}
+    float GetLogicalRatio() {
+        return static_cast<float>(GetScreenWidth()) / static_cast<float>(GetRenderWidth());
+    }
 
-float Tile::dim = 81;
+    PersistentData load_persistent_data(const std::string &persistent_data_path) {
+        if (std::string contents; read_file(persistent_data_path, contents)) {
+            try {
+                return deserialize_or_throw<PersistentData>(contents);
+            } catch (const std::exception &e) {
+                Logger::instance().info("Falling back to default persistent data: {}", e.what());
+                return PersistentData{};
+            }
+        }
+        Logger::instance().info("Falling back to default persistent data");
+        return PersistentData{};
+    }
+
+    bool write_persistent_data_to_disk(const std::string &persistent_data_path, const PersistentData &data) {
+        return write_file(persistent_data_path, serialize(data));
+    }
+}
 
 int main() {
     // -------------------------
@@ -128,11 +126,11 @@ int main() {
 
     // -------------------------
     // Initialize raylib
+    // TODO: Consider drawing an initial image
     // -------------------------
     InitCrossPlatformWindow(persistent_data.window_width,
                             persistent_data.window_height,
                             "Pirate Scrabble");
-    // maybe draw an initial image?
 
     // -------------------------
     // Initialize FreeType
@@ -154,14 +152,17 @@ int main() {
     ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.c_str(),
                                                       32.0f * GetLogicalRatio());
 
+    // -------------------------
+    // Initialize fonts
+    // -------------------------
+    /*
     const auto arial = FS_ROOT / "assets" / "arial.ttf";
     const auto face = ft_load_font(ft, arial);
-
     HBFont font(face, 48); // pixel size 48
+    */
 
     // -------------------------
-    // Initialize context. We have to be careful that this doesn't initialize any sprites.
-    // We want to read previous window size here though. Maybe move out of menu context?
+    // Initialize context
     // -------------------------
     GameObject root{};
     MainMenuContext menu_context{};
@@ -198,7 +199,9 @@ int main() {
             //fix this!
         }
 
-        // Update
+        // -------------------------
+        // Cleanup
+        // -------------------------
         {
             Profiler p("UpdateRec", perf.update_time, perf.update_count);
             const float dt = GetFrameTime();
@@ -206,7 +209,9 @@ int main() {
             TweenManager::instance().Update(dt);
         }
 
-        // Draw
+        // -------------------------
+        // Drawing
+        // -------------------------
         BeginDrawing();
         {
             ClearBackground(DARKGRAY);
