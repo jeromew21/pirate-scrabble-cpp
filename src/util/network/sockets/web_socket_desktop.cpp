@@ -3,11 +3,11 @@
 #include <utility>
 
 #include "ixwebsocket/IXNetSystem.h"
+#include "fmt/core.h"
 
 
 WebSocketDesktop::WebSocketDesktop(std::string url_): url(std::move(url_)) {
 #if _WIN32
-    // TODO: Untested
     static bool is_initialized = false;
     if (!is_initialized) {
         ix::initNetSystem();

@@ -5,19 +5,52 @@ Goals:
 - Can run on 4 major platforms: Windows, Mac, Linux, Web
 - Fast startup and load times
 - Fast iteration
+- Fast compilation
 
 ## Building
+Non vendored dependencies:
 
-Non vendored dependencies: Drop frameflow and emsdk in `./external`
-
-### Desktop
 ```
-mkdir build
-cmake -S . -B build
-cmake --build build -j8
+cd external
+git clone https://github.com/jeromew21/frameflow
 ```
 
-### Web
+### Linux
+Should work out of the box, with the exception of a handful of development libraries that are 
+distro-specific.
+
+### Apple
+Should work out of the box.
+
+### Windows (MSVC)
+Set up vcpkg
+```
+cd external
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+.\bootstrap-vcpkg.bat
+vcpkg.exe install ixwebsocket[mbedtls] zlib
+```
+
+Then build with MSVC toolchain:
+```
+cmake -B build \
+    -DCMAKE_TOOLCHAIN_FILE=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+```
+This script is collected and most up-to-date in `build_win.sh`.
+
+### Web (Emscripten)
+Set up emscripten:
+```
+cd external
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+./emsdk install latest
+./emsdk activate latest
+source ./emsdk_env.sh
+```
+
+Then build with emscripten toolchain
 ```
 mkdir -p build-web
 cd build-web
@@ -27,3 +60,5 @@ emmake make
 cd ..
 python3 server.py
 ```
+
+This script is collected and most up-to-date in `build_web.sh`.

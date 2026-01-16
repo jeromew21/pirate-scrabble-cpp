@@ -1,10 +1,13 @@
 .idea
 cmake-build-debug
+cmake-build-debug-visual-studio
 cmake-build-release
+cmake-build-release-visual-studio
 build
 *.json
 *.log
 *.ini
 external/frameflow
 external/emsdk
+external/vcpkg
 build-web

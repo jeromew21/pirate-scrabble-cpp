@@ -4,7 +4,7 @@
 
 FT_Face ft_load_font(const FT_Library &ft, const fs::path &path) {
     FT_Face face;
-    if (FT_New_Face(ft, path.c_str(), 0, &face)) {
+    if (FT_New_Face(ft, path.string().c_str(), 0, &face)) {
         Logger::instance().error("Failed to load font");
         exit(1);
     }

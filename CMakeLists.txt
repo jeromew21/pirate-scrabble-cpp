@@ -14,7 +14,7 @@ if (EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -sUSE_PTHREADS=1")
-else ()
+elseif (UNIX)
     # Enable AddressSanitizer for debug builds
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         message(STATUS "AddressSanitizer enabled")
@@ -37,7 +37,7 @@ if (NOT EMSCRIPTEN)
     add_subdirectory(external/IXWebSocket)
 endif ()
 
-set(SOURCES
+set(TARGET_SOURCES
         src/scrabble/main.cpp
         external/imgui/imgui.h
         external/imgui/imgui.cpp
@@ -93,12 +93,12 @@ set(SOURCES
 )
 
 if (EMSCRIPTEN)
-    list(APPEND SOURCES src/util/network/sockets/web_socket_web.cpp)
+    list(APPEND TARGET_SOURCES src/util/network/sockets/web_socket_web.cpp)
 else ()
-    list(APPEND SOURCES src/util/network/sockets/web_socket_desktop.cpp)
+    list(APPEND TARGET_SOURCES src/util/network/sockets/web_socket_desktop.cpp)
 endif ()
 
-add_executable(${TARGET_NAME} ${SOURCES})
+add_executable(${TARGET_NAME} ${TARGET_SOURCES})
 
 target_include_directories(${TARGET_NAME}
         PRIVATE
@@ -119,6 +119,10 @@ target_link_libraries(${TARGET_NAME}
         concurrentqueue
         fmt::fmt
 )
+
+if (WIN32)
+    target_link_libraries(pirate-scrabble PRIVATE Bcrypt)
+endif()
 
 if (NOT EMSCRIPTEN)
     target_link_libraries(${TARGET_NAME}

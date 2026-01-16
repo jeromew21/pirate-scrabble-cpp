@@ -122,7 +122,7 @@ namespace {
         free(val);  // must free the WASM heap allocation
         const bool result = true;
 #else
-        const bool result = read_file(path, out_token);
+        const bool result = read_file(path.string(), out_token);
 #endif
         std::erase_if(out_token, isspace); // this is necessary for some reason
         return result;
@@ -183,7 +183,7 @@ int main() {
     const ImGuiIO &io = ImGui::GetIO();
     io.Fonts->SetFontLoader(ImGuiFreeType::GetFontLoader());
     const auto ibm_plex_mono = FS_ROOT / "assets" / "IBM_Plex_Mono" / "IBMPlexMono-Light.ttf";
-    ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.c_str(),
+    ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.string().c_str(),
                                                       32.0f * GetLogicalRatio());
 
     // -------------------------
@@ -227,7 +227,7 @@ int main() {
         // todo: shutdown harfbuzz/freetype
         // todo: recursively delete root
         if (menu_context->user_opt) {
-            if (!write_token(token_path, menu_context->user_opt->token)) {
+            if (!write_token(token_path.string(), menu_context->user_opt->token)) {
                 Logger::instance().info("Failed to write token to disk");
             }
         }
