@@ -71,3 +71,12 @@ bool scrabble::can_steal_word(const std::string &new_word, const Word &stolen_wo
 
     return true;
 }
+
+std::optional<int> scrabble::get_tile_by_id(const std::string &id, const GameState &game) {
+    int i = 0;
+    for (TileProps t : game.tiles ) {
+        if (id == t.id) return i;
+        i++;
+    }
+    return std::nullopt;
+}

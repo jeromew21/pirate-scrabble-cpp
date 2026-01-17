@@ -25,6 +25,8 @@ namespace scrabble {
 
         MultiplayerContext *multiplayer_context;
 
+        bool* show_debug_window;
+
         float loading_counter{0};
 
         float loading_time{2.0f};

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 
 namespace scrabble {
     struct Word;
@@ -19,4 +20,6 @@ namespace scrabble {
     };
 
     bool can_steal_word(const std::string &new_word, const Word& stolen_word, const GameState &game);
+
+    std::optional<int> get_tile_by_id(const std::string &id, const GameState &game);
 }

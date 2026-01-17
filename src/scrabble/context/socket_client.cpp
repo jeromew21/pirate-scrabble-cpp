@@ -79,6 +79,7 @@ namespace scrabble {
         auto *ws = new WebSocket(url);
 
         ws->on_open = [ws, token]() {
+            Logger::instance().info("Multiplayer game socket connected");
             ws->send(token);
         };
         ws->on_message = [recvLoginQueue](const std::string &msg) {

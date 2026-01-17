@@ -257,6 +257,7 @@ int main() {
     auto *menu_context = new MainMenuContext{[&request_exit] { request_exit = true; }};
     menu_context->big_font = big_font;
     menu_context->monospace_font = imgui_monospace_font;
+    menu_context->show_debug_window = &persistent_data.show_debug_window;
     root->AddChild(menu_context);
 
 
@@ -370,7 +371,6 @@ int main() {
                 perf.draw_count = 0;
                 perf.last_print = now;
             }
-            persistent_data.show_debug_window = true;
             if (persistent_data.show_debug_window) {
                 ImGui::PushFont(imgui_font);
                 ImGui::Begin("Debug", &persistent_data.show_debug_window);

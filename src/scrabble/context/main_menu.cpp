@@ -108,6 +108,8 @@ void MainMenuContext::RenderMainMenu() {
         ImGui::Text("Copyright 2026");
     }
 
+    ImGui::Checkbox("Show debug window", show_debug_window);
+
     ImGui::End();
 }
 

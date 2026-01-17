@@ -79,6 +79,8 @@ namespace scrabble {
 
         void EnterPlaying();
 
+        void ExitMultiplayer();
+
         void PollGameEvents() const;
 
         void SendWord(const std::string &word) const;

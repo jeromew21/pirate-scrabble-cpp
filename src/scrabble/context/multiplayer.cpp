@@ -111,6 +111,16 @@ namespace {
         return serialize(action);
     }
 
+    std::string end_action(const int player_id) {
+        const auto action = MultiplayerAction{
+            .playerId = player_id,
+            .actionType = "END",
+            .action = std::nullopt,
+            .data = ""
+        };
+        return serialize(action);
+    }
+
     std::string flip_action(const int player_id, const int user_index, const std::string &tile_id) {
         const auto action = MultiplayerAction{
             .playerId = player_id,
@@ -248,6 +258,7 @@ MultiplayerContext::~MultiplayerContext() {
     if (game_socket) {
         game_socket->close();
         delete game_socket;
+        game_socket = nullptr;
     }
 }
 
@@ -302,14 +313,17 @@ void MultiplayerContext::Update(const float delta_time) {
             }
             if (response.game->phase == "CREATED") {
                 state = State::Lobby;
-            } else {
+            } else if (response.game->phase == "ONGOING") {
+                state = State::Playing;
+            } else if (response.game->phase == "FINISHED") {
                 state = State::Playing;
             }
+            auto old_game = *game_opt;
+            game_opt = response.game;
             if (response.game->lastAction != last_action_) {
-                Logger::instance().info("Recieved a new action");
+                Logger::instance().info("Received a new action");
                 last_action_ = response.game->lastAction;
-                HandleAction(*game_opt, *response.game);
-                game_opt = response.game;
+                HandleAction(old_game, *response.game);
             }
         } else {
             Logger::instance().error("{}", response.errorMessage);
@@ -332,6 +346,7 @@ void MultiplayerContext::Draw() {
     }
     if (should_redraw_layout) {
         RedrawLayout();
+        RedrawGame();
         should_redraw_layout = false;
     }
     canvas->Show();
@@ -342,10 +357,17 @@ void MultiplayerContext::Draw() {
     } else {
         RenderPlaying();
     }
+    if (ImGui::Button("Back")) {
+        ExitMultiplayer();
+        main_menu->EnterMainMenu();
+    }
     ImGui::End();
     DrawTiles();
 }
 
+/**
+ * Should only be called when screen size changes for responsive layout redraw.
+ */
 void MultiplayerContext::RedrawLayout() {
     using namespace frameflow;
 
@@ -368,6 +390,7 @@ void MultiplayerContext::RedrawLayout() {
     }
 }
 
+// this should intake a thing
 void MultiplayerContext::RedrawGame() const {
     if (state == State::Gateway || state == State::PreInit) return;
     if (!game_opt.has_value()) return;
@@ -436,11 +459,12 @@ void MultiplayerContext::RenderGateway() {
         t.detach();
     }
     static std::string foo;
-    ImGui::InputText("", &foo);
+    ImGui::InputText("Game ID or URL", &foo);
     if (ImGui::Button("Join Game")) {
         // do new game socket thread
     }
     if (ImGui::Button("Back")) {
+        ExitMultiplayer();
         main_menu->EnterMainMenu();
     }
     ImGui::End();
@@ -548,10 +572,8 @@ void MultiplayerContext::RenderPlaying() const {
         }
         return 1;
     };
-    ImGuiStyle& style = ImGui::GetStyle();
-
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 12)); // vertical + horizontal
-    ImGui::PushFont(main_menu->big_font); // optional if you have one
+    ImGui::PushFont(main_menu->big_font);
 
     ImGui::SetNextItemWidth(600.0f);
 
@@ -564,6 +586,11 @@ void MultiplayerContext::RenderPlaying() const {
 
     ImGui::PopFont();
     ImGui::PopStyleVar();
+    if (game_opt->phase == "ONGOING") {
+        if (ImGui::Button("End Game")) {
+            game_socket->send(end_action(main_menu->user_opt->id));
+        }
+    }
     ImGui::Text("%s", game_opt->phase.c_str());
     InspectStruct("game", *game_opt);
 }
@@ -598,6 +625,17 @@ void MultiplayerContext::EnterPlaying() {
     state = State::Playing;
 }
 
+void MultiplayerContext::ExitMultiplayer() {
+    if (game_socket != nullptr) {
+        game_socket->close();
+        delete game_socket;
+        game_socket = nullptr;
+    }
+    game_opt = std::nullopt;
+    state = State::PreInit;
+    last_action_ = std::nullopt;
+}
+
 void MultiplayerContext::PollGameEvents() const {
     const bool want_mouse = ImGui::GetIO().WantCaptureMouse;
     const bool left_mouse_down = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -616,8 +654,18 @@ void MultiplayerContext::PollGameEvents() const {
             FlipTile(tile_props.id);
         }
     }
-    if (IsKeyPressed(KEY_SPACE)) {
-        want_word_input_focus_ = true;
+    if (!ImGui::GetIO().WantCaptureKeyboard) {
+        if (IsKeyPressed(KEY_SPACE)) {
+            want_word_input_focus_ = true;
+        }
+        if (IsKeyPressed(KEY_F)) {
+            for (const auto &props: game_opt->state.tiles) {
+                if (!props.faceUp) {
+                    FlipTile(props.id);
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -669,10 +717,9 @@ void MultiplayerContext::HandleFlipAction(const MultiplayerGame &old_state, cons
     for (int i = 0; i < old_state.state.tiles.size(); i++) {
         if (action.flippedTileId == old_state.state.tiles[i].id) {
             const auto tween = TweenManager::instance().CreateTween(
-                &public_tile_draw_data[i].rotation, 720, 1, Easing::EaseInOutSine
+                &public_tile_draw_data[i].rotation, 360, 0.25f, Easing::EaseInOutSine
             );
-            tween->SetOnComplete([this, new_state] {
-                game_opt = new_state;
+            tween->SetOnComplete([this] {
                 this->RedrawGame();
             });
             break;
@@ -683,6 +730,27 @@ void MultiplayerContext::HandleFlipAction(const MultiplayerGame &old_state, cons
 void MultiplayerContext::HandleClaimAction(const MultiplayerGame &old_state, const MultiplayerGame &new_state,
                                            const GameStateUpdate &action) {
     Logger::instance().info("Received claim action");
-    game_opt = new_state;
-    RedrawGame();
+
+    int i = 0;
+    for (auto &t: old_state.state.tiles) {
+        if (get_tile_by_id(t.id, new_state.state) == std::nullopt) {
+            TweenManager::instance().CreateTween(
+                &public_tile_draw_data[i].position.x, 0, 4, Easing::EaseInOutSine
+            );
+            TweenManager::instance().CreateTween(
+                &public_tile_draw_data[i].position.y, 0, 4, Easing::EaseInOutSine
+            );
+        }
+        i++;
+    }
+
+    static float foo = 0;
+    TweenManager::instance().CreateTween(
+        &foo, 0, 4
+    )->SetOnComplete([this] {
+        this->RedrawGame();
+    });
+
+    // Peek a new layout (removing the old word from the flow and adding the new one
+    // Animate tiles flowing to new layout
 }
