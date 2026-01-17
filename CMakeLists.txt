@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(${TARGET_NAME}-executable LANGUAGES CXX)
+project(pirate-scrabble-cpp LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,7 +32,7 @@ add_subdirectory(external/concurrentqueue)
 add_subdirectory(external/fmt)
 add_subdirectory(external/frameflow)
 
-if (NOT EMSCRIPTEN)
+if (NOT EMSCRIPTEN AND NOT WIN32)
     set(USE_TLS 1 CACHE INTERNAL "Force TLS")
     add_subdirectory(external/IXWebSocket)
 endif ()

@@ -4,6 +4,9 @@
 
 #include "ixwebsocket/IXWebSocket.h"
 
+/**
+ * Desktop implementation for sockets, on top of IXWebSocket.
+ */
 struct WebSocketDesktop : WebSocketImpl {
     ix::WebSocket ws;
     std::string url;

@@ -13,6 +13,8 @@
 #include "types.h"
 #include "util/logging/logging.h"
 
+using namespace scrabble;
+
 void LoginContext::Update(float delta_time) {
     std::string msg;
     while (recv_login_queue.try_dequeue(msg)) {
@@ -47,7 +49,7 @@ void LoginContext::Draw() {
     }
 }
 
-void LoginContext::AttemptTokenAuth(const std::string& token) {
-    std::thread t(TokenAuthSocket, std::ref(recv_login_queue),  token);
+void LoginContext::AttemptTokenAuth(const std::string &token) {
+    std::thread t(TokenAuthSocket, std::ref(recv_login_queue), token);
     t.detach();
 }

@@ -1,0 +1,49 @@
+\doxysection{texthb.\+h}
+\hypertarget{texthb_8h_source}{}\label{texthb_8h_source}\index{src/text/texthb.h@{src/text/texthb.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}raylib.h"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}freetype\_library.h"{}}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ TextMetrics\ struct}}
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00013\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structTextMetrics}{TextMetrics}}\ \{}
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{keywordtype}{float}\ width;}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{keywordtype}{float}\ height;}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keywordtype}{float}\ ascent;}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keywordtype}{float}\ descent;}
+\DoxyCodeLine{00018\ \};}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{class\ }HBFont\ \{}
+\DoxyCodeLine{00021\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00022\ \ \ \ \ HBFont(FT\_Face\ f,\ \textcolor{keywordtype}{int}\ size);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ defined\ in\ .cpp}}
+\DoxyCodeLine{00023\ \ \ \ \ \string~HBFont();\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ must\ be\ defined\ where\ Impl\ is\ complete}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ HBFont(HBFont\&\&)\ \textcolor{keyword}{noexcept};\ \ \ \ \textcolor{comment}{//\ movable}}
+\DoxyCodeLine{00026\ \ \ \ \ HBFont\&\ operator=(HBFont\&\&)\ \textcolor{keyword}{noexcept};}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \ \ \ \ HBFont(\textcolor{keyword}{const}\ HBFont\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00029\ \ \ \ \ HBFont\&\ operator=(\textcolor{keyword}{const}\ HBFont\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structHBFont_1_1Impl}{Impl}};\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ forward\ declaration\ only}}
+\DoxyCodeLine{00032\ \ \ \ \ std::unique\_ptr<Impl>\ impl\_;}
+\DoxyCodeLine{00033\ \};}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00036\ \textcolor{comment}{//\ DrawTextHB\ function}}
+\DoxyCodeLine{00037\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00038\ \textcolor{keywordtype}{void}\ DrawTextHB(\mbox{\hyperlink{classHBFont}{HBFont}}\ \&font,\ \textcolor{keyword}{const}\ std::string\ \&text,\ \textcolor{keywordtype}{float}\ x,\ \textcolor{keywordtype}{float}\ y,\ Color\ tint);}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00041\ \textcolor{comment}{//\ Measure\ text\ with\ cached\ HBFont}}
+\DoxyCodeLine{00042\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00043\ \mbox{\hyperlink{structTextMetrics}{TextMetrics}}\ MeasureTextHB(\mbox{\hyperlink{classHBFont}{HBFont}}\ \&font,\ \textcolor{keyword}{const}\ std::string\ \&text);}
+
+\end{DoxyCode}

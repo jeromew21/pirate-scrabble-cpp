@@ -1,0 +1,32 @@
+\doxysection{socket\+\_\+client.\+h}
+\hypertarget{socket__client_8h_source}{}\label{socket__client_8h_source}\index{src/scrabble/context/socket\_client.h@{src/scrabble/context/socket\_client.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}util/queue.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}util/network/sockets/web\_socket.h"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#ifdef\ \_\_EMSCRIPTEN\_\_}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}util/network/sockets/web\_socket\_web.h"{}}}
+\DoxyCodeLine{00010\ \textcolor{keyword}{using\ }WebSocket\ =\ \mbox{\hyperlink{structWebSocketWeb}{WebSocketWeb}};}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}util/network/sockets/web\_socket\_desktop.h"{}}}
+\DoxyCodeLine{00013\ \textcolor{keyword}{using\ }WebSocket\ =\ \mbox{\hyperlink{structWebSocketDesktop}{WebSocketDesktop}};}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{namespace\ }scrabble\ \{}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keywordtype}{void}\ UserLoginSocket(Queue\ \&recvLoginQueue,\ \textcolor{keyword}{const}\ std::string\ \&username,\ \textcolor{keyword}{const}\ std::string\ \&password);}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keywordtype}{void}\ TokenAuthSocket(Queue\ \&recvLoginQueue,\ \textcolor{keyword}{const}\ std::string\ \&token);}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keywordtype}{void}\ NewGameSocket(Queue\ \&recvLoginQueue,\ \textcolor{keyword}{const}\ std::string\ \&token);}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{comment}{//void\ JoinGameSocket(Queue\ \&recvLoginQueue,\ std::string\ token);}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ WebSocketImpl*\ create\_multiplayer\_game\_socket(Queue\ *recvLoginQueue,\ \textcolor{keyword}{const}\ std::string\&\ token,\ \textcolor{keyword}{const}\ std::string\ \&game\_id);}
+\DoxyCodeLine{00026\ \}}
+
+\end{DoxyCode}

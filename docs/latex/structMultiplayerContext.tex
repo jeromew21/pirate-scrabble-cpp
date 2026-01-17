@@ -1,0 +1,143 @@
+\doxysection{Multiplayer\+Context Struct Reference}
+\hypertarget{structMultiplayerContext}{}\label{structMultiplayerContext}\index{MultiplayerContext@{MultiplayerContext}}
+Inheritance diagram for Multiplayer\+Context\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{structMultiplayerContext}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structMultiplayerContext_1_1Layout}{Layout}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structMultiplayerContext_a573f0d1bc22d65f275595b66ff535456}\label{structMultiplayerContext_a573f0d1bc22d65f275595b66ff535456} 
+enum class {\bfseries State} \{ {\bfseries Pre\+Init}
+, {\bfseries Gateway}
+, {\bfseries Lobby}
+, {\bfseries Playing}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{structMultiplayerContext_a5011ff3e631c668ad9c2bd36427ab155}{Update}} (float delta\+\_\+time) override
+\item 
+void \mbox{\hyperlink{structMultiplayerContext_a3a04a1786f3f851f1a051398a8e14291}{Draw}} () override
+\item 
+\Hypertarget{structMultiplayerContext_a54ad146f8e316b43c1fbc1d20c6c383d}\label{structMultiplayerContext_a54ad146f8e316b43c1fbc1d20c6c383d} 
+void {\bfseries Redraw\+Layout} ()
+\item 
+\Hypertarget{structMultiplayerContext_a57e2f9326a5b161250a7a3b3d08a946e}\label{structMultiplayerContext_a57e2f9326a5b161250a7a3b3d08a946e} 
+void {\bfseries Redraw\+Game} ()
+\item 
+\Hypertarget{structMultiplayerContext_a09df78571f0eb2b42017ec047072f39b}\label{structMultiplayerContext_a09df78571f0eb2b42017ec047072f39b} 
+void {\bfseries Render\+Gateway} ()
+\item 
+\Hypertarget{structMultiplayerContext_acfb603f6e2d84d03af2762e1d5147800}\label{structMultiplayerContext_acfb603f6e2d84d03af2762e1d5147800} 
+void {\bfseries Render\+Chat} () const
+\item 
+\Hypertarget{structMultiplayerContext_aec4f7e88f61b4aa7c7b718215753bb3c}\label{structMultiplayerContext_aec4f7e88f61b4aa7c7b718215753bb3c} 
+void {\bfseries Render\+Lobby} () const
+\item 
+\Hypertarget{structMultiplayerContext_a53e975b7a0b7e4e598cac9953a78936b}\label{structMultiplayerContext_a53e975b7a0b7e4e598cac9953a78936b} 
+void {\bfseries Render\+Playing} () const
+\item 
+\Hypertarget{structMultiplayerContext_aba1589c8347745c5cbf796a08c7820c8}\label{structMultiplayerContext_aba1589c8347745c5cbf796a08c7820c8} 
+void {\bfseries Enter\+Gateway} ()
+\item 
+\Hypertarget{structMultiplayerContext_a65aba5c9354d3ab656772d68dc7bab87}\label{structMultiplayerContext_a65aba5c9354d3ab656772d68dc7bab87} 
+void {\bfseries Enter\+Lobby} (const std\+::string \&game\+\_\+id)
+\item 
+\Hypertarget{structMultiplayerContext_ae5f0eec460234bd877cc85432b02caa0}\label{structMultiplayerContext_ae5f0eec460234bd877cc85432b02caa0} 
+void {\bfseries Enter\+Playing} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+void {\bfseries Update\+Rec} (float delta\+\_\+time)
+\item 
+void \mbox{\hyperlink{classGameObject_a081619ba157c8ba8eda438e185ec4ff3}{Draw\+Rec}} ()
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries Add\+Child} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+void {\bfseries Show} ()
+\item 
+void {\bfseries Hide} ()
+\item 
+bool {\bfseries Is\+Visible} () const
+\item 
+void {\bfseries Delete} ()
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries Get\+Children} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structMultiplayerContext_a33647d905b6749e918b290936e9c8bcb}\label{structMultiplayerContext_a33647d905b6749e918b290936e9c8bcb} 
+\mbox{\hyperlink{structMainMenuContext}{Main\+Menu\+Context}} \texorpdfstring{$\ast$}{*} {\bfseries main\+\_\+menu} \{nullptr\}
+\item 
+\Hypertarget{structMultiplayerContext_ac8a299a58e2d4e72e0bf5168b495e5fd}\label{structMultiplayerContext_ac8a299a58e2d4e72e0bf5168b495e5fd} 
+Queue {\bfseries recv\+\_\+create\+\_\+queue}
+\item 
+\Hypertarget{structMultiplayerContext_a5a4ae5237d20481c09a1264fef337f7a}\label{structMultiplayerContext_a5a4ae5237d20481c09a1264fef337f7a} 
+Queue {\bfseries recv\+\_\+game\+\_\+queue}
+\item 
+\Hypertarget{structMultiplayerContext_a2d1dab7a26a241fa1f7f414e93a52f14}\label{structMultiplayerContext_a2d1dab7a26a241fa1f7f414e93a52f14} 
+float {\bfseries time\+\_\+since\+\_\+last\+\_\+poll} \{0\}
+\item 
+\Hypertarget{structMultiplayerContext_a12e1b421641805c9e93d2359905dc49d}\label{structMultiplayerContext_a12e1b421641805c9e93d2359905dc49d} 
+bool {\bfseries should\+\_\+redraw\+\_\+layout} \{false\}
+\item 
+\Hypertarget{structMultiplayerContext_af137adcda9ae60487eda4023964fddac}\label{structMultiplayerContext_af137adcda9ae60487eda4023964fddac} 
+\mbox{\hyperlink{classLayoutSystem}{Layout\+System}} \texorpdfstring{$\ast$}{*} {\bfseries canvas}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+virtual void {\bfseries Add\+Child\+Hook} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+virtual void {\bfseries Delete\+Hook} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries parent} \{nullptr\}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries children}
+\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{structMultiplayerContext_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{structMultiplayerContext_a3a04a1786f3f851f1a051398a8e14291}\index{MultiplayerContext@{MultiplayerContext}!Draw@{Draw}}
+\index{Draw@{Draw}!MultiplayerContext@{MultiplayerContext}}
+\doxysubsubsection{\texorpdfstring{Draw()}{Draw()}}
+{\footnotesize\ttfamily \label{structMultiplayerContext_a3a04a1786f3f851f1a051398a8e14291} 
+void Multiplayer\+Context\+::\+Draw (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+The single object draw function. Usually this is too slow and you have to implement batching. 
+
+Reimplemented from \mbox{\hyperlink{classGameObject_ad3ac1deac50048cf7a1a19eb0e61ad26}{Game\+Object}}.
+
+\Hypertarget{structMultiplayerContext_a5011ff3e631c668ad9c2bd36427ab155}\index{MultiplayerContext@{MultiplayerContext}!Update@{Update}}
+\index{Update@{Update}!MultiplayerContext@{MultiplayerContext}}
+\doxysubsubsection{\texorpdfstring{Update()}{Update()}}
+{\footnotesize\ttfamily \label{structMultiplayerContext_a5011ff3e631c668ad9c2bd36427ab155} 
+void Multiplayer\+Context\+::\+Update (\begin{DoxyParamCaption}\item[{float}]{delta\+\_\+time}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classGameObject}{Game\+Object}}.
+
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/scrabble/context/multiplayer.\+h\item 
+src/scrabble/context/multiplayer.\+cpp\end{DoxyCompactItemize}

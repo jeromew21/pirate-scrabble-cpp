@@ -1,0 +1,87 @@
+\doxysection{Web\+Socket\+Web Struct Reference}
+\hypertarget{structWebSocketWeb}{}\label{structWebSocketWeb}\index{WebSocketWeb@{WebSocketWeb}}
+Inheritance diagram for Web\+Socket\+Web\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{structWebSocketWeb}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structWebSocketWeb_a4dfc82fdec76d91de6d3d9e2b12d9f3d}\label{structWebSocketWeb_a4dfc82fdec76d91de6d3d9e2b12d9f3d} 
+{\bfseries Web\+Socket\+Web} (const std\+::string \&url\+\_\+)
+\item 
+void \mbox{\hyperlink{structWebSocketWeb_adce13ac6bc3a366726a69ccc35d32d51}{connect}} () override
+\item 
+void \mbox{\hyperlink{structWebSocketWeb_ae3f19c643f1cbedb2a8f674a87824e37}{send}} (const std\+::string \&message) override
+\item 
+void \mbox{\hyperlink{structWebSocketWeb_a024a2b4367fa875a452d409dc48d1931}{close}} () override
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structWebSocketWeb_a67708d74c6a8bceff6245cf18e0cacc3}\label{structWebSocketWeb_a67708d74c6a8bceff6245cf18e0cacc3} 
+EMSCRIPTEN\+\_\+\+WEBSOCKET\+\_\+T {\bfseries ws} \{\}
+\item 
+\Hypertarget{structWebSocketWeb_a79c77e9522dec3422d69c20111a42c3e}\label{structWebSocketWeb_a79c77e9522dec3422d69c20111a42c3e} 
+std\+::string {\bfseries url}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes inherited from \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::function$<$ void()$>$ {\bfseries on\+\_\+open}
+\item 
+std\+::function$<$ void(const std\+::string \&)$>$ {\bfseries on\+\_\+message}
+\item 
+std\+::function$<$ void()$>$ {\bfseries on\+\_\+close}
+\item 
+std\+::function$<$ void(const std\+::string \&)$>$ {\bfseries on\+\_\+error}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Public Types inherited from \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}}
+\begin{DoxyCompactItemize}
+\item 
+using {\bfseries Ptr} = std\+::shared\+\_\+ptr$<$\mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}$>$
+\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{structWebSocketWeb_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{structWebSocketWeb_a024a2b4367fa875a452d409dc48d1931}\index{WebSocketWeb@{WebSocketWeb}!close@{close}}
+\index{close@{close}!WebSocketWeb@{WebSocketWeb}}
+\doxysubsubsection{\texorpdfstring{close()}{close()}}
+{\footnotesize\ttfamily \label{structWebSocketWeb_a024a2b4367fa875a452d409dc48d1931} 
+void Web\+Socket\+Web\+::close (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}.
+
+\Hypertarget{structWebSocketWeb_adce13ac6bc3a366726a69ccc35d32d51}\index{WebSocketWeb@{WebSocketWeb}!connect@{connect}}
+\index{connect@{connect}!WebSocketWeb@{WebSocketWeb}}
+\doxysubsubsection{\texorpdfstring{connect()}{connect()}}
+{\footnotesize\ttfamily \label{structWebSocketWeb_adce13ac6bc3a366726a69ccc35d32d51} 
+void Web\+Socket\+Web\+::connect (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}.
+
+\Hypertarget{structWebSocketWeb_ae3f19c643f1cbedb2a8f674a87824e37}\index{WebSocketWeb@{WebSocketWeb}!send@{send}}
+\index{send@{send}!WebSocketWeb@{WebSocketWeb}}
+\doxysubsubsection{\texorpdfstring{send()}{send()}}
+{\footnotesize\ttfamily \label{structWebSocketWeb_ae3f19c643f1cbedb2a8f674a87824e37} 
+void Web\+Socket\+Web\+::send (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{message}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}.
+
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/util/network/sockets/web\+\_\+socket\+\_\+web.\+h\item 
+src/util/network/sockets/web\+\_\+socket\+\_\+web.\+cpp\end{DoxyCompactItemize}

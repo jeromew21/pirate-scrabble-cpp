@@ -1,0 +1,29 @@
+\doxysection{layout\+\_\+system.\+h}
+\hypertarget{layout__system_8h_source}{}\label{layout__system_8h_source}\index{src/game\_object/ui/layout\_system.h@{src/game\_object/ui/layout\_system.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}frameflow/layout.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}game\_object/game\_object.h"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{class\ }LayoutSystem\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classGameObject}{GameObject}}\ \{}
+\DoxyCodeLine{00010\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00011\ \ \ \ \ std::unique\_ptr<frameflow::System>\ system;}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \ \ \ \ frameflow::NodeId\ root\_node\_id\{frameflow::NullNode\};}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{keywordtype}{bool}\ fill\_screen\{\textcolor{keyword}{true}\};}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \ \ \ \ LayoutSystem();}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLayoutSystem_adad177df41feefb14eb83ada144b203c}{Update}}(\textcolor{keywordtype}{float}\ delta\_time)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00022\ \ \ \ \ \textcolor{keywordtype}{void}\ AddChildHook(\mbox{\hyperlink{classGameObject}{GameObject}}\ *child)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00023\ \};}
+
+\end{DoxyCode}

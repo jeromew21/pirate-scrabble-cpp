@@ -1,0 +1,60 @@
+\doxysection{serialization.\+h}
+\hypertarget{serialization_8h_source}{}\label{serialization_8h_source}\index{src/util/serialization/serialization.h@{src/util/serialization/serialization.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}json.hpp"{}}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{comment}{//\ Add\ this\ template\ specialization\ for\ std::optional\ support}}
+\DoxyCodeLine{00006\ \textcolor{keyword}{namespace\ }nlohmann\ \{}
+\DoxyCodeLine{00007\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keyword}{struct\ }adl\_serializer<std::optional<T>\ >\ \{}
+\DoxyCodeLine{00009\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ to\_json(json\ \&j,\ \textcolor{keyword}{const}\ std::optional<T>\ \&opt)\ \{}
+\DoxyCodeLine{00010\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (opt)\ \{}
+\DoxyCodeLine{00011\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ j\ =\ *opt;}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ j\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ from\_json(\textcolor{keyword}{const}\ json\ \&j,\ std::optional<T>\ \&opt)\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (j.is\_null())\ \{}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ opt\ =\ std::nullopt;}
+\DoxyCodeLine{00020\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ opt\ =\ j.get<T>();}
+\DoxyCodeLine{00022\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00024\ \ \ \ \ \};}
+\DoxyCodeLine{00025\ \}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{comment}{//\ Serialization\ /\ Deserialization\ helpers}}
+\DoxyCodeLine{00028\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00029\ std::string\ serialize(\textcolor{keyword}{const}\ T\ \&obj)\ \{}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{using\ namespace\ }nlohmann;}
+\DoxyCodeLine{00031\ \ \ \ \ json\ j\ =\ obj;}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordflow}{return}\ j.dump();}
+\DoxyCodeLine{00033\ \}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00036\ T\ deserialize(\textcolor{keyword}{const}\ std::string\ \&jsonString)\ \{}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{using\ namespace\ }nlohmann;}
+\DoxyCodeLine{00038\ \ \ \ \ json\ j\ =\ json::parse(jsonString);}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keywordflow}{return}\ j.get<T>();}
+\DoxyCodeLine{00040\ \}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{comment}{//\ Templated\ function\ that\ throws\ on\ error}}
+\DoxyCodeLine{00043\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00044\ T\ deserialize\_or\_throw(\textcolor{keyword}{const}\ std::string\ \&str)\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{using\ namespace\ }nlohmann;}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ json\ j\ =\ json::parse(str);}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ j.get<T>();}
+\DoxyCodeLine{00049\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (\textcolor{keyword}{const}\ json::parse\_error\ \&e)\ \{}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(std::string(\textcolor{stringliteral}{"{}JSON\ parse\ error:\ "{}})\ +\ e.what());}
+\DoxyCodeLine{00051\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (\textcolor{keyword}{const}\ json::type\_error\ \&e)\ \{}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(std::string(\textcolor{stringliteral}{"{}JSON\ type\ error:\ "{}})\ +\ e.what());}
+\DoxyCodeLine{00053\ \ \ \ \ \}}
+\DoxyCodeLine{00054\ \}}
+
+\end{DoxyCode}

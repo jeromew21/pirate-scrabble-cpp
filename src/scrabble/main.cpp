@@ -27,6 +27,8 @@
 #include <emscripten.h>
 #endif
 
+using namespace scrabble;
+
 namespace {
     std::function<void()> main_loop_function;
 

@@ -1,0 +1,48 @@
+\doxysection{main\+\_\+menu.\+h}
+\hypertarget{main__menu_8h_source}{}\label{main__menu_8h_source}\index{src/scrabble/context/main\_menu.h@{src/scrabble/context/main\_menu.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}types.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}game\_object/game\_object.h"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{namespace\ }scrabble\ \{}
+\DoxyCodeLine{00007\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structscrabble_1_1LoginContext}{LoginContext}};}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structscrabble_1_1MultiplayerContext}{MultiplayerContext}};}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{keyword}{struct\ }MainMenuContext\ :\ \mbox{\hyperlink{classGameObject}{GameObject}}\ \{}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum\ class}\ State\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \ \ \ \ InitialLoading,}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \ \ \ \ Menu,}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \ \ \ \ Multiplayer,}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \ \ \ \ \ \ \ \ State\ state\{State::InitialLoading\};}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \ \ \ \ std::optional<User>\ user\_opt\{std::nullopt\};}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structscrabble_1_1LoginContext}{LoginContext}}\ *login\_context;}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structscrabble_1_1MultiplayerContext}{MultiplayerContext}}\ *multiplayer\_context;}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ loading\_counter\{0\};}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ loading\_time\{2.0f\};}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ std::optional<std::function<void()>>\ request\_exit\_hook;}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ MainMenuContext(std::function<\textcolor{keywordtype}{void}()>\ request\_exit);}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{structscrabble_1_1MainMenuContext_aabf0ba737aa698796100d53bde42076c}{Draw}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{structscrabble_1_1MainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f}{Update}}(\textcolor{keywordtype}{float}\ delta\_time)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ RenderMainMenu();}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ EnterMainMenu();}
+\DoxyCodeLine{00041\ \ \ \ \ \};}
+\DoxyCodeLine{00042\ \}}
+
+\end{DoxyCode}

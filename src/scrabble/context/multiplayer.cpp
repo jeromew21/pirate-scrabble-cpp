@@ -13,7 +13,6 @@
 #include "socket_client.h"
 #include "external/cgltf.h"
 #include "game_object/entity/sprite.h"
-#include "game_object/tween/tween.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
 #include "scrabble/sprites/tile.h"
@@ -21,11 +20,12 @@
 #include "util/queue.h"
 #include "util/network/sockets/web_socket.h"
 
+using namespace scrabble;
+
 namespace {
     WebSocketImpl *game_socket{nullptr};
 
     std::optional<MultiplayerGame> game{std::nullopt};
-
 
     struct TileDrawData {
         float2 dimensions;
@@ -47,7 +47,7 @@ namespace {
         }
     }
 
-    constexpr float margin = 8.0f;
+    constexpr float default_margin = 8.0f;
 
     MultiplayerAction start_action(const int player_id) {
         const auto action = MultiplayerAction{
@@ -100,9 +100,9 @@ namespace {
         });
     }
 
-    MarginContainer *margin_all(const float margin) {
+    MarginContainer *margin_all(const float size) {
         using namespace frameflow;
-        return new MarginContainer(MarginData{margin, margin, margin, margin});
+        return new MarginContainer(MarginData{size, size, size, size});
     }
 }
 
@@ -137,22 +137,22 @@ MultiplayerContext::MultiplayerContext() {
     layout_.right->GetNode()->minimum_size = {100, 0};
     layout_.right->GetNode()->expand.x = 1;
 
-    auto *p0 = margin_all(margin);
+    auto *p0 = margin_all(default_margin);
     layout_.left->AddChild(p0);
     p0->GetNode()->anchors = {0, 0, 1, 0};
     p0->GetNode()->expand.y = 1;
 
-    auto *p1 = margin_all(margin);
+    auto *p1 = margin_all(default_margin);
     layout_.right->AddChild(p1);
     p1->GetNode()->anchors = {0, 0, 1, 0};
     p1->GetNode()->expand.y = 1;
 
-    auto *p2 = margin_all(margin);
+    auto *p2 = margin_all(default_margin);
     layout_.left->AddChild(p2);
     p2->GetNode()->anchors = {0, 0, 1, 0};
     p2->GetNode()->expand.y = 1;
 
-    auto *p3 = margin_all(margin);
+    auto *p3 = margin_all(default_margin);
     layout_.right->AddChild(p3);
     p3->GetNode()->anchors = {0, 0, 1, 0};
     p3->GetNode()->expand.y = 1;
@@ -264,16 +264,16 @@ void MultiplayerContext::Draw() {
 void MultiplayerContext::RedrawLayout() {
     using namespace frameflow;
 
-    layout_.middle->GetNode()->minimum_size = {(2 * margin + Tile::dim) * 10, 0};
+    layout_.middle->GetNode()->minimum_size = {(2 * default_margin + Tile::dim) * 10, 0};
 
     for (auto *child: layout_.public_tiles->GetChildren()) {
         child->Delete();
     }
     layout_.tile_slots.clear();
     for (int i = 0; i < 144; i++) {
-        auto *outer = margin_all(margin);
+        auto *outer = margin_all(default_margin);
         layout_.public_tiles->AddChild(outer);
-        outer->GetNode()->minimum_size = {Tile::dim + margin * 2, Tile::dim + margin * 2};
+        outer->GetNode()->minimum_size = {Tile::dim + default_margin * 2, Tile::dim + default_margin * 2};
 
         auto *inner = new Control();
         outer->AddChild(inner);
@@ -283,7 +283,7 @@ void MultiplayerContext::RedrawLayout() {
     }
 }
 
-void MultiplayerContext::RedrawGame() {
+void MultiplayerContext::RedrawGame() const {
     if (state == State::Gateway || state == State::PreInit) return;
     if (!game.has_value()) return;
 
@@ -313,10 +313,10 @@ void MultiplayerContext::RedrawGame() {
         }
         for (const auto &[history, id]: game->state.playerWords[player_index]) {
             const auto &word = history.front();
-            auto *word_margin = margin_all(margin * 2.0f);
+            auto *word_margin = margin_all(default_margin * 2.0f);
             flow->AddChild(word_margin);
             word_margin->GetNode()->minimum_size = {
-                margin * 4 + (Tile::dim + 2 * 2) * (float) word.length(), Tile::dim + 2 * 2 + margin * 4
+                default_margin * 4 + (Tile::dim + 2 * 2) * static_cast<float>(word.length()), Tile::dim + 2 * 2 + default_margin * 4
             };
             auto *word_box = horizontal_box();
             word_margin->AddChild(word_box);

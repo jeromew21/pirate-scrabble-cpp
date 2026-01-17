@@ -1,0 +1,105 @@
+\doxysection{control.\+h}
+\hypertarget{control_8h_source}{}\label{control_8h_source}\index{src/game\_object/ui/control.h@{src/game\_object/ui/control.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}raylib.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}frameflow/layout.hpp"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}game\_object/game\_object.h"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classLayoutSystem}{LayoutSystem}};}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{class\ }Control\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classGameObject}{GameObject}}\ \{}
+\DoxyCodeLine{00012\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ DrawDebugBorders\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \ \ \ \ \mbox{\hyperlink{classLayoutSystem}{LayoutSystem}}\ *layout\_system\_\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \ \ \ \ frameflow::NodeId\ node\_id\_\{frameflow::NullNode\};}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ Control()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ InitializeLayout(\mbox{\hyperlink{classLayoutSystem}{LayoutSystem}}\ *system);}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keywordtype}{void}\ ForceComputeLayout()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ [[nodiscard]]\ frameflow::Node\ *\mbox{\hyperlink{classControl_a5418abada82436418955a29eb713a530}{GetNode}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classControl_a696c9955f4dc11e798836299a1a34c29}{Draw}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keywordtype}{void}\ AddChildHook(\mbox{\hyperlink{classGameObject}{GameObject}}\ *child)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordtype}{void}\ DeleteHook()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00033\ \};}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{class\ }BoxContainer\ :\ \textcolor{keyword}{public}\ Control\ \{}
+\DoxyCodeLine{00036\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00037\ \ \ \ \ frameflow::BoxData\ box\_data;}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{explicit}\ BoxContainer(\textcolor{keyword}{const}\ frameflow::BoxData\ \&data);}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{void}\ InitializeLayout(\mbox{\hyperlink{classLayoutSystem}{LayoutSystem}}\ *system)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00042\ \};}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{class\ }FlowContainer\ :\ \textcolor{keyword}{public}\ Control\ \{}
+\DoxyCodeLine{00045\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00046\ \ \ \ \ frameflow::FlowData\ flow\_data;}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keyword}{explicit}\ FlowContainer(\textcolor{keyword}{const}\ frameflow::FlowData\ \&data);}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{void}\ InitializeLayout(\mbox{\hyperlink{classLayoutSystem}{LayoutSystem}}\ *system)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00051\ \};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{keyword}{class\ }CenterContainer\ :\ \textcolor{keyword}{public}\ Control\ \{}
+\DoxyCodeLine{00054\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keyword}{explicit}\ CenterContainer()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keywordtype}{void}\ InitializeLayout(\mbox{\hyperlink{classLayoutSystem}{LayoutSystem}}\ *system)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00058\ \};}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \textcolor{keyword}{class\ }MarginContainer\ :\ \textcolor{keyword}{public}\ Control\ \{}
+\DoxyCodeLine{00061\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00062\ \ \ \ \ frameflow::MarginData\ margin\_data;}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{explicit}\ MarginContainer(\textcolor{keyword}{const}\ frameflow::MarginData\ \&data);}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordtype}{void}\ InitializeLayout(\mbox{\hyperlink{classLayoutSystem}{LayoutSystem}}\ *system)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00067\ \};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classHBFont}{HBFont}};}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \textcolor{keyword}{class\ }Label\ :\ \textcolor{keyword}{public}\ Control\ \{}
+\DoxyCodeLine{00072\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00073\ \ \ \ \ std::string\ text;}
+\DoxyCodeLine{00074\ \ \ \ \ \mbox{\hyperlink{classHBFont}{HBFont}}\ *font\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00075\ \ \ \ \ Color\ color\{BLACK\};}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{explicit}\ Label()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLabel_af021691b39b1b4e87d5d1fca3e12b915}{Draw}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLabel_af01452e6078712cffb4d580236351f22}{Update}}(\textcolor{keywordtype}{float}\ delta\_time)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{float}\ ascent\{\};}
+\DoxyCodeLine{00085\ \};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \textcolor{keyword}{class\ }LineInput\ :\ \textcolor{keyword}{public}\ Control\ \{}
+\DoxyCodeLine{00088\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00089\ \ \ \ \ std::string\ text;}
+\DoxyCodeLine{00090\ \ \ \ \ \mbox{\hyperlink{classHBFont}{HBFont}}\ *font\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00091\ \ \ \ \ Color\ color\{BLACK\};}
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keywordtype}{bool}\ has\_focus\{\textcolor{keyword}{false}\};\ \textcolor{comment}{//\ focusGroup?}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keyword}{explicit}\ LineInput()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLineInput_a7a68879d322218970f4e021454218790}{Draw}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLineInput_ab4df0f3c70acbd9c28401b77d2017de4}{Update}}(\textcolor{keywordtype}{float}\ delta\_time)\ \textcolor{keyword}{override};;}
+\DoxyCodeLine{00099\ \};}
+
+\end{DoxyCode}

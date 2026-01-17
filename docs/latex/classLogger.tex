@@ -1,0 +1,41 @@
+\doxysection{Logger Class Reference}
+\hypertarget{classLogger}{}\label{classLogger}\index{Logger@{Logger}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classLogger_add0f34d4c753c86af8074840a72366b3}\label{classLogger_add0f34d4c753c86af8074840a72366b3} 
+{\bfseries Logger} (const \mbox{\hyperlink{classLogger}{Logger}} \&)=delete
+\item 
+\Hypertarget{classLogger_a8c0ca770cdc91ca9fc3015286568e1ea}\label{classLogger_a8c0ca770cdc91ca9fc3015286568e1ea} 
+\mbox{\hyperlink{classLogger}{Logger}} \& {\bfseries operator=} (const \mbox{\hyperlink{classLogger}{Logger}} \&)=delete
+\item 
+\Hypertarget{classLogger_aa5251e494be23a4e195e48b89b3ec39f}\label{classLogger_aa5251e494be23a4e195e48b89b3ec39f} 
+{\footnotesize template$<$typename... Args$>$ }\\void {\bfseries info} (fmt\+::format\+\_\+string$<$ Args... $>$ fmt\+\_\+str, Args \&\&... args)
+\item 
+\Hypertarget{classLogger_af1e2a98376838aaf307cc574a8e6f8a8}\label{classLogger_af1e2a98376838aaf307cc574a8e6f8a8} 
+{\footnotesize template$<$typename... Args$>$ }\\void {\bfseries warn} (fmt\+::format\+\_\+string$<$ Args... $>$ fmt\+\_\+str, Args \&\&... args)
+\item 
+\Hypertarget{classLogger_a001b562d2472c35a4cbba1e06c7a64ac}\label{classLogger_a001b562d2472c35a4cbba1e06c7a64ac} 
+{\footnotesize template$<$typename... Args$>$ }\\void {\bfseries error} (fmt\+::format\+\_\+string$<$ Args... $>$ fmt\+\_\+str, Args \&\&... args)
+\item 
+\Hypertarget{classLogger_a1c20a44c6f3e51545abd1a90f1f92000}\label{classLogger_a1c20a44c6f3e51545abd1a90f1f92000} 
+const std\+::vector$<$ std\+::string $>$ \& {\bfseries entries} () const
+\item 
+\Hypertarget{classLogger_a5f1f1a4b507d69181be0fa4085bf1094}\label{classLogger_a5f1f1a4b507d69181be0fa4085bf1094} 
+{\bfseries Logger} (const char \texorpdfstring{$\ast$}{*}output\+\_\+file)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classLogger_aab87772d20b408751f9d4f9e2fd00a75}\label{classLogger_aab87772d20b408751f9d4f9e2fd00a75} 
+static void {\bfseries Initialize} (const char \texorpdfstring{$\ast$}{*}output\+\_\+file)
+\item 
+\Hypertarget{classLogger_a4aa4d7c3b98f6e12e7ea8253da5ea0cd}\label{classLogger_a4aa4d7c3b98f6e12e7ea8253da5ea0cd} 
+static \mbox{\hyperlink{classLogger}{Logger}} \& {\bfseries instance} ()
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/util/logging/logging.\+h\item 
+src/util/logging/logging.\+cpp\end{DoxyCompactItemize}

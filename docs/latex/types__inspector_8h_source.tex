@@ -1,0 +1,237 @@
+\doxysection{types\+\_\+inspector.\+h}
+\hypertarget{types__inspector_8h_source}{}\label{types__inspector_8h_source}\index{src/scrabble/context/types\_inspector.h@{src/scrabble/context/types\_inspector.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}imgui.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{using\ namespace\ }scrabble;}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{comment}{//\ Helper\ functions\ for\ displaying\ different\ types}}
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }ImGuiInspect\ \{}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ Field(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ std::string\&\ value)\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ ImGui::Text(\textcolor{stringliteral}{"{}\%s:\ \%s"{}},\ label,\ value.c\_str());}
+\DoxyCodeLine{00014\ \ \ \ \ \}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ Field(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keywordtype}{int}\ value)\ \{}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ ImGui::Text(\textcolor{stringliteral}{"{}\%s:\ \%d"{}},\ label,\ value);}
+\DoxyCodeLine{00018\ \ \ \ \ \}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ Field(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keywordtype}{bool}\ value)\ \{}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ ImGui::Text(\textcolor{stringliteral}{"{}\%s:\ \%s"{}},\ label,\ value\ ?\ \textcolor{stringliteral}{"{}true"{}}\ :\ \textcolor{stringliteral}{"{}false"{}});}
+\DoxyCodeLine{00022\ \ \ \ \ \}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keywordtype}{void}\ Field(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ std::optional<T>\&\ opt)\ \{}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (opt)\ \{}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \ \ \ \ Field(label,\ *opt);}
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::TextDisabled(\textcolor{stringliteral}{"{}\%s:\ None"{}},\ label);}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00031\ \ \ \ \ \}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ VectorField(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ std::vector<T>\&\ vec);}
+\DoxyCodeLine{00035\ \}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{comment}{//\ Macro\ to\ start\ inspecting\ a\ struct}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#define\ IMGUI\_INSPECT\_BEGIN(structName,\ obj)\ \(\backslash\)}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\ \ \ \ if\ (ImGui::TreeNode(structName))\ \{}}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ IMGUI\_INSPECT\_END()\ \(\backslash\)}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ ImGui::TreePop();\ \(\backslash\)}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\ \ \ \ \}}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{comment}{//\ Macro\ to\ inspect\ a\ simple\ field}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#define\ IMGUI\_INSPECT\_FIELD(obj,\ field)\ \(\backslash\)}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\ \ \ \ ImGuiInspect::Field(\#field,\ obj.field)}}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{comment}{//\ Forward\ declarations\ for\ struct\ inspectors}}
+\DoxyCodeLine{00050\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1PersistentData}{PersistentData}}\&\ data);}
+\DoxyCodeLine{00051\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ TileProps\&\ tile);}
+\DoxyCodeLine{00052\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1Word}{Word}}\&\ word);}
+\DoxyCodeLine{00053\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1GameState}{GameState}}\&\ state);}
+\DoxyCodeLine{00054\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ GameStateUpdate\&\ update);}
+\DoxyCodeLine{00055\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerChatMessage\&\ msg);}
+\DoxyCodeLine{00056\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerAction\&\ action);}
+\DoxyCodeLine{00057\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerGame\&\ game);}
+\DoxyCodeLine{00058\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerActionResponse\&\ response);}
+\DoxyCodeLine{00059\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ User\&\ user);}
+\DoxyCodeLine{00060\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1UserLoginAttempt}{UserLoginAttempt}}\&\ attempt);}
+\DoxyCodeLine{00061\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1UserResponse}{UserResponse}}\&\ response);}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \textcolor{comment}{//\ Template\ specialization\ for\ vectors\ of\ structs}}
+\DoxyCodeLine{00064\ \textcolor{keyword}{namespace\ }ImGuiInspect\ \{}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ VectorField(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ std::vector<T>\&\ vec)\ \{}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label,\ \textcolor{stringliteral}{"{}\%s\ [\%zu]"{}},\ label,\ vec.size()))\ \{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i\ =\ 0;\ i\ <\ vec.size();\ i++)\ \{}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ itemLabel\ =\ std::to\_string(i);}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_same\_v<T,\ std::string>)\ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::Text(\textcolor{stringliteral}{"{}[\%zu]:\ \%s"{}},\ i,\ vec[i].c\_str());}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (std::is\_arithmetic\_v<T>)\ \{}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::Text(\textcolor{stringliteral}{"{}[\%zu]:\ \%d"{}},\ i,\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(vec[i]));}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ InspectStruct(itemLabel.c\_str(),\ vec[i]);}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00080\ \ \ \ \ \}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{comment}{//\ Specialization\ for\ vector\ of\ vectors}}
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{void}\ VectorField(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ std::vector<std::vector<T>>\&\ vec)\ \{}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label,\ \textcolor{stringliteral}{"{}\%s\ [\%zu]"{}},\ label,\ vec.size()))\ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i\ =\ 0;\ i\ <\ vec.size();\ i++)\ \{}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ itemLabel\ =\ std::string(label)\ +\ \textcolor{stringliteral}{"{}["{}}\ +\ std::to\_string(i)\ +\ \textcolor{stringliteral}{"{}]"{}};}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ VectorField(itemLabel.c\_str(),\ vec[i]);}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00092\ \ \ \ \ \}}
+\DoxyCodeLine{00093\ \}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \textcolor{comment}{//\ Implementation\ of\ struct\ inspectors}}
+\DoxyCodeLine{00096\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1PersistentData}{PersistentData}}\&\ data)\ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(data,\ dummy);}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00100\ \ \ \ \ \}}
+\DoxyCodeLine{00101\ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ TileProps\&\ tile)\ \{}
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(tile,\ letter);}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(tile,\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(tile,\ faceUp);}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00109\ \ \ \ \ \}}
+\DoxyCodeLine{00110\ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1Word}{Word}}\&\ word)\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ ImGuiInspect::VectorField(\textcolor{stringliteral}{"{}history"{}},\ word.history);}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(word,\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00117\ \ \ \ \ \}}
+\DoxyCodeLine{00118\ \}}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1GameState}{GameState}}\&\ state)\ \{}
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(state,\ tileCount);}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(state,\ wordMinimumSize);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(state,\ playerCount);}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ ImGuiInspect::VectorField(\textcolor{stringliteral}{"{}tiles"{}},\ state.tiles);}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(state,\ dictionary);}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ ImGuiInspect::VectorField(\textcolor{stringliteral}{"{}playerWords"{}},\ state.playerWords);}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00129\ \ \ \ \ \}}
+\DoxyCodeLine{00130\ \}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ GameStateUpdate\&\ update)\ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(update,\ actionType);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(update,\ flippedTileId);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(update,\ claimWord);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(update,\ stolenWordId);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(update,\ actingPlayer);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(update,\ stolenPlayer);}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00141\ \ \ \ \ \}}
+\DoxyCodeLine{00142\ \}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerChatMessage\&\ msg)\ \{}
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(msg,\ sender);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(msg,\ timestamp);}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(msg,\ message);}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00150\ \ \ \ \ \}}
+\DoxyCodeLine{00151\ \}}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerAction\&\ action)\ \{}
+\DoxyCodeLine{00154\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(action,\ playerId);}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(action,\ actionType);}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (action.action)\ \{}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ InspectStruct(\textcolor{stringliteral}{"{}action"{}},\ *action.action);}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::TextDisabled(\textcolor{stringliteral}{"{}action:\ None"{}});}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(action,\ data);}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00164\ \ \ \ \ \}}
+\DoxyCodeLine{00165\ \}}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerGame\&\ game)\ \{}
+\DoxyCodeLine{00168\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(game,\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(game,\ phase);}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ InspectStruct(\textcolor{stringliteral}{"{}state"{}},\ game.state);}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ ImGuiInspect::VectorField(\textcolor{stringliteral}{"{}playerIds"{}},\ game.playerIds);}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ ImGuiInspect::VectorField(\textcolor{stringliteral}{"{}playerNames"{}},\ game.playerNames);}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(game,\ buzzHolder);}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(game,\ buzzElapsed);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (game.lastAction)\ \{}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ InspectStruct(\textcolor{stringliteral}{"{}lastAction"{}},\ *game.lastAction);}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::TextDisabled(\textcolor{stringliteral}{"{}lastAction:\ None"{}});}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ ImGuiInspect::VectorField(\textcolor{stringliteral}{"{}chat"{}},\ game.chat);}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00183\ \ \ \ \ \}}
+\DoxyCodeLine{00184\ \}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ MultiplayerActionResponse\&\ response)\ \{}
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(response,\ ok);}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (response.game)\ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ InspectStruct(\textcolor{stringliteral}{"{}game"{}},\ *response.game);}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::TextDisabled(\textcolor{stringliteral}{"{}game:\ None"{}});}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(response,\ hashCode);}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(response,\ errorMessage);}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00197\ \ \ \ \ \}}
+\DoxyCodeLine{00198\ \}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ User\&\ user)\ \{}
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(user,\ \textcolor{keywordtype}{id});}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(user,\ username);}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(user,\ token);}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ ImGui::TextDisabled(\textcolor{stringliteral}{"{}salt:\ [HIDDEN]"{}});\ \textcolor{comment}{//\ Don't\ show\ security-\/sensitive\ data}}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(user,\ email);}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(user,\ currentGame);}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00209\ \ \ \ \ \}}
+\DoxyCodeLine{00210\ \}}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00212\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1UserLoginAttempt}{UserLoginAttempt}}\&\ attempt)\ \{}
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(attempt,\ username);}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ ImGui::TextDisabled(\textcolor{stringliteral}{"{}password:\ [HIDDEN]"{}});\ \textcolor{comment}{//\ Don't\ show\ passwords}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00217\ \ \ \ \ \}}
+\DoxyCodeLine{00218\ \}}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ InspectStruct(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ label,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structscrabble_1_1UserResponse}{UserResponse}}\&\ response)\ \{}
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keywordflow}{if}\ (ImGui::TreeNode(label))\ \{}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(response,\ ok);}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ IMGUI\_INSPECT\_FIELD(response,\ error);}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (response.user)\ \{}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ InspectStruct(\textcolor{stringliteral}{"{}user"{}},\ *response.user);}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ ImGui::TextDisabled(\textcolor{stringliteral}{"{}user:\ None"{}});}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ ImGui::TreePop();}
+\DoxyCodeLine{00230\ \ \ \ \ \}}
+\DoxyCodeLine{00231\ \}}
+
+\end{DoxyCode}

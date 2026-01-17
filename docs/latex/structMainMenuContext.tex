@@ -1,0 +1,122 @@
+\doxysection{Main\+Menu\+Context Struct Reference}
+\hypertarget{structMainMenuContext}{}\label{structMainMenuContext}\index{MainMenuContext@{MainMenuContext}}
+Inheritance diagram for Main\+Menu\+Context\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{structMainMenuContext}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structMainMenuContext_abd8b8b91ce5d35caf926cdea6b715ab6}\label{structMainMenuContext_abd8b8b91ce5d35caf926cdea6b715ab6} 
+enum class {\bfseries State} \{ {\bfseries Initial\+Loading}
+, {\bfseries Menu}
+, {\bfseries Multiplayer}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structMainMenuContext_a911306c6260dc8e93c9b409526356e3f}\label{structMainMenuContext_a911306c6260dc8e93c9b409526356e3f} 
+{\bfseries Main\+Menu\+Context} (std\+::function$<$ void()$>$ request\+\_\+exit)
+\item 
+void \mbox{\hyperlink{structMainMenuContext_aabf0ba737aa698796100d53bde42076c}{Draw}} () override
+\item 
+void \mbox{\hyperlink{structMainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f}{Update}} (float delta\+\_\+time) override
+\item 
+\Hypertarget{structMainMenuContext_a43bf86a8ad6a4ecd3a4d375781d13695}\label{structMainMenuContext_a43bf86a8ad6a4ecd3a4d375781d13695} 
+void {\bfseries Render\+Main\+Menu} ()
+\item 
+\Hypertarget{structMainMenuContext_a7315342a2f6f86de63d88237a61bd0a1}\label{structMainMenuContext_a7315342a2f6f86de63d88237a61bd0a1} 
+void {\bfseries Enter\+Main\+Menu} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+void {\bfseries Update\+Rec} (float delta\+\_\+time)
+\item 
+void \mbox{\hyperlink{classGameObject_a081619ba157c8ba8eda438e185ec4ff3}{Draw\+Rec}} ()
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries Add\+Child} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+void {\bfseries Show} ()
+\item 
+void {\bfseries Hide} ()
+\item 
+bool {\bfseries Is\+Visible} () const
+\item 
+void {\bfseries Delete} ()
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries Get\+Children} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structMainMenuContext_aa589b199b430e315357bc64e3a73eb36}\label{structMainMenuContext_aa589b199b430e315357bc64e3a73eb36} 
+State {\bfseries state} \{State\+::\+Initial\+Loading\}
+\item 
+\Hypertarget{structMainMenuContext_aae48211ca958a04930a531946f77b3f0}\label{structMainMenuContext_aae48211ca958a04930a531946f77b3f0} 
+std\+::optional$<$ User $>$ {\bfseries user\+\_\+opt} \{std\+::nullopt\}
+\item 
+\Hypertarget{structMainMenuContext_ad8fdc74488aa82404f0100570fc94167}\label{structMainMenuContext_ad8fdc74488aa82404f0100570fc94167} 
+\mbox{\hyperlink{structLoginContext}{Login\+Context}} \texorpdfstring{$\ast$}{*} {\bfseries login\+\_\+context}
+\item 
+\Hypertarget{structMainMenuContext_af0dbcfe65d0ecae73d710fae8607f3c0}\label{structMainMenuContext_af0dbcfe65d0ecae73d710fae8607f3c0} 
+\mbox{\hyperlink{structMultiplayerContext}{Multiplayer\+Context}} \texorpdfstring{$\ast$}{*} {\bfseries multiplayer\+\_\+context}
+\item 
+\Hypertarget{structMainMenuContext_a9fec0a3b1fd39fec7aeac615cef713ba}\label{structMainMenuContext_a9fec0a3b1fd39fec7aeac615cef713ba} 
+float {\bfseries loading\+\_\+counter} \{0\}
+\item 
+\Hypertarget{structMainMenuContext_ad63ec4d1766a6cea7c6c9daeb8c49b61}\label{structMainMenuContext_ad63ec4d1766a6cea7c6c9daeb8c49b61} 
+float {\bfseries loading\+\_\+time} \{2.\+0f\}
+\item 
+\Hypertarget{structMainMenuContext_ab1d5cb76e2f2d1311958b2558968ac97}\label{structMainMenuContext_ab1d5cb76e2f2d1311958b2558968ac97} 
+std\+::optional$<$ std\+::function$<$ void()$>$ $>$ {\bfseries request\+\_\+exit\+\_\+hook}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+virtual void {\bfseries Add\+Child\+Hook} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+virtual void {\bfseries Delete\+Hook} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries parent} \{nullptr\}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries children}
+\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{structMainMenuContext_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{structMainMenuContext_aabf0ba737aa698796100d53bde42076c}\index{MainMenuContext@{MainMenuContext}!Draw@{Draw}}
+\index{Draw@{Draw}!MainMenuContext@{MainMenuContext}}
+\doxysubsubsection{\texorpdfstring{Draw()}{Draw()}}
+{\footnotesize\ttfamily \label{structMainMenuContext_aabf0ba737aa698796100d53bde42076c} 
+void Main\+Menu\+Context\+::\+Draw (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+The single object draw function. Usually this is too slow and you have to implement batching. 
+
+Reimplemented from \mbox{\hyperlink{classGameObject_ad3ac1deac50048cf7a1a19eb0e61ad26}{Game\+Object}}.
+
+\Hypertarget{structMainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f}\index{MainMenuContext@{MainMenuContext}!Update@{Update}}
+\index{Update@{Update}!MainMenuContext@{MainMenuContext}}
+\doxysubsubsection{\texorpdfstring{Update()}{Update()}}
+{\footnotesize\ttfamily \label{structMainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f} 
+void Main\+Menu\+Context\+::\+Update (\begin{DoxyParamCaption}\item[{float}]{delta\+\_\+time}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classGameObject}{Game\+Object}}.
+
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/scrabble/context/main\+\_\+menu.\+h\item 
+src/scrabble/context/main\+\_\+menu.\+cpp\end{DoxyCompactItemize}

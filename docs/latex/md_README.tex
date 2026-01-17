@@ -1,0 +1,70 @@
+\chapter{Pirate Scrabble CPP \mbox{[}Title TBD\mbox{]} }
+\hypertarget{md_README}{}\label{md_README}\index{Pirate Scrabble CPP \mbox{[}Title TBD\mbox{]}@{Pirate Scrabble CPP [Title TBD]}}
+\label{md_README_autotoc_md0}%
+\Hypertarget{md_README_autotoc_md0}%
+
+
+This is a frontend implementation of Pirate Scrabble written in pure C++.
+
+Goals\+:
+\begin{DoxyItemize}
+\item Can run on 4 major platforms\+: Windows, Mac, Linux, Web
+\item Fast startup and load times
+\item Fast iteration
+\item Fast compilation
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md1}{}\doxysection{\texorpdfstring{Building}{Building}}\label{md_README_autotoc_md1}
+Non vendored dependencies\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ external}
+\DoxyCodeLine{git\ clone\ https://github.com/jeromew21/frameflow}
+
+\end{DoxyCode}
+\hypertarget{md_README_autotoc_md2}{}\doxysubsection{\texorpdfstring{Linux}{Linux}}\label{md_README_autotoc_md2}
+Should work out of the box, with the exception of a handful of development libraries that are distro-\/specific.\hypertarget{md_README_autotoc_md3}{}\doxysubsection{\texorpdfstring{Apple}{Apple}}\label{md_README_autotoc_md3}
+Should work out of the box.\hypertarget{md_README_autotoc_md4}{}\doxysubsection{\texorpdfstring{Windows (MSVC)}{Windows (MSVC)}}\label{md_README_autotoc_md4}
+Set up vcpkg 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ external}
+\DoxyCodeLine{git\ clone\ https://github.com/microsoft/vcpkg.git}
+\DoxyCodeLine{cd\ vcpkg}
+\DoxyCodeLine{.\(\backslash\)bootstrap-\/vcpkg.bat}
+\DoxyCodeLine{vcpkg.exe\ install\ ixwebsocket[mbedtls]\ zlib}
+
+\end{DoxyCode}
+
+
+Then build with MSVC toolchain\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cmake\ -\/B\ build\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ -\/DCMAKE\_TOOLCHAIN\_FILE=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake}
+
+\end{DoxyCode}
+ This script is collected and most up-\/to-\/date in {\ttfamily build\+\_\+win.\+sh}.\hypertarget{md_README_autotoc_md5}{}\doxysubsection{\texorpdfstring{Web (Emscripten)}{Web (Emscripten)}}\label{md_README_autotoc_md5}
+Set up emscripten\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ external}
+\DoxyCodeLine{git\ clone\ https://github.com/emscripten-\/core/emsdk.git}
+\DoxyCodeLine{cd\ emsdk}
+\DoxyCodeLine{./emsdk\ install\ latest}
+\DoxyCodeLine{./emsdk\ activate\ latest}
+\DoxyCodeLine{source\ ./emsdk\_env.sh}
+
+\end{DoxyCode}
+
+
+Then build with emscripten toolchain 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{mkdir\ -\/p\ build-\/web}
+\DoxyCodeLine{cd\ build-\/web}
+\DoxyCodeLine{emcmake\ cmake\ ..\ -\/DPLATFORM=Web\ -\/DBUILD\_EXAMPLES=OFF}
+\DoxyCodeLine{emmake\ make}
+\DoxyCodeLine{}
+\DoxyCodeLine{cd\ ..}
+\DoxyCodeLine{python3\ server.py}
+
+\end{DoxyCode}
+
+
+This script is collected and most up-\/to-\/date in {\ttfamily build\+\_\+web.\+sh}. 

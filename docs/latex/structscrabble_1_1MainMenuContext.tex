@@ -1,0 +1,122 @@
+\doxysection{scrabble\+::Main\+Menu\+Context Struct Reference}
+\hypertarget{structscrabble_1_1MainMenuContext}{}\label{structscrabble_1_1MainMenuContext}\index{scrabble::MainMenuContext@{scrabble::MainMenuContext}}
+Inheritance diagram for scrabble\+::Main\+Menu\+Context\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{structscrabble_1_1MainMenuContext}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_ad1f073a3832ab9d095403769840a67e1}\label{structscrabble_1_1MainMenuContext_ad1f073a3832ab9d095403769840a67e1} 
+enum class {\bfseries State} \{ {\bfseries Initial\+Loading}
+, {\bfseries Menu}
+, {\bfseries Multiplayer}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a911306c6260dc8e93c9b409526356e3f}\label{structscrabble_1_1MainMenuContext_a911306c6260dc8e93c9b409526356e3f} 
+{\bfseries Main\+Menu\+Context} (std\+::function$<$ void()$>$ request\+\_\+exit)
+\item 
+void \mbox{\hyperlink{structscrabble_1_1MainMenuContext_aabf0ba737aa698796100d53bde42076c}{Draw}} () override
+\item 
+void \mbox{\hyperlink{structscrabble_1_1MainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f}{Update}} (float delta\+\_\+time) override
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a43bf86a8ad6a4ecd3a4d375781d13695}\label{structscrabble_1_1MainMenuContext_a43bf86a8ad6a4ecd3a4d375781d13695} 
+void {\bfseries Render\+Main\+Menu} ()
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a7315342a2f6f86de63d88237a61bd0a1}\label{structscrabble_1_1MainMenuContext_a7315342a2f6f86de63d88237a61bd0a1} 
+void {\bfseries Enter\+Main\+Menu} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classGameObject_a1f6b69831f2c132ef9985b2f0329fbcb}{Update\+Rec}} (float delta\+\_\+time)
+\item 
+void \mbox{\hyperlink{classGameObject_a081619ba157c8ba8eda438e185ec4ff3}{Draw\+Rec}} ()
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries Add\+Child} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+void {\bfseries Show} ()
+\item 
+void {\bfseries Hide} ()
+\item 
+bool {\bfseries Is\+Visible} () const
+\item 
+void {\bfseries Delete} ()
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries Get\+Children} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_ac696c73ade2c3cde3afc00e028e96d78}\label{structscrabble_1_1MainMenuContext_ac696c73ade2c3cde3afc00e028e96d78} 
+State {\bfseries state} \{State\+::\+Initial\+Loading\}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a39794e130044adfc84d9aad1cc0d22c8}\label{structscrabble_1_1MainMenuContext_a39794e130044adfc84d9aad1cc0d22c8} 
+std\+::optional$<$ User $>$ {\bfseries user\+\_\+opt} \{std\+::nullopt\}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a10a38e870b297d5a86558025bd7ce58a}\label{structscrabble_1_1MainMenuContext_a10a38e870b297d5a86558025bd7ce58a} 
+\mbox{\hyperlink{structscrabble_1_1LoginContext}{Login\+Context}} \texorpdfstring{$\ast$}{*} {\bfseries login\+\_\+context}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a063b931268a71abdf9a7bb06c6d16996}\label{structscrabble_1_1MainMenuContext_a063b931268a71abdf9a7bb06c6d16996} 
+\mbox{\hyperlink{structscrabble_1_1MultiplayerContext}{Multiplayer\+Context}} \texorpdfstring{$\ast$}{*} {\bfseries multiplayer\+\_\+context}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a865c9dc65891f0b0f5382aa86cdd005a}\label{structscrabble_1_1MainMenuContext_a865c9dc65891f0b0f5382aa86cdd005a} 
+float {\bfseries loading\+\_\+counter} \{0\}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a841bbbd1136533c22b70108a4993171d}\label{structscrabble_1_1MainMenuContext_a841bbbd1136533c22b70108a4993171d} 
+float {\bfseries loading\+\_\+time} \{2.\+0f\}
+\item 
+\Hypertarget{structscrabble_1_1MainMenuContext_a3ef540ec49eec5703982ec77f0320c61}\label{structscrabble_1_1MainMenuContext_a3ef540ec49eec5703982ec77f0320c61} 
+std\+::optional$<$ std\+::function$<$ void()$>$ $>$ {\bfseries request\+\_\+exit\+\_\+hook}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Protected Member Functions inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+virtual void {\bfseries Add\+Child\+Hook} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+virtual void {\bfseries Delete\+Hook} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries parent} \{nullptr\}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries children}
+\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{structscrabble_1_1MainMenuContext_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{structscrabble_1_1MainMenuContext_aabf0ba737aa698796100d53bde42076c}\index{scrabble::MainMenuContext@{scrabble::MainMenuContext}!Draw@{Draw}}
+\index{Draw@{Draw}!scrabble::MainMenuContext@{scrabble::MainMenuContext}}
+\doxysubsubsection{\texorpdfstring{Draw()}{Draw()}}
+{\footnotesize\ttfamily \label{structscrabble_1_1MainMenuContext_aabf0ba737aa698796100d53bde42076c} 
+void Main\+Menu\+Context\+::\+Draw (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+The single object draw function. Usually this is too slow and you have to implement batching. 
+
+Reimplemented from \mbox{\hyperlink{classGameObject_ad3ac1deac50048cf7a1a19eb0e61ad26}{Game\+Object}}.
+
+\Hypertarget{structscrabble_1_1MainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f}\index{scrabble::MainMenuContext@{scrabble::MainMenuContext}!Update@{Update}}
+\index{Update@{Update}!scrabble::MainMenuContext@{scrabble::MainMenuContext}}
+\doxysubsubsection{\texorpdfstring{Update()}{Update()}}
+{\footnotesize\ttfamily \label{structscrabble_1_1MainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f} 
+void Main\+Menu\+Context\+::\+Update (\begin{DoxyParamCaption}\item[{float}]{delta\+\_\+time}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Single object update function, called every frame. 
+
+Reimplemented from \mbox{\hyperlink{classGameObject_aa237f2dd57b4a6ec27e64dc0a8a36c1c}{Game\+Object}}.
+
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/scrabble/context/main\+\_\+menu.\+h\item 
+src/scrabble/context/main\+\_\+menu.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,25 @@
+\doxysection{web\+\_\+socket\+\_\+web.\+h}
+\hypertarget{web__socket__web_8h_source}{}\label{web__socket__web_8h_source}\index{src/util/network/sockets/web\_socket\_web.h@{src/util/network/sockets/web\_socket\_web.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}web\_socket.h"{}}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <emscripten/websocket.h>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{struct\ }WebSocketWeb\ :\ \mbox{\hyperlink{structWebSocketImpl}{WebSocketImpl}}\ \{}
+\DoxyCodeLine{00009\ \ \ \ \ EMSCRIPTEN\_WEBSOCKET\_T\ ws\{\};}
+\DoxyCodeLine{00010\ \ \ \ \ std::string\ url;}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keyword}{explicit}\ WebSocketWeb(\textcolor{keyword}{const}\ std::string\&\ url\_);}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{keywordtype}{void}\ connect()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keywordtype}{void}\ send(\textcolor{keyword}{const}\ std::string\&\ message)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keywordtype}{void}\ close()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00019\ \};}
+
+\end{DoxyCode}

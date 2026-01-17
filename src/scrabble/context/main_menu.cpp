@@ -13,8 +13,7 @@
 #include "util/logging/logging.h"
 #include "types.h"
 
-namespace {
-}
+using namespace scrabble;
 
 MainMenuContext::MainMenuContext(std::function<void()> request_exit)
     : login_context(new LoginContext()),

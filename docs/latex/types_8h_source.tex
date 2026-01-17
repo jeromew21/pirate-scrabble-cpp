@@ -1,0 +1,176 @@
+\doxysection{types.\+h}
+\hypertarget{types_8h_source}{}\label{types_8h_source}\index{src/scrabble/context/types.h@{src/scrabble/context/types.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}util/serialization/serialization.h"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{namespace\ }scrabble\ \{}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structscrabble_1_1PersistentData}{PersistentData}}\ \{}
+\DoxyCodeLine{00010\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ window\_width\{1920\};}
+\DoxyCodeLine{00011\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ window\_height\{1080\};}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ show\_debug\_window\{\textcolor{keyword}{true}\};}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ dummy\{0\};}
+\DoxyCodeLine{00014\ \ \ \ \ \};}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structscrabble_1_1PersistentData}{PersistentData}},}
+\DoxyCodeLine{00018\ \ \ \ \ \ \ \ \ window\_width,}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ window\_height,}
+\DoxyCodeLine{00020\ \ \ \ \ \ \ \ \ show\_debug\_window,}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ dummy}
+\DoxyCodeLine{00022\ \ \ \ \ )}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keyword}{struct\ }TileProps\ \{}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ std::string\ letter;}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ std::string\ id;}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ faceUp;}
+\DoxyCodeLine{00028\ \ \ \ \ \};}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(TileProps,\ letter,\ \textcolor{keywordtype}{id},\ faceUp)}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \ \ \ \ struct\ \mbox{\hyperlink{structscrabble_1_1Word}{Word}}\ \{}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ std::vector<std::string>\ history;}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ std::string\ id;}
+\DoxyCodeLine{00035\ \ \ \ \ \};}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(\mbox{\hyperlink{structscrabble_1_1Word}{Word}},\ history,\ \textcolor{keywordtype}{id})}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ struct\ \mbox{\hyperlink{structscrabble_1_1GameState}{GameState}}\ \{}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ tileCount;}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ wordMinimumSize;}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ playerCount;}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ std::vector<TileProps>\ tiles;}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ std::string\ dictionary;}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ std::vector<std::vector<Word>\ >\ playerWords;}
+\DoxyCodeLine{00046\ \ \ \ \ \};}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structscrabble_1_1GameState}{GameState}},}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ tileCount,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ wordMinimumSize,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ playerCount,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ tiles,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ dictionary,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ playerWords}
+\DoxyCodeLine{00056\ \ \ \ \ )}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keyword}{struct\ }GameStateUpdate\ \{}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ std::string\ actionType;}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ std::string\ flippedTileId;}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ std::string\ claimWord;}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ std::string\ stolenWordId;}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ actingPlayer;}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ std::optional<int>\ stolenPlayer;}
+\DoxyCodeLine{00065\ \ \ \ \ \};}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ GameStateUpdate,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ actionType,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ flippedTileId,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ claimWord,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ stolenWordId,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ actingPlayer,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ stolenPlayer}
+\DoxyCodeLine{00075\ \ \ \ \ )}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{struct\ }MultiplayerChatMessage\ \{}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ std::optional<std::string>\ sender;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ std::string\ timestamp;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ std::string\ message;}
+\DoxyCodeLine{00081\ \ \ \ \ \};}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ MultiplayerChatMessage,}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ sender,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ timestamp,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ message}
+\DoxyCodeLine{00088\ \ \ \ \ )}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keyword}{struct\ }MultiplayerAction\ \{}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ playerId;}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ std::string\ actionType;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ std::optional<GameStateUpdate>\ action;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ std::string\ data;}
+\DoxyCodeLine{00095\ \ \ \ \ \};}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ MultiplayerAction,}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ playerId,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ actionType,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ action,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ data}
+\DoxyCodeLine{00103\ \ \ \ \ )}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{keyword}{struct\ }MultiplayerGame\ \{}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ std::string\ id;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ std::string\ phase;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ GameState\ state;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ std::vector<int>\ playerIds;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ std::vector<std::string>\ playerNames;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ std::optional<int>\ buzzHolder;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ std::optional<int>\ buzzElapsed;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ std::optional<GameStateUpdate>\ lastAction;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ std::vector<MultiplayerChatMessage>\ chat;}
+\DoxyCodeLine{00115\ \ \ \ \ \};}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ MultiplayerGame,}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{id},}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ phase,}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ state,}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ playerIds,}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ playerNames,}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ buzzHolder,}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ buzzElapsed,}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ lastAction,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ chat}
+\DoxyCodeLine{00128\ \ \ \ \ )}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{struct\ }MultiplayerActionResponse\ \{}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ok;}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ std::optional<MultiplayerGame>\ game;}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ hashCode;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ std::string\ errorMessage;}
+\DoxyCodeLine{00135\ \ \ \ \ \};}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ MultiplayerActionResponse,}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ ok,}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ game,}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ hashCode,}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ errorMessage}
+\DoxyCodeLine{00143\ \ \ \ \ )}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keyword}{struct\ }User\ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ id;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ std::string\ username;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ std::string\ token;}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ std::string\ salt;\ \textcolor{comment}{//\ You\ probably\ shouldn't\ have\ this\ -\/\ security\ risk!}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ std::string\ email;}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ std::optional<std::string>\ currentGame;}
+\DoxyCodeLine{00152\ \ \ \ \ \};}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(User,\ \textcolor{keywordtype}{id},\ username,\ token,\ salt,\ email,\ currentGame)}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ struct\ \mbox{\hyperlink{structscrabble_1_1UserLoginAttempt}{UserLoginAttempt}}\ \{}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ std::string\ username;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ std::string\ password;}
+\DoxyCodeLine{00159\ \ \ \ \ \};}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(\mbox{\hyperlink{structscrabble_1_1UserLoginAttempt}{UserLoginAttempt}},\ username,\ password)}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ struct\ \mbox{\hyperlink{structscrabble_1_1UserResponse}{UserResponse}}\ \{}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ok;}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ std::string\ error;}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ std::optional<User>\ user;}
+\DoxyCodeLine{00167\ \ \ \ \ \};}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ NLOHMANN\_DEFINE\_TYPE\_NON\_INTRUSIVE(\mbox{\hyperlink{structscrabble_1_1UserResponse}{UserResponse}},\ ok,\ error,\ user)}
+\DoxyCodeLine{00170\ \}}
+
+\end{DoxyCode}

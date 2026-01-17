@@ -1,0 +1,31 @@
+\doxysection{web\+\_\+socket.\+h}
+\hypertarget{web__socket_8h_source}{}\label{web__socket_8h_source}\index{src/util/network/sockets/web\_socket.h@{src/util/network/sockets/web\_socket.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structWebSocketImpl}{WebSocketImpl}}\ \{}
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{keyword}{using\ }Ptr\ =\ std::shared\_ptr<WebSocketImpl>;}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{structWebSocketImpl}{\string~WebSocketImpl}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ connect()\ =\ 0;}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ send(\textcolor{keyword}{const}\ std::string\&\ message)\ =\ 0;}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ close()\ =\ 0;}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ std::function<void()>\ on\_open;}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ std::function<void(\textcolor{keyword}{const}\ std::string\&)>\ on\_message;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ std::function<void()>\ on\_close;}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \ std::function<void(\textcolor{keyword}{const}\ std::string\&)>\ on\_error;}
+\DoxyCodeLine{00028\ \};}
+
+\end{DoxyCode}

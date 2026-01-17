@@ -5,6 +5,8 @@
 #include <vector>
 #include <optional>
 
+using namespace scrabble;
+
 // Helper functions for displaying different types
 namespace ImGuiInspect {
     inline void Field(const char* label, const std::string& value) {
@@ -20,7 +22,7 @@ namespace ImGuiInspect {
     }
 
     template<typename T>
-    inline void Field(const char* label, const std::optional<T>& opt) {
+    void Field(const char* label, const std::optional<T>& opt) {
         if (opt) {
             Field(label, *opt);
         } else {
@@ -79,7 +81,7 @@ namespace ImGuiInspect {
 
     // Specialization for vector of vectors
     template<typename T>
-    inline void VectorField(const char* label, const std::vector<std::vector<T>>& vec) {
+    void VectorField(const char* label, const std::vector<std::vector<T>>& vec) {
         if (ImGui::TreeNode(label, "%s [%zu]", label, vec.size())) {
             for (size_t i = 0; i < vec.size(); i++) {
                 std::string itemLabel = std::string(label) + "[" + std::to_string(i) + "]";

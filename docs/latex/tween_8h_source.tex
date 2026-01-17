@@ -1,0 +1,123 @@
+\doxysection{tween.\+h}
+\hypertarget{tween_8h_source}{}\label{tween_8h_source}\index{src/game\_object/tween/tween.h@{src/game\_object/tween/tween.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Easing\ functions}}
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }Easing\ \{}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ Linear(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{\ \textcolor{keywordflow}{return}\ t;\ \}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseInQuad(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{\ \textcolor{keywordflow}{return}\ t\ *\ t;\ \}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseOutQuad(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{\ \textcolor{keywordflow}{return}\ t\ *\ (2.0f\ -\/\ t);\ \}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseInOutQuad(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t\ <\ 0.5f\ ?\ 2.0f\ *\ t\ *\ t\ :\ -\/1.0f\ +\ (4.0f\ -\/\ 2.0f\ *\ t)\ *\ t;}
+\DoxyCodeLine{00018\ \ \ \ \ \}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseInCubic(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{\ \textcolor{keywordflow}{return}\ t\ *\ t\ *\ t;\ \}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseOutCubic(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{}
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1.0f\ +\ (t\ -\/\ 1.0f)\ *\ (t\ -\/\ 1.0f)\ *\ (t\ -\/\ 1.0f);;}
+\DoxyCodeLine{00024\ \ \ \ \ \}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseInOutCubic(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t\ <\ 0.5f\ ?\ 4.0f\ *\ t\ *\ t\ *\ t\ :\ (t\ -\/\ 1.0f)\ *\ (2.0f\ *\ t\ -\/\ 2.0f)\ *\ (2.0f\ *\ t\ -\/\ 2.0f)\ +\ 1.0f;}
+\DoxyCodeLine{00028\ \ \ \ \ \}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseInSine(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{\ \textcolor{keywordflow}{return}\ 1.0f\ -\/\ cosf(t\ *\ 1.57079632679f);\ \}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseOutSine(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{\ \textcolor{keywordflow}{return}\ sinf(t\ *\ 1.57079632679f);\ \}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{float}\ EaseInOutSine(\textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ t)\ \{\ \textcolor{keywordflow}{return}\ -\/(cosf(3.14159265359f\ *\ t)\ -\/\ 1.0f)\ /\ 2.0f;\ \}}
+\DoxyCodeLine{00035\ \}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{using\ }EasingFunc\ =\ std::function<float(\textcolor{keywordtype}{float})>;}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{keyword}{class\ }Tween\ \{}
+\DoxyCodeLine{00040\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{float}\ *target;}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keywordtype}{float}\ start\_value;}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keywordtype}{float}\ end\_value;}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{float}\ duration;}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{float}\ elapsed;}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ EasingFunc\ easing;}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ std::function<void()>\ on\_complete;}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keywordtype}{bool}\ finished;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ Tween(\textcolor{keywordtype}{float}\ *ptr,\ \textcolor{keywordtype}{float}\ start,\ \textcolor{keywordtype}{float}\ end,\ \textcolor{keywordtype}{float}\ dur,\ EasingFunc\ ease\ =\ Easing::Linear);}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keywordtype}{void}\ Update(\textcolor{keywordtype}{float}\ dt);}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keywordtype}{void}\ SetOnComplete(\textcolor{keyword}{const}\ std::function<\textcolor{keywordtype}{void}()>\ \&callback);}
+\DoxyCodeLine{00062\ \};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classTweenManager}{TweenManager}}\ \{}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{comment}{//\ TODO:\ this\ could\ theoretically\ be\ a\ problem.\ Consider\ switching\ to\ vector\ of\ unique\_ptr}}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{comment}{//\ Every\ time\ calling\ CreateTween*,\ we\ could\ be\ invalidating\ other\ Tween\ references.}}
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{comment}{//\ This\ probably\ won't\ be\ a\ problem\ unless\ we're\ creating\ Tweens\ from\ different\ threads\ or}}
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{comment}{//\ doing\ stuff\ out\ of\ order,\ but\ still\ a\ problem\ nonetheless.}}
+\DoxyCodeLine{00069\ \ \ \ \ std::vector<Tween>\ tween\_list;}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00072\ \ \ \ \ \mbox{\hyperlink{classTween}{Tween}}\ *CreateTween(\textcolor{keywordtype}{float}\ *target,\ \textcolor{keywordtype}{float}\ end\_value,\ \textcolor{keywordtype}{float}\ duration,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ EasingFunc\ easing\ =\ Easing::Linear);}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \mbox{\hyperlink{classTween}{Tween}}\ *CreateTweenFromTo(\textcolor{keywordtype}{float}\ *target,\ \textcolor{keywordtype}{float}\ start\_value,\ \textcolor{keywordtype}{float}\ end\_value,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ duration,\ EasingFunc\ easing\ =\ Easing::Linear);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keywordtype}{void}\ Update(\textcolor{keywordtype}{float}\ delta\_time);}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{keywordtype}{void}\ Clear();}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{size\_t}\ GetActiveTweenCount()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{classTweenManager}{TweenManager}}\&\ instance();}
+\DoxyCodeLine{00085\ \};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \textcolor{comment}{//\ Example\ usage:}}
+\DoxyCodeLine{00088\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00089\ \textcolor{comment}{int\ main()\ \{}}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ \ \ \ TweenManager\ tweenManager;}}
+\DoxyCodeLine{00091\ \textcolor{comment}{}}
+\DoxyCodeLine{00092\ \textcolor{comment}{\ \ \ \ float\ playerX\ =\ 0.0f;}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ \ \ \ float\ playerY\ =\ 0.0f;}}
+\DoxyCodeLine{00094\ \textcolor{comment}{\ \ \ \ float\ alpha\ =\ 0.0f;}}
+\DoxyCodeLine{00095\ \textcolor{comment}{}}
+\DoxyCodeLine{00096\ \textcolor{comment}{\ \ \ \ //\ Tween\ from\ current\ value\ to\ 100\ over\ 2\ seconds\ with\ ease-\/out}}
+\DoxyCodeLine{00097\ \textcolor{comment}{\ \ \ \ tweenManager.CreateTween(\&playerX,\ 100.0f,\ 2.0f,\ Easing::EaseOutQuad);}}
+\DoxyCodeLine{00098\ \textcolor{comment}{}}
+\DoxyCodeLine{00099\ \textcolor{comment}{\ \ \ \ //\ Tween\ from\ specific\ start\ to\ end\ value}}
+\DoxyCodeLine{00100\ \textcolor{comment}{\ \ \ \ auto*\ yTween\ =\ tweenManager.CreateTweenFromTo(\&playerY,\ 0.0f,\ 50.0f,\ 1.5f,\ Easing::EaseInOutCubic);}}
+\DoxyCodeLine{00101\ \textcolor{comment}{\ \ \ \ yTween-\/>SetOnComplete([]()\ \{}}
+\DoxyCodeLine{00102\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ Do\ something\ when\ tween\ completes}}
+\DoxyCodeLine{00103\ \textcolor{comment}{\ \ \ \ \});}}
+\DoxyCodeLine{00104\ \textcolor{comment}{}}
+\DoxyCodeLine{00105\ \textcolor{comment}{\ \ \ \ //\ Fade\ in\ alpha}}
+\DoxyCodeLine{00106\ \textcolor{comment}{\ \ \ \ tweenManager.CreateTween(\&alpha,\ 1.0f,\ 1.0f,\ Easing::EaseInSine);}}
+\DoxyCodeLine{00107\ \textcolor{comment}{}}
+\DoxyCodeLine{00108\ \textcolor{comment}{\ \ \ \ //\ Game\ loop}}
+\DoxyCodeLine{00109\ \textcolor{comment}{\ \ \ \ float\ deltaTime\ =\ 0.016f;\ //\ 60\ FPS}}
+\DoxyCodeLine{00110\ \textcolor{comment}{\ \ \ \ while\ (true)\ \{}}
+\DoxyCodeLine{00111\ \textcolor{comment}{\ \ \ \ \ \ \ \ tweenManager.Update(deltaTime);}}
+\DoxyCodeLine{00112\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ Render\ using\ playerX,\ playerY,\ alpha\ values}}
+\DoxyCodeLine{00113\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{00114\ \textcolor{comment}{}}
+\DoxyCodeLine{00115\ \textcolor{comment}{\ \ \ \ return\ 0;}}
+\DoxyCodeLine{00116\ \textcolor{comment}{\}}}
+\DoxyCodeLine{00117\ \textcolor{comment}{*/}}
+
+\end{DoxyCode}

@@ -1,0 +1,109 @@
+\doxysection{Line\+Input Class Reference}
+\hypertarget{classLineInput}{}\label{classLineInput}\index{LineInput@{LineInput}}
+Inheritance diagram for Line\+Input\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classLineInput}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classLineInput_a7a68879d322218970f4e021454218790}{Draw}} () override
+\item 
+void \mbox{\hyperlink{classLineInput_ab4df0f3c70acbd9c28401b77d2017de4}{Update}} (float delta\+\_\+time) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classControl}{Control}}}
+\begin{DoxyCompactItemize}
+\item 
+virtual void {\bfseries Initialize\+Layout} (\mbox{\hyperlink{classLayoutSystem}{Layout\+System}} \texorpdfstring{$\ast$}{*}system)
+\item 
+void {\bfseries Force\+Compute\+Layout} () const
+\item 
+frameflow\+::\+Node \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classControl_a5418abada82436418955a29eb713a530}{Get\+Node}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classGameObject_a1f6b69831f2c132ef9985b2f0329fbcb}{Update\+Rec}} (float delta\+\_\+time)
+\item 
+void \mbox{\hyperlink{classGameObject_a081619ba157c8ba8eda438e185ec4ff3}{Draw\+Rec}} ()
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries Add\+Child} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+void {\bfseries Show} ()
+\item 
+void {\bfseries Hide} ()
+\item 
+bool {\bfseries Is\+Visible} () const
+\item 
+void {\bfseries Delete} ()
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries Get\+Children} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classLineInput_af8e84e2e74a942b613700d26c43f00ba}\label{classLineInput_af8e84e2e74a942b613700d26c43f00ba} 
+std\+::string {\bfseries text}
+\item 
+\Hypertarget{classLineInput_ac0a86402d361b6b7fd750e8d109044b6}\label{classLineInput_ac0a86402d361b6b7fd750e8d109044b6} 
+\mbox{\hyperlink{classHBFont}{HBFont}} \texorpdfstring{$\ast$}{*} {\bfseries font} \{nullptr\}
+\item 
+\Hypertarget{classLineInput_a8e471992fff05134ecec0b3c766e640e}\label{classLineInput_a8e471992fff05134ecec0b3c766e640e} 
+Color {\bfseries color} \{BLACK\}
+\item 
+\Hypertarget{classLineInput_a2eee4ac5d55e3c65629cd025a71504cb}\label{classLineInput_a2eee4ac5d55e3c65629cd025a71504cb} 
+bool {\bfseries has\+\_\+focus} \{false\}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes inherited from \mbox{\hyperlink{classControl}{Control}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classLayoutSystem}{Layout\+System}} \texorpdfstring{$\ast$}{*} {\bfseries layout\+\_\+system\+\_\+} \{nullptr\}
+\item 
+frameflow\+::\+Node\+Id {\bfseries node\+\_\+id\+\_\+} \{frameflow\+::\+Null\+Node\}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Static Public Attributes inherited from \mbox{\hyperlink{classControl}{Control}}}
+\begin{DoxyCompactItemize}
+\item 
+static bool {\bfseries Draw\+Debug\+Borders} = true
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \mbox{\hyperlink{classGameObject}{Game\+Object}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries parent} \{nullptr\}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries children}
+\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{classLineInput_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classLineInput_a7a68879d322218970f4e021454218790}\index{LineInput@{LineInput}!Draw@{Draw}}
+\index{Draw@{Draw}!LineInput@{LineInput}}
+\doxysubsubsection{\texorpdfstring{Draw()}{Draw()}}
+{\footnotesize\ttfamily \label{classLineInput_a7a68879d322218970f4e021454218790} 
+void Line\+Input\+::\+Draw (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+The single object draw function. Usually this is too slow and you have to implement batching. 
+
+Reimplemented from \mbox{\hyperlink{classControl_a696c9955f4dc11e798836299a1a34c29}{Control}}.
+
+\Hypertarget{classLineInput_ab4df0f3c70acbd9c28401b77d2017de4}\index{LineInput@{LineInput}!Update@{Update}}
+\index{Update@{Update}!LineInput@{LineInput}}
+\doxysubsubsection{\texorpdfstring{Update()}{Update()}}
+{\footnotesize\ttfamily \label{classLineInput_ab4df0f3c70acbd9c28401b77d2017de4} 
+void Line\+Input\+::\+Update (\begin{DoxyParamCaption}\item[{float}]{delta\+\_\+time}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Single object update function, called every frame. 
+
+Reimplemented from \mbox{\hyperlink{classGameObject_aa237f2dd57b4a6ec27e64dc0a8a36c1c}{Game\+Object}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/game\+\_\+object/ui/control.\+h\item 
+src/game\+\_\+object/ui/control.\+cpp\end{DoxyCompactItemize}

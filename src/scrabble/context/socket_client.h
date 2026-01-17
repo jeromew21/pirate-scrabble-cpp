@@ -13,13 +13,14 @@ using WebSocket = WebSocketWeb;
 using WebSocket = WebSocketDesktop;
 #endif
 
-void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const std::string &password);
+namespace scrabble {
+    void UserLoginSocket(Queue &recvLoginQueue, const std::string &username, const std::string &password);
 
-void TokenAuthSocket(Queue &recvLoginQueue, std::string token);
+    void TokenAuthSocket(Queue &recvLoginQueue, const std::string &token);
 
-void NewGameSocket(Queue &recvLoginQueue, std::string token);
+    void NewGameSocket(Queue &recvLoginQueue, const std::string &token);
 
-//void JoinGameSocket(Queue &recvLoginQueue, std::string token);
+    //void JoinGameSocket(Queue &recvLoginQueue, std::string token);
 
-WebSocketImpl* create_multiplayer_game_socket(Queue *recvLoginQueue, const std::string& token, const std::string &game_id);
-
+    WebSocketImpl* create_multiplayer_game_socket(Queue *recvLoginQueue, const std::string& token, const std::string &game_id);
+}

@@ -1,0 +1,29 @@
+\doxysection{filesystem.\+h}
+\hypertarget{filesystem_8h_source}{}\label{filesystem_8h_source}\index{src/util/filesystem/filesystem.h@{src/util/filesystem/filesystem.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <filesystem>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{namespace\ }fs\ =\ std::filesystem;}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ todo:\ move\ this\ into\ function?}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#ifdef\ \_\_EMSCRIPTEN\_\_}}
+\DoxyCodeLine{00010\ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ fs::path\ FS\_ROOT\ =\ \textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00012\ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ fs::path\ FS\_ROOT\ =\ \textcolor{stringliteral}{"{}."{}};}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{keywordtype}{bool}\ read\_file(\textcolor{keyword}{const}\ std::string\ \&path,\ std::string\&\ out\_contents);}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keywordtype}{bool}\ write\_file(\textcolor{keyword}{const}\ std::string\ \&path,\ \textcolor{keyword}{const}\ std::string\ \&contents);}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ fs::path\ executable\_path();}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ fs::path\ executable\_dir();}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ }
+
+\end{DoxyCode}

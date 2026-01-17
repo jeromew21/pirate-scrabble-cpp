@@ -1,9 +1,10 @@
 #include "game_object.h"
 
-#include <algorithm>
-
 GameObject::~GameObject() = default;
 
+/**
+ * Recursive update.
+ */
 void GameObject::UpdateRec(const float delta_time) {
     Update(delta_time);
     for (const auto &child: children) {
@@ -11,6 +12,10 @@ void GameObject::UpdateRec(const float delta_time) {
     }
 }
 
+/**
+ * The recursive draw function.
+ * Usually this is too slow and you have to implement batching.
+ */
 void GameObject::DrawRec() {
     if (!visible_in_tree) return;
     Draw();
@@ -64,11 +69,15 @@ std::vector<GameObject *> GameObject::GetChildren() {
     return children;
 }
 
-// Default impl, does nothing
+/**
+ * The single object draw function. Usually this is too slow and you have to implement batching.
+ */
 void GameObject::Draw() {
 }
 
-// Default impl, does nothing
+/**
+ * Single object update function, called every frame.
+ */
 void GameObject::Update(float) {
 }
 

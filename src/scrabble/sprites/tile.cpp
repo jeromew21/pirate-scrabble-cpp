@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <memory>
-#include <tuple>
 
 #include "raylib.h"
 #include "fmt/color.h"
@@ -12,6 +11,9 @@
 #include "text/texthb.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
+#include "util/logging/logging.h"
+
+using namespace scrabble;
 
 namespace {
     constexpr float render_size = 256.f;
@@ -29,7 +31,6 @@ namespace {
 
         auto *tile = new Tile();
         sys->AddChild(tile);
-        tile->Initialize();
         auto *label = new Label();
         tile->AddChild(label);
         label->font = &font;
@@ -173,11 +174,6 @@ void main() {
     std::unique_ptr<RoundedRectShader> rounded_rect_shader;
 }
 
-void Tile::Initialize() const {
-    //GetNode()->minimum_size = {dim, dim};
-    rounded_rect_shader = std::make_unique<RoundedRectShader>();
-}
-
 void Tile::DeInitializeTextures() {
     UnloadRenderTexture(tile_texture_map);
 }
@@ -195,6 +191,7 @@ void Tile::Draw() {
 
 // TODO: make this a spritesheet, single texture
 void Tile::InitializeTextures(FT_Library ft) {
+    rounded_rect_shader = std::make_unique<RoundedRectShader>();
     tile_texture_map = LoadRenderTexture(render_size * 8, render_size * 16);
     SetTextureFilter(tile_texture_map.texture, TEXTURE_FILTER_BILINEAR);
     generate_tile_sprites(ft);

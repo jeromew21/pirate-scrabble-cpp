@@ -4,10 +4,10 @@ cmake-build-debug-visual-studio
 cmake-build-release
 cmake-build-release-visual-studio
 build
+build-web
 *.json
 *.log
 *.ini
 external/frameflow
 external/emsdk
 external/vcpkg
-build-web

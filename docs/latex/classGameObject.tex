@@ -1,0 +1,98 @@
+\doxysection{Game\+Object Class Reference}
+\hypertarget{classGameObject}{}\label{classGameObject}\index{GameObject@{GameObject}}
+Inheritance diagram for Game\+Object\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.131313cm]{classGameObject}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classGameObject_a1f6b69831f2c132ef9985b2f0329fbcb}{Update\+Rec}} (float delta\+\_\+time)
+\item 
+void \mbox{\hyperlink{classGameObject_a081619ba157c8ba8eda438e185ec4ff3}{Draw\+Rec}} ()
+\item 
+\Hypertarget{classGameObject_a31ab3f560b5d6880141f42ae9904478b}\label{classGameObject_a31ab3f560b5d6880141f42ae9904478b} 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries Add\+Child} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+\Hypertarget{classGameObject_a93a0050cf755fdaf75faf6a7b17a03c0}\label{classGameObject_a93a0050cf755fdaf75faf6a7b17a03c0} 
+void {\bfseries Show} ()
+\item 
+\Hypertarget{classGameObject_a0478198877ad1cde80eee59c0e638aeb}\label{classGameObject_a0478198877ad1cde80eee59c0e638aeb} 
+void {\bfseries Hide} ()
+\item 
+\Hypertarget{classGameObject_af06f90cbbc82993d993227f546a74d29}\label{classGameObject_af06f90cbbc82993d993227f546a74d29} 
+bool {\bfseries Is\+Visible} () const
+\item 
+\Hypertarget{classGameObject_a322beae90ff8c484e0c52da2c8b4a2a5}\label{classGameObject_a322beae90ff8c484e0c52da2c8b4a2a5} 
+void {\bfseries Delete} ()
+\item 
+\Hypertarget{classGameObject_a6b31c73acce9e5a1cdd0d0cbed8c3304}\label{classGameObject_a6b31c73acce9e5a1cdd0d0cbed8c3304} 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries Get\+Children} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \mbox{\hyperlink{classGameObject_ad3ac1deac50048cf7a1a19eb0e61ad26}{Draw}} ()
+\item 
+virtual void \mbox{\hyperlink{classGameObject_aa237f2dd57b4a6ec27e64dc0a8a36c1c}{Update}} (float delta\+\_\+time)
+\item 
+\Hypertarget{classGameObject_aca065fd029d0682754cb1292257756d6}\label{classGameObject_aca065fd029d0682754cb1292257756d6} 
+virtual void {\bfseries Add\+Child\+Hook} (\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*}child)
+\item 
+\Hypertarget{classGameObject_a8d39c3ce49e09c68566529592e7bf14b}\label{classGameObject_a8d39c3ce49e09c68566529592e7bf14b} 
+virtual void {\bfseries Delete\+Hook} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classGameObject_a4113a496ed45ca90756cfa0d8dfe6171}\label{classGameObject_a4113a496ed45ca90756cfa0d8dfe6171} 
+\mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} {\bfseries parent} \{nullptr\}
+\item 
+\Hypertarget{classGameObject_a9417a9c87322435253c41590d49858a2}\label{classGameObject_a9417a9c87322435253c41590d49858a2} 
+std\+::vector$<$ \mbox{\hyperlink{classGameObject}{Game\+Object}} \texorpdfstring{$\ast$}{*} $>$ {\bfseries children}
+\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{classGameObject_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classGameObject_ad3ac1deac50048cf7a1a19eb0e61ad26}\index{GameObject@{GameObject}!Draw@{Draw}}
+\index{Draw@{Draw}!GameObject@{GameObject}}
+\doxysubsubsection{\texorpdfstring{Draw()}{Draw()}}
+{\footnotesize\ttfamily \label{classGameObject_ad3ac1deac50048cf7a1a19eb0e61ad26} 
+void Game\+Object\+::\+Draw (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+The single object draw function. Usually this is too slow and you have to implement batching. 
+
+Reimplemented in \mbox{\hyperlink{classControl_a696c9955f4dc11e798836299a1a34c29}{Control}}, \mbox{\hyperlink{classLabel_af021691b39b1b4e87d5d1fca3e12b915}{Label}}, \mbox{\hyperlink{classLineInput_a7a68879d322218970f4e021454218790}{Line\+Input}}, \mbox{\hyperlink{structscrabble_1_1LoginContext_adbfeb79402d44366f017f184c9b6a1db}{scrabble\+::\+Login\+Context}}, \mbox{\hyperlink{structscrabble_1_1MainMenuContext_aabf0ba737aa698796100d53bde42076c}{scrabble\+::\+Main\+Menu\+Context}}, \mbox{\hyperlink{structscrabble_1_1MultiplayerContext_a3a04a1786f3f851f1a051398a8e14291}{scrabble\+::\+Multiplayer\+Context}}, \mbox{\hyperlink{classscrabble_1_1Tile_adf76b9e3b16683d18bf37429f903c713}{scrabble\+::\+Tile}}, and \mbox{\hyperlink{classSprite_a19dae127e873faf0adf984210bb5edad}{Sprite}}.
+
+\Hypertarget{classGameObject_a081619ba157c8ba8eda438e185ec4ff3}\index{GameObject@{GameObject}!DrawRec@{DrawRec}}
+\index{DrawRec@{DrawRec}!GameObject@{GameObject}}
+\doxysubsubsection{\texorpdfstring{DrawRec()}{DrawRec()}}
+{\footnotesize\ttfamily \label{classGameObject_a081619ba157c8ba8eda438e185ec4ff3} 
+void Game\+Object\+::\+Draw\+Rec (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+The recursive draw function. Usually this is too slow and you have to implement batching. \Hypertarget{classGameObject_aa237f2dd57b4a6ec27e64dc0a8a36c1c}\index{GameObject@{GameObject}!Update@{Update}}
+\index{Update@{Update}!GameObject@{GameObject}}
+\doxysubsubsection{\texorpdfstring{Update()}{Update()}}
+{\footnotesize\ttfamily \label{classGameObject_aa237f2dd57b4a6ec27e64dc0a8a36c1c} 
+void Game\+Object\+::\+Update (\begin{DoxyParamCaption}\item[{float}]{delta\+\_\+time}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+Single object update function, called every frame. 
+
+Reimplemented in \mbox{\hyperlink{classLabel_af01452e6078712cffb4d580236351f22}{Label}}, \mbox{\hyperlink{classLayoutSystem_adad177df41feefb14eb83ada144b203c}{Layout\+System}}, \mbox{\hyperlink{classLineInput_ab4df0f3c70acbd9c28401b77d2017de4}{Line\+Input}}, \mbox{\hyperlink{structscrabble_1_1LoginContext_ab274eead80a6956c688c70e43b65e5a2}{scrabble\+::\+Login\+Context}}, \mbox{\hyperlink{structscrabble_1_1MainMenuContext_a7a51f9578ca08c3797a2ca55686e0f1f}{scrabble\+::\+Main\+Menu\+Context}}, and \mbox{\hyperlink{structscrabble_1_1MultiplayerContext_a5011ff3e631c668ad9c2bd36427ab155}{scrabble\+::\+Multiplayer\+Context}}.
+
+\Hypertarget{classGameObject_a1f6b69831f2c132ef9985b2f0329fbcb}\index{GameObject@{GameObject}!UpdateRec@{UpdateRec}}
+\index{UpdateRec@{UpdateRec}!GameObject@{GameObject}}
+\doxysubsubsection{\texorpdfstring{UpdateRec()}{UpdateRec()}}
+{\footnotesize\ttfamily \label{classGameObject_a1f6b69831f2c132ef9985b2f0329fbcb} 
+void Game\+Object\+::\+Update\+Rec (\begin{DoxyParamCaption}\item[{float}]{delta\+\_\+time}{}\end{DoxyParamCaption})}
+
+Recursive update. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/game\+\_\+object/game\+\_\+object.\+h\item 
+src/game\+\_\+object/game\+\_\+object.\+cpp\end{DoxyCompactItemize}

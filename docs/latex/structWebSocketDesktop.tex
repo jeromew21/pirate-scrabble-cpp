@@ -1,0 +1,94 @@
+\doxysection{Web\+Socket\+Desktop Struct Reference}
+\hypertarget{structWebSocketDesktop}{}\label{structWebSocketDesktop}\index{WebSocketDesktop@{WebSocketDesktop}}
+
+
+{\ttfamily \#include $<$web\+\_\+socket\+\_\+desktop.\+h$>$}
+
+Inheritance diagram for Web\+Socket\+Desktop\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{structWebSocketDesktop}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structWebSocketDesktop_ac86ccca52f9a046efdec3c161c49173c}\label{structWebSocketDesktop_ac86ccca52f9a046efdec3c161c49173c} 
+{\bfseries Web\+Socket\+Desktop} (std\+::string)
+\item 
+void \mbox{\hyperlink{structWebSocketDesktop_a71d476d6e481e3741278b78b0c203f13}{connect}} () override
+\item 
+void \mbox{\hyperlink{structWebSocketDesktop_a0072db389a485f02bbc5fa8715b3eded}{send}} (const std\+::string \&message) override
+\item 
+void \mbox{\hyperlink{structWebSocketDesktop_a44da5ca0b46c0735887d0d3cb2f41124}{close}} () override
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structWebSocketDesktop_ac1d8e2a39d14e776c6730436a46b5ab1}\label{structWebSocketDesktop_ac1d8e2a39d14e776c6730436a46b5ab1} 
+ix\+::\+Web\+Socket {\bfseries ws}
+\item 
+\Hypertarget{structWebSocketDesktop_af9b909bfcb5d82bfa8ad2e2f5025139b}\label{structWebSocketDesktop_af9b909bfcb5d82bfa8ad2e2f5025139b} 
+std\+::string {\bfseries url}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes inherited from \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::function$<$ void()$>$ {\bfseries on\+\_\+open}
+\item 
+std\+::function$<$ void(const std\+::string \&)$>$ {\bfseries on\+\_\+message}
+\item 
+std\+::function$<$ void()$>$ {\bfseries on\+\_\+close}
+\item 
+std\+::function$<$ void(const std\+::string \&)$>$ {\bfseries on\+\_\+error}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Public Types inherited from \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}}
+\begin{DoxyCompactItemize}
+\item 
+using {\bfseries Ptr} = std\+::shared\+\_\+ptr$<$\mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}$>$
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Desktop implementation for sockets, on top of IXWeb\+Socket. 
+
+\label{doc-func-members}
+\Hypertarget{structWebSocketDesktop_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{structWebSocketDesktop_a44da5ca0b46c0735887d0d3cb2f41124}\index{WebSocketDesktop@{WebSocketDesktop}!close@{close}}
+\index{close@{close}!WebSocketDesktop@{WebSocketDesktop}}
+\doxysubsubsection{\texorpdfstring{close()}{close()}}
+{\footnotesize\ttfamily \label{structWebSocketDesktop_a44da5ca0b46c0735887d0d3cb2f41124} 
+void Web\+Socket\+Desktop\+::close (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}.
+
+\Hypertarget{structWebSocketDesktop_a71d476d6e481e3741278b78b0c203f13}\index{WebSocketDesktop@{WebSocketDesktop}!connect@{connect}}
+\index{connect@{connect}!WebSocketDesktop@{WebSocketDesktop}}
+\doxysubsubsection{\texorpdfstring{connect()}{connect()}}
+{\footnotesize\ttfamily \label{structWebSocketDesktop_a71d476d6e481e3741278b78b0c203f13} 
+void Web\+Socket\+Desktop\+::connect (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}.
+
+\Hypertarget{structWebSocketDesktop_a0072db389a485f02bbc5fa8715b3eded}\index{WebSocketDesktop@{WebSocketDesktop}!send@{send}}
+\index{send@{send}!WebSocketDesktop@{WebSocketDesktop}}
+\doxysubsubsection{\texorpdfstring{send()}{send()}}
+{\footnotesize\ttfamily \label{structWebSocketDesktop_a0072db389a485f02bbc5fa8715b3eded} 
+void Web\+Socket\+Desktop\+::send (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{message}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}.
+
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/util/network/sockets/web\+\_\+socket\+\_\+desktop.\+h\item 
+src/util/network/sockets/web\+\_\+socket\+\_\+desktop.\+cpp\end{DoxyCompactItemize}

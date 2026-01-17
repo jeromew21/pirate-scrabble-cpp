@@ -1,0 +1,53 @@
+\doxysection{Web\+Socket\+Impl Struct Reference}
+\hypertarget{structWebSocketImpl}{}\label{structWebSocketImpl}\index{WebSocketImpl@{WebSocketImpl}}
+
+
+{\ttfamily \#include $<$web\+\_\+socket.\+h$>$}
+
+Inheritance diagram for Web\+Socket\+Impl\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{structWebSocketImpl}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structWebSocketImpl_ac3de73b280d8e6858509cccbff10a218}\label{structWebSocketImpl_ac3de73b280d8e6858509cccbff10a218} 
+using {\bfseries Ptr} = std\+::shared\+\_\+ptr$<$\mbox{\hyperlink{structWebSocketImpl}{Web\+Socket\+Impl}}$>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structWebSocketImpl_af111e81df63aae489bcda31b69b2817b}\label{structWebSocketImpl_af111e81df63aae489bcda31b69b2817b} 
+virtual void {\bfseries connect} ()=0
+\item 
+\Hypertarget{structWebSocketImpl_ae9054c1ce2597b18bd36067d6c1efc32}\label{structWebSocketImpl_ae9054c1ce2597b18bd36067d6c1efc32} 
+virtual void {\bfseries send} (const std\+::string \&message)=0
+\item 
+\Hypertarget{structWebSocketImpl_a3329b1f743e0fc32ce582e97af23965c}\label{structWebSocketImpl_a3329b1f743e0fc32ce582e97af23965c} 
+virtual void {\bfseries close} ()=0
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{structWebSocketImpl_ae768633580efbc6ff6bb56eba92adcfd}\label{structWebSocketImpl_ae768633580efbc6ff6bb56eba92adcfd} 
+std\+::function$<$ void()$>$ {\bfseries on\+\_\+open}
+\item 
+\Hypertarget{structWebSocketImpl_a8cd674e40c358cf299ac6345e1684628}\label{structWebSocketImpl_a8cd674e40c358cf299ac6345e1684628} 
+std\+::function$<$ void(const std\+::string \&)$>$ {\bfseries on\+\_\+message}
+\item 
+\Hypertarget{structWebSocketImpl_a898f7b94eb138ebfb661929f9916c741}\label{structWebSocketImpl_a898f7b94eb138ebfb661929f9916c741} 
+std\+::function$<$ void()$>$ {\bfseries on\+\_\+close}
+\item 
+\Hypertarget{structWebSocketImpl_af1a609805a821f206eb6999a55e0cd52}\label{structWebSocketImpl_af1a609805a821f206eb6999a55e0cd52} 
+std\+::function$<$ void(const std\+::string \&)$>$ {\bfseries on\+\_\+error}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Abstract base class for web socket connection. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/util/network/sockets/web\+\_\+socket.\+h\end{DoxyCompactItemize}
