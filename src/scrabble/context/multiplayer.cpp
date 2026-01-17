@@ -47,7 +47,7 @@ namespace {
         }
     }
 
-    constexpr float default_margin = 8.0f;
+    constexpr float DEFAULT_MARGIN = 8.0f;
 
     MultiplayerAction start_action(const int player_id) {
         const auto action = MultiplayerAction{
@@ -137,22 +137,22 @@ MultiplayerContext::MultiplayerContext() {
     layout_.right->GetNode()->minimum_size = {100, 0};
     layout_.right->GetNode()->expand.x = 1;
 
-    auto *p0 = margin_all(default_margin);
+    auto *p0 = margin_all(DEFAULT_MARGIN);
     layout_.left->AddChild(p0);
     p0->GetNode()->anchors = {0, 0, 1, 0};
     p0->GetNode()->expand.y = 1;
 
-    auto *p1 = margin_all(default_margin);
+    auto *p1 = margin_all(DEFAULT_MARGIN);
     layout_.right->AddChild(p1);
     p1->GetNode()->anchors = {0, 0, 1, 0};
     p1->GetNode()->expand.y = 1;
 
-    auto *p2 = margin_all(default_margin);
+    auto *p2 = margin_all(DEFAULT_MARGIN);
     layout_.left->AddChild(p2);
     p2->GetNode()->anchors = {0, 0, 1, 0};
     p2->GetNode()->expand.y = 1;
 
-    auto *p3 = margin_all(default_margin);
+    auto *p3 = margin_all(DEFAULT_MARGIN);
     layout_.right->AddChild(p3);
     p3->GetNode()->anchors = {0, 0, 1, 0};
     p3->GetNode()->expand.y = 1;
@@ -264,16 +264,16 @@ void MultiplayerContext::Draw() {
 void MultiplayerContext::RedrawLayout() {
     using namespace frameflow;
 
-    layout_.middle->GetNode()->minimum_size = {(2 * default_margin + Tile::dim) * 10, 0};
+    layout_.middle->GetNode()->minimum_size = {(2 * DEFAULT_MARGIN + Tile::dim) * 10, 0};
 
     for (auto *child: layout_.public_tiles->GetChildren()) {
         child->Delete();
     }
     layout_.tile_slots.clear();
     for (int i = 0; i < 144; i++) {
-        auto *outer = margin_all(default_margin);
+        auto *outer = margin_all(DEFAULT_MARGIN);
         layout_.public_tiles->AddChild(outer);
-        outer->GetNode()->minimum_size = {Tile::dim + default_margin * 2, Tile::dim + default_margin * 2};
+        outer->GetNode()->minimum_size = {Tile::dim + DEFAULT_MARGIN * 2, Tile::dim + DEFAULT_MARGIN * 2};
 
         auto *inner = new Control();
         outer->AddChild(inner);
@@ -313,10 +313,10 @@ void MultiplayerContext::RedrawGame() const {
         }
         for (const auto &[history, id]: game->state.playerWords[player_index]) {
             const auto &word = history.front();
-            auto *word_margin = margin_all(default_margin * 2.0f);
+            auto *word_margin = margin_all(DEFAULT_MARGIN * 2.0f);
             flow->AddChild(word_margin);
             word_margin->GetNode()->minimum_size = {
-                default_margin * 4 + (Tile::dim + 2 * 2) * static_cast<float>(word.length()), Tile::dim + 2 * 2 + default_margin * 4
+                DEFAULT_MARGIN * 4 + (Tile::dim + 2 * 2) * static_cast<float>(word.length()), Tile::dim + 2 * 2 + DEFAULT_MARGIN * 4
             };
             auto *word_box = horizontal_box();
             word_margin->AddChild(word_box);

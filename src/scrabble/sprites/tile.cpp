@@ -16,13 +16,13 @@
 using namespace scrabble;
 
 namespace {
-    constexpr float render_size = 256.f;
+    constexpr float RENDER_SIZE = 256.f;
     float2 map_[128];
     RenderTexture2D tile_texture_map;
 
     void generate_tile_sprites(FT_Library ft) {
         const float prev_dim = Tile::dim;
-        Tile::dim = render_size;
+        Tile::dim = RENDER_SIZE;
         const auto face = ft_load_font(ft, FS_ROOT / "assets" / "arial.ttf");
 
         HBFont font(face, static_cast<int>(Tile::dim * 0.85f)); // pixel size 48
@@ -46,8 +46,10 @@ namespace {
         Control::DrawDebugBorders = false;
         for (int row = 0; row < 16; row++) {
             for (int col = 0; col < 8; col++) {
-                char code = row * 8 + col;
-                tile->GetNode()->bounds.origin = {Tile::dim * col, Tile::dim * (15 - row)};
+                const char code = static_cast<char>(row * 8 + col);
+                tile->GetNode()->bounds.origin = {
+                    static_cast<float>(col) * Tile::dim, Tile::dim * (15.0f - static_cast<float>(row))
+                };
                 label->text = std::string(1, code);
                 tile->UpdateRec(0.016f);
                 compute_layout(sys->system.get(), tile->node_id_);
@@ -56,7 +58,7 @@ namespace {
                     tile->DrawRec();
                 }
                 EndTextureMode();
-                map_[code] = {Tile::dim * col, Tile::dim * row};
+                map_[code] = {static_cast<float>(col) * Tile::dim, static_cast<float>(row) * Tile::dim};
             }
         }
         Control::DrawDebugBorders = temp;
@@ -66,15 +68,15 @@ namespace {
     }
 
     class RoundedRectShader {
-        Shader shader;
-        Texture2D blankTex; // Add this
+        Shader shader{};
+        Texture2D blankTex{};
         int sizeLoc, radiusLoc, colorLoc;
 
     public:
         RoundedRectShader() {
             const char *fragment_shader_code =
 #if defined(PLATFORM_WEB)
-                    R"(#version 100
+                            R"(#version 100
 precision mediump float;
 
 varying vec2 fragTexCoord;
@@ -99,7 +101,7 @@ void main() {
 }
 )"
 #else
-                    R"(#version 330
+                            R"(#version 330
 
 in vec2 fragTexCoord;
 out vec4 finalColor;
@@ -124,7 +126,7 @@ void main() {
 }
 )"
 #endif
-            ;
+                    ;
             SetTraceLogLevel(LOG_DEBUG);
             shader = LoadShaderFromMemory(nullptr, fragment_shader_code);
             // Check if shader loaded
@@ -143,13 +145,18 @@ void main() {
             UnloadImage(img);
         }
 
-        void Draw(float x, float y, float width, float height, float radius, Color color) {
+        void Draw(float x, float y, float width, float height, float radius, Color color) const {
             BeginShaderMode(shader);
 
-            float size[2] = {width, height};
+            const float size[2] = {(float) width, (float) height};
             SetShaderValue(shader, sizeLoc, size, SHADER_UNIFORM_VEC2);
             SetShaderValue(shader, radiusLoc, &radius, SHADER_UNIFORM_FLOAT);
-            float col[4] = {color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f};
+            const float col[4] = {
+                static_cast<float>(color.r) / 255.0f,
+                static_cast<float>(color.g) / 255.0f,
+                static_cast<float>(color.b) / 255.0f,
+                static_cast<float>(color.a) / 255.0f
+            };
             SetShaderValue(shader, colorLoc, col, SHADER_UNIFORM_VEC4);
 
             // Use DrawTexturePro to ensure proper UVs
@@ -179,7 +186,7 @@ void Tile::DeInitializeTextures() {
 }
 
 void Tile::Draw() {
-    const Color color = {243, 237, 166, 255};
+    constexpr Color color = {243, 237, 166, 255};
     const auto node = *GetNode();
     rounded_rect_shader->Draw(
         node.bounds.origin.x,
@@ -192,7 +199,7 @@ void Tile::Draw() {
 // TODO: make this a spritesheet, single texture
 void Tile::InitializeTextures(FT_Library ft) {
     rounded_rect_shader = std::make_unique<RoundedRectShader>();
-    tile_texture_map = LoadRenderTexture(render_size * 8, render_size * 16);
+    tile_texture_map = LoadRenderTexture(RENDER_SIZE * 8, RENDER_SIZE * 16);
     SetTextureFilter(tile_texture_map.texture, TEXTURE_FILTER_BILINEAR);
     generate_tile_sprites(ft);
 }

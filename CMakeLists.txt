@@ -121,7 +121,7 @@ target_link_libraries(${TARGET_NAME}
 )
 
 if (WIN32)
-    target_link_libraries(pirate-scrabble PRIVATE Bcrypt)
+    target_link_libraries(${TARGET_NAME} PRIVATE Bcrypt)
 endif()
 
 if (NOT EMSCRIPTEN)
@@ -131,7 +131,13 @@ if (NOT EMSCRIPTEN)
     )
 endif ()
 
-# Detect Emscripten
+target_compile_definitions(${TARGET_NAME} PRIVATE
+        $<$<CONFIG:Debug>:BUILD_DEBUG>
+        $<$<CONFIG:Release>:BUILD_RELEASE>
+        $<$<CONFIG:RelWithDebInfo>:BUILD_RELWITHDEBINFO>
+        $<$<CONFIG:MinSizeRel>:BUILD_MINSIZEREL>
+)
+
 if (EMSCRIPTEN)
     message(STATUS "Building for Emscripten")
 
@@ -174,3 +180,38 @@ if (NOT EMSCRIPTEN)
     # Make sure it runs before your target links
     add_dependencies(${TARGET_NAME} copy_assets_target)
 endif ()
+
+# Build timestamp
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S" UTC)
+
+target_compile_definitions(${TARGET_NAME} PRIVATE BUILD_TIMESTAMP_UTC="${BUILD_TIMESTAMP}")
+
+find_package(Git REQUIRED)
+
+execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+target_compile_definitions(${TARGET_NAME} PRIVATE
+        GIT_COMMIT_HASH=\"${GIT_COMMIT_HASH}\"
+)
+
+find_package(Doxygen REQUIRED)
+
+set(DOXYFILE_IN  ${CMAKE_SOURCE_DIR}/Doxyfile)
+set(DOXYFILE_OUT ${CMAKE_BINARY_DIR}/Doxyfile)
+
+configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
+
+file(GLOB_RECURSE DOXY_INPUTS
+        ${CMAKE_SOURCE_DIR}/src/*.h
+        ${CMAKE_SOURCE_DIR}/include/*.h)
+
+add_custom_target(docs
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
+        DEPENDS ${DOXY_INPUTS}
+)
+

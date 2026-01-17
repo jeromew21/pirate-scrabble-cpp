@@ -30,6 +30,28 @@
 using namespace scrabble;
 
 namespace {
+#if defined(BUILD_DEBUG)
+    constexpr const char *BUILD_CONFIG = "Debug";
+#elif defined(BUILD_RELEASE)
+    constexpr const char *BUILD_CONFIG = "Release";
+#elif defined(BUILD_RELWITHDEBINFO)
+    constexpr const char *BUILD_CONFIG = "RelWithDebInfo";
+#elif defined(BUILD_MINSIZEREL)
+    constexpr const char *BUILD_CONFIG = "MinSizeRel";
+#else
+    constexpr const char *BUILD_CONFIG = "Unknown";
+#endif
+
+#ifndef GIT_COMMIT_HASH
+#define GIT_COMMIT_HASH "unknown"
+#endif
+    constexpr const char* BUILD_GIT_HASH = GIT_COMMIT_HASH;
+
+#ifndef BUILD_TIMESTAMP_UTC
+#define BUILD_TIMESTAMP_UTC "unknown"
+#endif
+    constexpr const char* BUILD_TIMESTAMP = BUILD_TIMESTAMP_UTC;
+
     std::function<void()> main_loop_function;
 
     extern "C" void loop_wrapper() {
@@ -117,11 +139,11 @@ namespace {
 
     bool read_token(const fs::path &path, std::string &out_token) {
 #ifdef __EMSCRIPTEN__
-        const char* key = path.c_str();
-        char* val = get_local_storage(key);
+        const char *key = path.c_str();
+        char *val = get_local_storage(key);
         std::string data(val);
         out_token.append(data);
-        free(val);  // must free the WASM heap allocation
+        free(val); // must free the WASM heap allocation
         const bool result = true;
 #else
         const bool result = read_file(path.string(), out_token);
@@ -164,9 +186,10 @@ int main() {
     // Initialize raylib
     // TODO: Consider drawing an initial image
     // -------------------------
+    const std::string window_title = fmt::format("Pirate Scrabble ({})", BUILD_CONFIG);
     InitCrossPlatformWindow(persistent_data.window_width,
                             persistent_data.window_height,
-                            "Pirate Scrabble");
+                            window_title.c_str());
 
     // -------------------------
     // Initialize FreeType
@@ -298,8 +321,14 @@ int main() {
             persistent_data.show_debug_window = true;
             if (persistent_data.show_debug_window) {
                 ImGui::Begin("Debug", &persistent_data.show_debug_window);
+                if (ImGui::Button("Exit")) {
+                    request_exit = true;
+                }
+                ImGui::Text("Git hash: %s", BUILD_GIT_HASH);
+                ImGui::Text("Build timestamp: %s", BUILD_TIMESTAMP);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
                 ImGui::Checkbox("Draw debug borders", &Control::DrawDebugBorders);
+                ImGui::Separator();
                 ImGui::Text("UpdateRec average: %f ms", perf.update_avg);
                 ImGui::Text("DrawRec average: %f ms", perf.draw_avg);
                 ImGui::Separator();
