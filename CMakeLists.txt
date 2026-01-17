@@ -85,11 +85,11 @@ set(TARGET_SOURCES
         src/game_object/entity/sprite.cpp
         src/game_object/entity/sprite.h
         src/util/logging/logging.h
-        src/text/freetype_library.cpp
-        src/text/freetype_library.h
         src/util/logging/logging.cpp
         src/util/scope_exit_callback.h
         src/util/serialization/serialization.h
+        src/scrabble/actions/legal_actions.h
+        src/scrabble/actions/legal_actions.cpp
 )
 
 if (EMSCRIPTEN)

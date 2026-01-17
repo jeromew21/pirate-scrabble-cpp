@@ -62,6 +62,9 @@ namespace scrabble {
         std::string stolenWordId;
         int actingPlayer;
         std::optional<int> stolenPlayer;
+
+        bool operator==(const GameStateUpdate&) const = default;
+        bool operator!=(const GameStateUpdate&) const = default;
     };
 
     NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(

@@ -17,6 +17,8 @@
 #include "game_object/ui/layout_system.h"
 #include "scrabble/sprites/tile.h"
 #include "types_inspector.h"
+#include "game_object/tween/tween.h"
+#include "scrabble/actions/legal_actions.h"
 #include "util/queue.h"
 #include "util/network/sockets/web_socket.h"
 
@@ -25,58 +27,126 @@ using namespace scrabble;
 namespace {
     WebSocketImpl *game_socket{nullptr};
 
-    std::optional<MultiplayerGame> game{std::nullopt};
+    std::optional<MultiplayerGame> game_opt{std::nullopt};
+
+    bool want_word_input_focus_{false};
+
+    size_t user_index_;
 
     struct TileDrawData {
         float2 dimensions;
         float2 position;
+        float rotation;
         Rectangle region;
     };
 
-    std::vector<TileDrawData> tile_draw_data;
+    std::vector<TileDrawData> public_tile_draw_data;
+    std::vector<TileDrawData> word_tile_draw_data;
+
+    std::optional<GameStateUpdate> last_action_;
 
     void DrawTiles() {
         const auto texture = Tile::GetTileTexture();
-        for (const auto &data: tile_draw_data) {
+        for (const auto &data: public_tile_draw_data) {
+            const auto xh = data.dimensions.x / 2.0f;
+            const auto yh = data.dimensions.y / 2.0f;
             DrawTexturePro(texture.texture,
                            data.region,
-                           {data.position.x, data.position.y, data.dimensions.x, data.dimensions.y},
-                           {0, 0},
-                           0,
+                           {data.position.x + xh, data.position.y + yh, data.dimensions.x, data.dimensions.y},
+                           {xh, yh},
+                           data.rotation,
+                           WHITE);
+        }
+        for (const auto &data: word_tile_draw_data) {
+            const auto xh = data.dimensions.x / 2.0f;
+            const auto yh = data.dimensions.y / 2.0f;
+            DrawTexturePro(texture.texture,
+                           data.region,
+                           {data.position.x + xh, data.position.y + yh, data.dimensions.x, data.dimensions.y},
+                           {xh, yh},
+                           data.rotation,
                            WHITE);
         }
     }
 
     constexpr float DEFAULT_MARGIN = 8.0f;
 
-    MultiplayerAction start_action(const int player_id) {
+    std::string start_action(const int player_id) {
         const auto action = MultiplayerAction{
             .playerId = player_id,
             .actionType = "START",
             .action = std::nullopt,
             .data = ""
         };
-        return action;
+        return serialize(action);
     }
 
-    MultiplayerAction poll_action(const int player_id) {
+    std::string poll_action(const int player_id) {
         const auto action = MultiplayerAction{
             .playerId = player_id,
             .actionType = "POLL",
             .action = std::nullopt,
             .data = ""
         };
-        return action;
+        return serialize(action);
     }
 
-    MultiplayerAction chat_action(const int player_id, const std::string &message) {
+    std::string chat_action(const int player_id, const std::string &message) {
         const auto action = MultiplayerAction{
             .playerId = player_id,
             .actionType = "CHAT",
             .action = std::nullopt,
             .data = message
         };
-        return action;
+        return serialize(action);
+    }
+
+    std::string buzz_action(const int player_id) {
+        const auto action = MultiplayerAction{
+            .playerId = player_id,
+            .actionType = "BUZZ",
+            .action = std::nullopt,
+            .data = ""
+        };
+        return serialize(action);
+    }
+
+    std::string flip_action(const int player_id, const int user_index, const std::string &tile_id) {
+        const auto action = MultiplayerAction{
+            .playerId = player_id,
+            .actionType = "ACTION",
+            .action = GameStateUpdate{
+                .actionType = "FLIP",
+                .flippedTileId = tile_id,
+                .claimWord = "",
+                .stolenWordId = "",
+                .actingPlayer = user_index,
+                .stolenPlayer = std::nullopt
+            },
+            .data = ""
+        };
+        return serialize(action);
+    }
+
+    std::string claim_action(const int player_id,
+                             const int user_index,
+                             const std::optional<int> stolen_user_index,
+                             const std::string &stolen_word_id,
+                             const std::string &claim_word) {
+        const auto action = MultiplayerAction{
+            .playerId = player_id,
+            .actionType = "ACTION",
+            .action = GameStateUpdate{
+                .actionType = "CLAIM",
+                .flippedTileId = "",
+                .claimWord = claim_word,
+                .stolenWordId = stolen_word_id,
+                .actingPlayer = user_index,
+                .stolenPlayer = stolen_user_index
+            },
+            .data = ""
+        };
+        return serialize(action);
     }
 
     FlowContainer *horizontal_flow() {
@@ -184,7 +254,7 @@ MultiplayerContext::~MultiplayerContext() {
 void MultiplayerContext::Update(const float delta_time) {
     switch (state) {
         case State::PreInit:
-            break;
+            return;
         case State::Gateway: {
             // join or create
             std::string msg;
@@ -201,37 +271,48 @@ void MultiplayerContext::Update(const float delta_time) {
             while (recv_join_queue.try_dequeue(msg)) {
             }
             */
-            break;
+            return;
         }
-        case State::Playing:
-        case State::Lobby: {
-            time_since_last_poll += delta_time;
-            if (time_since_last_poll > 0.100) {
-                assert(game_socket != nullptr);
-                game_socket->send(serialize(poll_action(main_menu->user_opt->id)));
-                time_since_last_poll = 0;
+        default: break;
+    }
+
+    // State is Playing or Lobby
+    if (state == State::Playing) {
+        PollGameEvents();
+    }
+    time_since_last_poll += delta_time;
+    if (time_since_last_poll > 0.100) {
+        assert(game_socket != nullptr);
+        game_socket->send(poll_action(main_menu->user_opt->id));
+        time_since_last_poll = 0;
+    }
+    std::string msg;
+    while (recv_game_queue.try_dequeue(msg)) {
+        if (auto response = deserialize<MultiplayerActionResponse>(msg); response.ok) {
+            if (!game_opt.has_value()) {
+                auto it = std::find(
+                    response.game->playerIds.begin(),
+                    response.game->playerIds.end(),
+                    main_menu->user_opt->id);
+                user_index_ = std::distance(response.game->playerIds.begin(), it);
+                game_opt = response.game;
+                Logger::instance().info("Entering playing state with user index {}", user_index_);
+                EnterPlaying();
+                RedrawGame();
             }
-            std::string msg;
-            while (recv_game_queue.try_dequeue(msg)) {
-                if (auto response = deserialize<MultiplayerActionResponse>(msg); response.ok) {
-                    if (game) {
-                        if (state == State::Lobby && response.game->phase != "CREATED") {
-                            EnterPlaying();
-                        }
-                    }
-                    if (response.game->phase == "CREATED") {
-                        state = State::Lobby;
-                    } else {
-                        state = State::Playing;
-                    }
-                    game = response.game;
-                    RedrawGame(); //force redraw after every update
-                } else {
-                    Logger::instance().error("{}", response.errorMessage);
-                }
-                break;
+            if (response.game->phase == "CREATED") {
+                state = State::Lobby;
+            } else {
+                state = State::Playing;
             }
-            break;
+            if (response.game->lastAction != last_action_) {
+                Logger::instance().info("Recieved a new action");
+                last_action_ = response.game->lastAction;
+                HandleAction(*game_opt, *response.game);
+                game_opt = response.game;
+            }
+        } else {
+            Logger::instance().error("{}", response.errorMessage);
         }
     }
 }
@@ -240,32 +321,29 @@ void MultiplayerContext::Draw() {
     switch (state) {
         case State::PreInit: {
             canvas->Hide();
-            break;
+            return;
         }
         case State::Gateway: {
             canvas->Hide();
             RenderGateway();
-            break;
+            return;
         }
-        case State::Playing:
-        case State::Lobby: {
-            if (should_redraw_layout) {
-                RedrawLayout();
-                should_redraw_layout = false;
-            }
-            canvas->Show();
-            ImGui::Begin("Multiplayer Debug");
-            RenderChat();
-            if (state == State::Lobby) {
-                RenderLobby();
-            } else {
-                RenderPlaying();
-            }
-            ImGui::End();
-            DrawTiles();
-            break;
-        }
+        default: break;
     }
+    if (should_redraw_layout) {
+        RedrawLayout();
+        should_redraw_layout = false;
+    }
+    canvas->Show();
+    RenderChat();
+    ImGui::Begin("Multiplayer");
+    if (state == State::Lobby) {
+        RenderLobby();
+    } else {
+        RenderPlaying();
+    }
+    ImGui::End();
+    DrawTiles();
 }
 
 void MultiplayerContext::RedrawLayout() {
@@ -292,38 +370,36 @@ void MultiplayerContext::RedrawLayout() {
 
 void MultiplayerContext::RedrawGame() const {
     if (state == State::Gateway || state == State::PreInit) return;
-    if (!game.has_value()) return;
+    if (!game_opt.has_value()) return;
 
-    tile_draw_data.clear();
+    public_tile_draw_data.clear();
+    word_tile_draw_data.clear();
 
-    {
-        int i = 0;
-        for (auto tile_props: game->state.tiles) {
-            const auto *slot = layout_.tile_slots[i];
-
-            auto region = Tile::GetTileTextureRegion(tile_props.letter.front());
-            tile_draw_data.push_back({
-                {Tile::dim, Tile::dim},
-                {slot->GetNode()->bounds.origin.x, slot->GetNode()->bounds.origin.y},
-                Rectangle{region.x, region.y, 256, -256}
-            });
-
-            i++;
-        }
+    for (int i = 0; i < game_opt->state.tiles.size(); i++) {
+        const auto &tile_props = game_opt->state.tiles[i];
+        const auto *slot = layout_.tile_slots[i];
+        const char letter = tile_props.faceUp ? tile_props.letter.front() : '\0';
+        const auto region = Tile::GetTileTextureRegion(letter);
+        public_tile_draw_data.push_back({
+            {Tile::dim, Tile::dim},
+            {slot->GetNode()->bounds.origin.x, slot->GetNode()->bounds.origin.y},
+            0,
+            Rectangle{region.x, region.y, 256, -256}
+        });
     }
 
-
-    for (int player_index = 0; player_index < game->state.playerCount; player_index++) {
+    for (int player_index = 0; player_index < game_opt->state.playerCount; player_index++) {
         auto *flow = layout_.player_flows[player_index];
         for (auto *child: flow->GetChildren()) {
             child->Delete();
         }
-        for (const auto &[history, id]: game->state.playerWords[player_index]) {
+        for (const auto &[history, id]: game_opt->state.playerWords[player_index]) {
             const auto &word = history.front();
             auto *word_margin = margin_all(DEFAULT_MARGIN * 2.0f);
             flow->AddChild(word_margin);
             word_margin->GetNode()->minimum_size = {
-                DEFAULT_MARGIN * 4 + (Tile::dim + 2 * 2) * static_cast<float>(word.length()), Tile::dim + 2 * 2 + DEFAULT_MARGIN * 4
+                DEFAULT_MARGIN * 4 + (Tile::dim + 2 * 2) * static_cast<float>(word.length()),
+                Tile::dim + 2 * 2 + DEFAULT_MARGIN * 4
             };
             auto *word_box = horizontal_box();
             word_margin->AddChild(word_box);
@@ -337,23 +413,15 @@ void MultiplayerContext::RedrawGame() const {
                 tile->GetNode()->minimum_size = {Tile::dim, Tile::dim};
                 tile->GetNode()->anchors = {0, 0, 1, 1};
 
-                flow->ForceComputeLayout();
+                flow->ForceComputeLayout(); // todo, defer this after
 
-                auto region = Tile::GetTileTextureRegion(c);
-                tile_draw_data.push_back({
+                const auto region = Tile::GetTileTextureRegion(c);
+                word_tile_draw_data.push_back({
                     {Tile::dim, Tile::dim},
                     {tile->GetNode()->bounds.origin.x, tile->GetNode()->bounds.origin.y},
+                    0,
                     Rectangle{region.x, region.y, 256, -256}
                 });
-
-                /*
-                auto *sprite = new Sprite();
-                sprite->SetTexture(Tile::GetTileTexture().texture, ::float2{Tile::dim, Tile::dim});
-                auto region = Tile::GetTileTextureRegion(c);
-                sprite->SetTextureRegion({region.x, region.y, 256, -256});
-                sprite->transform.local_position = {tile->GetNode()->bounds.origin.x, tile->GetNode()->bounds.origin.y};
-                tile->AddChild(sprite);
-                */
             }
         }
     }
@@ -379,10 +447,11 @@ void MultiplayerContext::RenderGateway() {
 }
 
 void MultiplayerContext::RenderChat() const {
-    if (!game) return;
+    if (!game_opt) return;
     assert(game_socket != nullptr);
 
     ImGui::Begin("Chat", nullptr, ImGuiWindowFlags_NoScrollbar);
+    ImGui::PushFont(main_menu->monospace_font);
 
     // Calculate input height
     const float inputHeight = ImGui::GetTextLineHeight() * 3 + ImGui::GetStyle().FramePadding.y * 2;
@@ -395,7 +464,7 @@ void MultiplayerContext::RenderChat() const {
                           ImVec2(0, -reservedHeight), // Reserve space for separator + input
                           ImGuiChildFlags_Borders);
 
-        for (const auto &msg: game->chat) {
+        for (const auto &msg: game_opt->chat) {
             // Timestamp
             ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "[%s]", msg.timestamp.c_str());
             ImGui::SameLine();
@@ -443,25 +512,60 @@ void MultiplayerContext::RenderChat() const {
 
     // Send message when Enter is pressed (without Ctrl)
     if (enterPressed && !inputBuffer.empty()) {
-        game_socket->send(serialize(chat_action(main_menu->user_opt->id, inputBuffer)));
+        game_socket->send(chat_action(main_menu->user_opt->id, inputBuffer));
         inputBuffer.clear();
         setFocus = true; // Retain focus
     }
 
+    ImGui::PopFont();
     ImGui::End();
 }
 
 void MultiplayerContext::RenderLobby() const {
     assert(game_socket != nullptr);
     if (ImGui::Button("Start Game")) {
-        game_socket->send(serialize(start_action(main_menu->user_opt->id)));
+        game_socket->send(start_action(main_menu->user_opt->id));
     }
 }
 
 void MultiplayerContext::RenderPlaying() const {
-    assert(game.has_value());
-    ImGui::Text("%s", game->phase.c_str());
-    InspectStruct("game", *game);
+    assert(game_opt.has_value());
+    assert(game_socket != nullptr);
+    static std::string word_input;
+    if (want_word_input_focus_) {
+        ImGui::SetKeyboardFocusHere();
+        want_word_input_focus_ = false;
+    }
+    constexpr ImGuiInputFlags flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCharFilter;
+    static auto filter = [](ImGuiInputTextCallbackData *data) {
+        const ImWchar c = data->EventChar;
+        if (c == ' ')
+            return 1;
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            if (c >= 'a' && c <= 'z')
+                data->EventChar = c - 'a' + 'A'; // force uppercase
+            return 0;
+        }
+        return 1;
+    };
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 12)); // vertical + horizontal
+    ImGui::PushFont(main_menu->big_font); // optional if you have one
+
+    ImGui::SetNextItemWidth(600.0f);
+
+    if (ImGui::InputText("Word", &word_input, flags, filter)) {
+        std::transform(word_input.begin(), word_input.end(), word_input.begin(),
+                       [](unsigned char c) { return std::toupper(c); });
+        SendWord(word_input);
+        word_input.clear();
+    }
+
+    ImGui::PopFont();
+    ImGui::PopStyleVar();
+    ImGui::Text("%s", game_opt->phase.c_str());
+    InspectStruct("game", *game_opt);
 }
 
 void MultiplayerContext::EnterGateway() {
@@ -475,6 +579,7 @@ void MultiplayerContext::EnterGateway() {
 }
 
 void MultiplayerContext::EnterLobby(const std::string &game_id) {
+    Logger::instance().info("Entering game lobby: {}", game_id);
     state = State::Lobby;
     if (game_socket != nullptr) {
         Logger::instance().info("Closing and resetting socket");
@@ -489,5 +594,95 @@ void MultiplayerContext::EnterLobby(const std::string &game_id) {
 }
 
 void MultiplayerContext::EnterPlaying() {
+    Logger::instance().info("Entering playing");
     state = State::Playing;
+}
+
+void MultiplayerContext::PollGameEvents() const {
+    const bool want_mouse = ImGui::GetIO().WantCaptureMouse;
+    const bool left_mouse_down = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    const auto mouse_position = GetMousePosition();
+    for (int i = 0; i < public_tile_draw_data.size(); i++) {
+        const auto data = public_tile_draw_data[i];
+        const Rectangle rect = {
+            data.position.x,
+            data.position.y,
+            data.dimensions.x,
+            data.dimensions.y
+        };
+        const bool is_over_rect = CheckCollisionPointRec(mouse_position, rect);
+        if (!want_mouse && left_mouse_down && is_over_rect) {
+            auto &tile_props = game_opt->state.tiles[i];
+            FlipTile(tile_props.id);
+        }
+    }
+    if (IsKeyPressed(KEY_SPACE)) {
+        want_word_input_focus_ = true;
+    }
+}
+
+void MultiplayerContext::SendWord(const std::string &word) const {
+    Logger::instance().info("Sending word: {}", word);
+
+    game_socket->send(buzz_action(main_menu->user_opt->id));
+
+    for (int i = 0; i < game_opt->state.playerCount; i++) {
+        for (auto &steal_candidate: game_opt->state.playerWords[i]) {
+            if (can_steal_word(word, steal_candidate, game_opt->state)) {
+                game_socket->send(claim_action(main_menu->user_opt->id,
+                                               static_cast<int>(user_index_),
+                                               i,
+                                               steal_candidate.id,
+                                               word
+                ));
+                return;
+            }
+        }
+    }
+
+    // try to steal from public
+    game_socket->send(claim_action(main_menu->user_opt->id,
+                                   static_cast<int>(user_index_),
+                                   std::nullopt,
+                                   "",
+                                   word));
+}
+
+void MultiplayerContext::FlipTile(const std::string &tile_id) const {
+    Logger::instance().info("Sending flip: {}", tile_id);
+    game_socket->send(flip_action(main_menu->user_opt->id,
+                                  static_cast<int>(user_index_),
+                                  tile_id));
+}
+
+void MultiplayerContext::HandleAction(const MultiplayerGame &old_state, const MultiplayerGame &new_state) {
+    if (new_state.lastAction->actionType == "FLIP") {
+        HandleFlipAction(old_state, new_state, *new_state.lastAction);
+    } else if (new_state.lastAction->actionType == "CLAIM") {
+        HandleClaimAction(old_state, new_state, *new_state.lastAction);
+    }
+}
+
+void MultiplayerContext::HandleFlipAction(const MultiplayerGame &old_state, const MultiplayerGame &new_state,
+                                          const GameStateUpdate &action) {
+    Logger::instance().info("Received flip action");
+    for (int i = 0; i < old_state.state.tiles.size(); i++) {
+        if (action.flippedTileId == old_state.state.tiles[i].id) {
+            const auto tween = TweenManager::instance().CreateTween(
+                &public_tile_draw_data[i].rotation, 720, 1, Easing::EaseInOutSine
+            );
+            tween->SetOnComplete([this, new_state] {
+                game_opt = new_state;
+                this->RedrawGame();
+            });
+            break;
+        }
+    }
+}
+
+void MultiplayerContext::HandleClaimAction(const MultiplayerGame &old_state, const MultiplayerGame &new_state,
+                                           const GameStateUpdate &action) {
+    Logger::instance().info("Received claim action");
+    game_opt = new_state;
+    RedrawGame();
 }

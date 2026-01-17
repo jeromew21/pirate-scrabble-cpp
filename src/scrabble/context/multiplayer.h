@@ -16,6 +16,9 @@ struct MarginContainer;
 namespace scrabble {
     struct MainMenuContext;
 
+    struct MultiplayerGame;
+
+    struct GameStateUpdate;
 
     struct MultiplayerContext : GameObject {
         enum class State {
@@ -52,7 +55,7 @@ namespace scrabble {
 
         MultiplayerContext();
 
-        ~MultiplayerContext();
+        ~MultiplayerContext() override;
 
         void Update(float delta_time) override;
 
@@ -75,6 +78,20 @@ namespace scrabble {
         void EnterLobby(const std::string &game_id);
 
         void EnterPlaying();
+
+        void PollGameEvents() const;
+
+        void SendWord(const std::string &word) const;
+
+        void FlipTile(const std::string &tile_id) const;
+
+        void HandleAction(const MultiplayerGame &old_state, const MultiplayerGame &new_state);
+
+        void HandleFlipAction(const MultiplayerGame &old_state, const MultiplayerGame &new_state,
+                              const GameStateUpdate &action);
+
+        void HandleClaimAction(const MultiplayerGame &old_state, const MultiplayerGame &new_state,
+                               const GameStateUpdate &action);
 
         // exit playing?
     };

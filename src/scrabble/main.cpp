@@ -231,8 +231,13 @@ int main() {
     const ImGuiIO &io = ImGui::GetIO();
     io.Fonts->SetFontLoader(ImGuiFreeType::GetFontLoader());
     const auto ibm_plex_mono = FS_ROOT / "assets" / "IBM_Plex_Mono" / "IBMPlexMono-Light.ttf";
-    ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.string().c_str(),
+    const auto rubik = FS_ROOT / "assets" / "Rubik-VariableFont_wght.ttf";
+    ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(rubik.string().c_str(),
                                                       32.0f * GetLogicalRatio());
+    ImFont *imgui_monospace_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.string().c_str(),
+                                                      32.0f * GetLogicalRatio());
+    ImFont *big_font = io.Fonts->AddFontFromFileTTF(rubik.string().c_str(),
+                                                      2.0f * 32.0f * GetLogicalRatio());
 
     // -------------------------
     // Initialize fonts
@@ -250,6 +255,8 @@ int main() {
     bool request_exit = false;
     auto *root = new GameObject();
     auto *menu_context = new MainMenuContext{[&request_exit] { request_exit = true; }};
+    menu_context->big_font = big_font;
+    menu_context->monospace_font = imgui_monospace_font;
     root->AddChild(menu_context);
 
     // -------------------------
@@ -330,6 +337,8 @@ int main() {
                 Profiler p("DrawRec", perf.draw_time, perf.draw_count);
                 root->DrawRec();
             }
+            ImGui::PopFont();
+
             const auto now = std::chrono::high_resolution_clock::now();
             const auto elapsed =
                     std::chrono::duration_cast<std::chrono::seconds>(now - perf.last_print).count();
@@ -344,7 +353,10 @@ int main() {
             }
             persistent_data.show_debug_window = true;
             if (persistent_data.show_debug_window) {
+                ImGui::PushFont(imgui_font);
                 ImGui::Begin("Debug", &persistent_data.show_debug_window);
+                ImGui::PopFont();
+                ImGui::PushFont(imgui_monospace_font);
                 if (ImGui::Button("Exit")) {
                     request_exit = true;
                 }
@@ -388,10 +400,10 @@ int main() {
                         ImGui::SetScrollHereY(1.0f);
                 }
                 ImGui::EndChild();
+                ImGui::PopFont();
                 ImGui::PopStyleColor();
                 ImGui::End();
             }
-            ImGui::PopFont();
             rlImGuiEnd();
         }
         EndDrawing();

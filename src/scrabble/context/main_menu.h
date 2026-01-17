@@ -3,6 +3,8 @@
 #include "types.h"
 #include "game_object/game_object.h"
 
+struct ImFont;
+
 namespace scrabble {
     struct LoginContext;
 
@@ -26,6 +28,10 @@ namespace scrabble {
         float loading_counter{0};
 
         float loading_time{2.0f};
+
+        ImFont* big_font;
+
+        ImFont* monospace_font;
 
         std::optional<std::function<void()>> request_exit_hook;
 

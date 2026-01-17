@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game_object/ui/control.h"
-#include "text/freetype_library.h"
 #include "util/math.h"
 
 namespace scrabble {
