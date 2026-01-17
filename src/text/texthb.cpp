@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "raylib.h"
+
 #include "hb.h"
 #include "hb-ft.h"
 
@@ -81,7 +83,7 @@ HBFont::HBFont(HBFont&&) noexcept = default;
 
 HBFont& HBFont::operator=(HBFont&&) noexcept = default;
 
-void DrawTextHB(HBFont &font, const std::string &text, float x, float y, Color tint) {
+void DrawTextHB(HBFont &font, const std::string &text, float x, float y, const Color &tint) {
     hb_font_t* hb_font = hb_ft_font_create(font.impl_->face, NULL);
     hb_buffer_t* buf = hb_buffer_create();
 

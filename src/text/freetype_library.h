@@ -7,6 +7,8 @@
 
 #include "util/filesystem/filesystem.h"
 
+// TODO: hide this all behind Pimpl or a wrapper.
+
 FT_Face ft_load_font(const FT_Library &ft, const fs::path &path);
 
 FT_Library ft_init();

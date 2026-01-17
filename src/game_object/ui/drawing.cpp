@@ -1,8 +1,11 @@
 #include "drawing.h"
 
+#include <algorithm>
+
+#include "raylib.h"
+
 // Draw a filled rounded rectangle
-void DrawRoundedRectangle(float x, float y, float width, float height, float radius, Color color)
-{
+void DrawRoundedRectangle(float x, float y, float width, float height, float radius, const Color &color) {
     // Clamp radius to half the smallest dimension
     radius = std::min(radius, std::min(width, height) / 2.0f);
 
@@ -12,20 +15,20 @@ void DrawRoundedRectangle(float x, float y, float width, float height, float rad
     }
 
     // Draw the main rectangles (cross shape)
-    DrawRectangle(x + radius, y, width - 2 * radius, height, color);  // Horizontal
+    DrawRectangle(x + radius, y, width - 2 * radius, height, color); // Horizontal
     DrawRectangle(x, y + radius, radius, height - 2 * radius, color); // Left vertical
     DrawRectangle(x + width - radius, y + radius, radius, height - 2 * radius, color); // Right vertical
 
     // Draw the four corner circles
-    DrawCircle(x + radius, y + radius, radius, color);                          // Top-left
-    DrawCircle(x + width - radius, y + radius, radius, color);                  // Top-right
-    DrawCircle(x + radius, y + height - radius, radius, color);                 // Bottom-left
-    DrawCircle(x + width - radius, y + height - radius, radius, color);         // Bottom-right
+    DrawCircle(x + radius, y + radius, radius, color); // Top-left
+    DrawCircle(x + width - radius, y + radius, radius, color); // Top-right
+    DrawCircle(x + radius, y + height - radius, radius, color); // Bottom-left
+    DrawCircle(x + width - radius, y + height - radius, radius, color); // Bottom-right
 }
 
 // Draw a rounded rectangle outline/stroke
-void DrawRoundedRectangleLines(float x, float y, float width, float height, float radius, float strokeWidth, Color color)
-{
+void DrawRoundedRectangleLines(float x, float y, float width, float height, float radius, float strokeWidth,
+                               const Color &color) {
     // Clamp radius to half the smallest dimension
     radius = std::min(radius, std::min(width, height) / 2.0f);
 
@@ -35,7 +38,7 @@ void DrawRoundedRectangleLines(float x, float y, float width, float height, floa
     }
 
     // Draw the four straight edges
-    DrawRectangle(x + radius, y, width - 2 * radius, strokeWidth, color);  // Top
+    DrawRectangle(x + radius, y, width - 2 * radius, strokeWidth, color); // Top
     DrawRectangle(x + radius, y + height - strokeWidth, width - 2 * radius, strokeWidth, color); // Bottom
     DrawRectangle(x, y + radius, strokeWidth, height - 2 * radius, color); // Left
     DrawRectangle(x + width - strokeWidth, y + radius, strokeWidth, height - 2 * radius, color); // Right

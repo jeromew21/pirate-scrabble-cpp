@@ -32,6 +32,7 @@ public:
     }
 
     F callback;
+
 private:
     bool active;
 };

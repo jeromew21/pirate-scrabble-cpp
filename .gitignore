@@ -11,3 +11,7 @@ build-web
 external/frameflow
 external/emsdk
 external/vcpkg
+imgui.ini
+pirate_scrabble.log
+pirate_scrabble_data.json
+pirate_scrabble_token

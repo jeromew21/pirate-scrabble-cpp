@@ -5,7 +5,6 @@
 #include "frameflow/layout.hpp"
 #include "game_object/game_object.h"
 
-
 class LayoutSystem : public GameObject {
 public:
     std::unique_ptr<frameflow::System> system;
