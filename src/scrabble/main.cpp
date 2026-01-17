@@ -44,12 +44,12 @@ namespace {
 #ifndef GIT_COMMIT_HASH
 #define GIT_COMMIT_HASH "unknown"
 #endif
-    constexpr const char* BUILD_GIT_HASH = GIT_COMMIT_HASH;
+    constexpr const char *BUILD_GIT_HASH = GIT_COMMIT_HASH;
 
 #ifndef BUILD_TIMESTAMP_UTC
 #define BUILD_TIMESTAMP_UTC "unknown"
 #endif
-    constexpr const char* BUILD_TIMESTAMP = BUILD_TIMESTAMP_UTC;
+    constexpr const char *BUILD_TIMESTAMP = BUILD_TIMESTAMP_UTC;
 
     std::function<void()> main_loop_function;
 
@@ -235,9 +235,9 @@ int main() {
     ImFont *imgui_font = io.Fonts->AddFontFromFileTTF(rubik.string().c_str(),
                                                       32.0f * GetLogicalRatio());
     ImFont *imgui_monospace_font = io.Fonts->AddFontFromFileTTF(ibm_plex_mono.string().c_str(),
-                                                      32.0f * GetLogicalRatio());
+                                                                32.0f * GetLogicalRatio());
     ImFont *big_font = io.Fonts->AddFontFromFileTTF(rubik.string().c_str(),
-                                                      2.0f * 32.0f * GetLogicalRatio());
+                                                    2.0f * 32.0f * GetLogicalRatio());
 
     // -------------------------
     // Initialize fonts
@@ -258,6 +258,15 @@ int main() {
     menu_context->big_font = big_font;
     menu_context->monospace_font = imgui_monospace_font;
     root->AddChild(menu_context);
+
+
+    // -------------------------
+    // Load background image
+    // -------------------------
+    auto bg_image_path = FS_ROOT / "assets" / "bg.jpg";
+    Image img = LoadImage(bg_image_path.string().c_str());
+    Texture2D bg_texture = LoadTextureFromImage(img);
+    UnloadImage(img);
 
     // -------------------------
     // Read token from disk
@@ -330,6 +339,16 @@ int main() {
         BeginDrawing();
         {
             ClearBackground(DARKGRAY);
+            DrawTexturePro(
+                bg_texture,
+                Rectangle{0, 0, (float) bg_texture.width, (float) bg_texture.height}, // source
+                Rectangle{0, 0, (float) persistent_data.window_width, (float) persistent_data.window_height},
+                // destination
+                Vector2{0, 0},
+                0.0f,
+                WHITE
+            );
+
             rlImGuiBegin();
 
             ImGui::PushFont(imgui_font);

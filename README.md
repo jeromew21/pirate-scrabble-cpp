@@ -34,10 +34,16 @@ vcpkg.exe install ixwebsocket[mbedtls] zlib
 
 Then build with MSVC toolchain:
 ```
+# Something like...
 cmake -B build \
     -DCMAKE_TOOLCHAIN_FILE=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
-This script is collected and most up-to-date in `build_win.sh`.
+This script is collected and most up-to-date in `win32/build_win.bat`.
+
+```
+cd win32
+build_win.bat
+```
 
 ### Web (Emscripten)
 Set up emscripten:
@@ -50,15 +56,10 @@ cd emsdk
 source ./emsdk_env.sh
 ```
 
-Then build with emscripten toolchain
-```
-mkdir -p build-web
-cd build-web
-emcmake cmake .. -DPLATFORM=Web -DBUILD_EXAMPLES=OFF
-emmake make
+Then build with emscripten toolchain.
+This script is collected and most up-to-date in `web/build_web.sh`.
 
-cd ..
-python3 server.py
 ```
-
-This script is collected and most up-to-date in `build_web.sh`.
+cd web
+./build_web.sh
+```

@@ -11,6 +11,8 @@ set GENERATOR="Visual Studio 17 2022"
 set ARCH=x64
 set TARGET=pirate-scrabble
 
+cd ..
+
 REM --- Make build directory if it doesn't exist ---
 if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
 

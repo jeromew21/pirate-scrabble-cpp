@@ -158,7 +158,7 @@ if (EMSCRIPTEN)
             -sUSE_WEBGL2=1
             #-sFULL_ES3=1
             -lwebsocket.js
-            --shell-file ${CMAKE_SOURCE_DIR}/shell.html
+            --shell-file ${CMAKE_SOURCE_DIR}/web/shell.html
             --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets
     )
 
