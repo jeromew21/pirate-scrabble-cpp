@@ -174,6 +174,13 @@ MultiplayerContext::MultiplayerContext() {
     RedrawLayout();
 }
 
+MultiplayerContext::~MultiplayerContext() {
+    if (game_socket) {
+        game_socket->close();
+        delete game_socket;
+    }
+}
+
 void MultiplayerContext::Update(const float delta_time) {
     switch (state) {
         case State::PreInit:

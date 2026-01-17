@@ -1,15 +1,19 @@
 #include "texthb.h"
 
 #include <cfloat>
+#include <optional>
 #include <vector>
 #include <unordered_map>
 
+#include "util/logging/logging.h"
+
 #include "raylib.h"
 
+#include "ft2build.h"
+#include "freetype/internal/ftobjs.h"
+#include FT_FREETYPE_H
 #include "hb.h"
 #include "hb-ft.h"
-
-#include "freetype_library.h"
 
 namespace {
     // -------------------------
@@ -22,6 +26,8 @@ namespace {
         int width;
         int height;
     };
+
+    FT_Library ft;
 }
 
 // -------------------------
@@ -37,11 +43,11 @@ struct HBFont::Impl {
     }
 
     ~Impl() {
-        for (auto &pair : glyphs) UnloadTexture(pair.second.texture);
+        for (auto &pair: glyphs) UnloadTexture(pair.second.texture);
     }
 
     // Get or create glyph texture
-    Glyph& GetGlyph(unsigned int glyphIndex) {
+    Glyph &GetGlyph(unsigned int glyphIndex) {
         auto it = glyphs.find(glyphIndex);
         if (it != glyphs.end()) return it->second;
 
@@ -69,33 +75,67 @@ struct HBFont::Impl {
         Texture2D tex = LoadTextureFromImage(img);
         //UnloadImage(img); //TODO: unload this?
 
-        Glyph glyph{tex, slot->bitmap_left, slot->bitmap_top, (int)w, (int)h};
+        Glyph glyph{tex, slot->bitmap_left, slot->bitmap_top, (int) w, (int) h};
         glyphs[glyphIndex] = glyph;
         return glyphs[glyphIndex];
     }
 };
 
-HBFont::HBFont(FT_Face f, int size) : impl_(std::make_unique<Impl>(f, size)) {}
+struct Freetype_Face::Impl {
+    std::optional<FT_Face> face;
+
+    Impl() = default;
+
+    ~Impl() = default;
+};
+
+Freetype_Face::Freetype_Face(const fs::path &path) : impl_(new Impl()) {
+    FT_Face ft_face;
+    if (FT_New_Face(ft, path.string().c_str(), 0, &ft_face)) {
+        Logger::instance().error("Failed to load font");
+        exit(1);
+    }
+    impl_->face = ft_face;
+}
+
+Freetype_Face::~Freetype_Face() {
+    FT_Done_Face(*impl_->face);
+    delete impl_;
+};
+
+void fonts_init() {
+    if (FT_Init_FreeType(&ft)) {
+        Logger::instance().error("Failed to init FreeType");
+        exit(1);
+    }
+}
+
+void fonts_de_init() {
+    FT_Done_Library(ft);
+}
+
+HBFont::HBFont(const Freetype_Face &f, int size) : impl_(std::make_unique<Impl>(*f.impl_->face, size)) {
+}
 
 HBFont::~HBFont() = default;
 
-HBFont::HBFont(HBFont&&) noexcept = default;
+HBFont::HBFont(HBFont &&) noexcept = default;
 
-HBFont& HBFont::operator=(HBFont&&) noexcept = default;
+HBFont &HBFont::operator=(HBFont &&) noexcept = default;
 
 void DrawTextHB(HBFont &font, const std::string &text, float x, float y, const Color &tint) {
-    hb_font_t* hb_font = hb_ft_font_create(font.impl_->face, NULL);
-    hb_buffer_t* buf = hb_buffer_create();
+    hb_font_t *hb_font = hb_ft_font_create(font.impl_->face, NULL);
+    hb_buffer_t *buf = hb_buffer_create();
 
     hb_buffer_add_utf8(buf, text.c_str(), -1, 0, -1);
     hb_buffer_guess_segment_properties(buf);
     hb_shape(hb_font, buf, NULL, 0);
 
     unsigned int len = hb_buffer_get_length(buf);
-    hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buf, nullptr);
-    hb_glyph_position_t* pos = hb_buffer_get_glyph_positions(buf, nullptr);
+    hb_glyph_info_t *info = hb_buffer_get_glyph_infos(buf, nullptr);
+    hb_glyph_position_t *pos = hb_buffer_get_glyph_positions(buf, nullptr);
 
-    Vector2 pen = { x, y };
+    Vector2 pen = {x, y};
 
     for (unsigned int i = 0; i < len; i++) {
         Glyph &g = font.impl_->GetGlyph(info[i].codepoint);
@@ -117,16 +157,16 @@ void DrawTextHB(HBFont &font, const std::string &text, float x, float y, const C
 // Measure text with cached HBFont
 // -------------------------
 TextMetrics MeasureTextHB(HBFont &font, const std::string &text) {
-    hb_font_t* hb_font = hb_ft_font_create(font.impl_->face, nullptr);
-    hb_buffer_t* buf = hb_buffer_create();
+    hb_font_t *hb_font = hb_ft_font_create(font.impl_->face, nullptr);
+    hb_buffer_t *buf = hb_buffer_create();
 
     hb_buffer_add_utf8(buf, text.c_str(), -1, 0, -1);
     hb_buffer_guess_segment_properties(buf);
     hb_shape(hb_font, buf, nullptr, 0);
 
     unsigned int len = hb_buffer_get_length(buf);
-    hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buf, nullptr);
-    hb_glyph_position_t* pos = hb_buffer_get_glyph_positions(buf, nullptr);
+    hb_glyph_info_t *info = hb_buffer_get_glyph_infos(buf, nullptr);
+    hb_glyph_position_t *pos = hb_buffer_get_glyph_positions(buf, nullptr);
 
     float width = 0;
     float minY = FLT_MAX, maxY = -FLT_MAX;
@@ -146,5 +186,5 @@ TextMetrics MeasureTextHB(HBFont &font, const std::string &text) {
     hb_buffer_destroy(buf);
     hb_font_destroy(hb_font);
 
-    return { width, maxY - minY, -minY, maxY };
+    return {width, maxY - minY, -minY, maxY};
 }

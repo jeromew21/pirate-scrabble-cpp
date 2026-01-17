@@ -52,6 +52,8 @@ namespace scrabble {
 
         MultiplayerContext();
 
+        ~MultiplayerContext();
+
         void Update(float delta_time) override;
 
         void Draw() override;

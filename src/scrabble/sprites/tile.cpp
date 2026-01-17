@@ -7,7 +7,6 @@
 #include "fmt/color.h"
 
 #include "game_object/ui/drawing.h"
-#include "text/freetype_library.h"
 #include "text/texthb.h"
 #include "game_object/ui/control.h"
 #include "game_object/ui/layout_system.h"
@@ -20,10 +19,10 @@ namespace {
     float2 map_[128];
     RenderTexture2D tile_texture_map;
 
-    void generate_tile_sprites(FT_Library ft) {
+    void generate_tile_sprites() {
         const float prev_dim = Tile::dim;
         Tile::dim = RENDER_SIZE;
-        const auto face = ft_load_font(ft, FS_ROOT / "assets" / "arial.ttf");
+        const auto face = Freetype_Face(FS_ROOT / "assets" / "arial.ttf");
 
         HBFont font(face, static_cast<int>(Tile::dim * 0.85f)); // pixel size 48
 
@@ -62,7 +61,6 @@ namespace {
             }
         }
         Control::DrawDebugBorders = temp;
-        ft_face_de_init(face);
         sys->Delete();
         Tile::dim = prev_dim;
     }
@@ -127,14 +125,13 @@ void main() {
 )"
 #endif
                     ;
-            SetTraceLogLevel(LOG_DEBUG);
             shader = LoadShaderFromMemory(nullptr, fragment_shader_code);
             // Check if shader loaded
             if (shader.id == 0) {
                 Logger::instance().info("Failed to compile shader");
                 // Check browser console for WebGL shader compilation errors
+                exit(1);
             }
-            SetTraceLogLevel(LOG_NONE);
             sizeLoc = GetShaderLocation(shader, "size");
             radiusLoc = GetShaderLocation(shader, "radius");
             colorLoc = GetShaderLocation(shader, "rectColor");
@@ -197,11 +194,11 @@ void Tile::Draw() {
 }
 
 // TODO: make this a spritesheet, single texture
-void Tile::InitializeTextures(FT_Library ft) {
+void Tile::InitializeTextures() {
     rounded_rect_shader = std::make_unique<RoundedRectShader>();
     tile_texture_map = LoadRenderTexture(RENDER_SIZE * 8, RENDER_SIZE * 16);
     SetTextureFilter(tile_texture_map.texture, TEXTURE_FILTER_BILINEAR);
-    generate_tile_sprites(ft);
+    generate_tile_sprites();
 }
 
 RenderTexture2D Tile::GetTileTexture() {

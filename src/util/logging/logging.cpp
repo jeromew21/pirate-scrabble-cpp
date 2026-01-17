@@ -4,11 +4,13 @@
 #include <memory>
 
 namespace {
-    std::unique_ptr<Logger> instance_;
+    Logger *instance_;
+    bool alive_;
 }
 
 void Logger::Initialize(const char *output_file) {
-    instance_ = std::make_unique<Logger>(output_file);
+    instance_ = new Logger(output_file);
+    alive_ = true;
 }
 
 Logger &Logger::instance() {
@@ -24,6 +26,7 @@ Logger::Logger(const char *output_file) : output_file(output_file) {
 }
 
 Logger::~Logger() {
+    alive_ = false;
     if (file_.is_open()) file_.close();
 }
 

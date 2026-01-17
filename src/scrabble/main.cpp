@@ -10,7 +10,6 @@
 
 #include "frameflow/layout.hpp"
 
-#include "text/freetype_library.h"
 #include "text/texthb.h"
 #include "context/types.h"
 #include "context/main_menu.h"
@@ -92,7 +91,6 @@ namespace {
     };
 
     void InitCrossPlatformWindow(const int logical_width, const int logical_height, const char *title) {
-        SetTraceLogLevel(LOG_NONE);
         constexpr unsigned int flags = FLAG_WINDOW_RESIZABLE
                                        | FLAG_MSAA_4X_HINT
                                        | FLAG_VSYNC_HINT;
@@ -105,7 +103,7 @@ namespace {
         return static_cast<float>(GetScreenWidth()) / static_cast<float>(GetRenderWidth());
     }
 
-    PersistentData load_persistent_data(const std::string &persistent_data_path) {
+    PersistentData load_persistent_data(const fs::path &persistent_data_path) {
         if (std::string contents; read_file(persistent_data_path, contents)) {
             try {
                 return deserialize_or_throw<PersistentData>(contents);
@@ -118,7 +116,7 @@ namespace {
         return PersistentData{};
     }
 
-    bool write_persistent_data_to_disk(const std::string &persistent_data_path, const PersistentData &data) {
+    bool write_persistent_data_to_disk(const fs::path &persistent_data_path, const PersistentData &data) {
         return write_file(persistent_data_path, serialize(data));
     }
 
@@ -146,13 +144,13 @@ namespace {
         free(val); // must free the WASM heap allocation
         const bool result = true;
 #else
-        const bool result = read_file(path.string(), out_token);
+        const bool result = read_file(path, out_token);
 #endif
         std::erase_if(out_token, isspace); // this is necessary for some reason
         return result;
     }
 
-    bool write_token(const std::string &token_path, const std::string &token) {
+    bool write_token(const fs::path &token_path, const std::string &token) {
 #ifdef __EMSCRIPTEN__
         set_local_storage(token_path.c_str(), token.c_str());
         return true;
@@ -174,7 +172,7 @@ int main() {
     // -------------------------
     // Initialize persistent data
     // -------------------------
-    const std::string persistent_data_path{"pirate_scrabble_data.json"};
+    const fs::path persistent_data_path{"pirate_scrabble_data.json"};
     PersistentData persistent_data = load_persistent_data("pirate_scrabble_data.json");
     ScopeExitCallback persistent_data_write_on_exit([&] {
         if (!write_persistent_data_to_disk(persistent_data_path, persistent_data)) {
@@ -186,7 +184,32 @@ int main() {
     // Initialize raylib
     // TODO: Consider drawing an initial image
     // -------------------------
+    auto raylib_logger_hook = [](const int logType, const char *text, va_list args) {
+        // Format the message from va_list
+        char buffer[4096];
+        vsnprintf(buffer, sizeof(buffer), text, args);
+
+        // Map Raylib logType to our logger level
+        switch (logType) {
+            case LOG_INFO:
+            case LOG_DEBUG:
+            case LOG_TRACE:
+                Logger::instance().info("{}", buffer);
+                break;
+            case LOG_WARNING:
+                Logger::instance().warn("{}", buffer);
+                break;
+            case LOG_ERROR:
+            case LOG_FATAL:
+                Logger::instance().error("{}", buffer);
+                break;
+            default:
+                Logger::instance().info("{}", buffer);
+                break;
+        }
+    };
     const std::string window_title = fmt::format("Pirate Scrabble ({})", BUILD_CONFIG);
+    SetTraceLogCallback(raylib_logger_hook);
     InitCrossPlatformWindow(persistent_data.window_width,
                             persistent_data.window_height,
                             window_title.c_str());
@@ -194,12 +217,12 @@ int main() {
     // -------------------------
     // Initialize FreeType
     // -------------------------
-    auto *ft = ft_init();
+    fonts_init();
 
     // -------------------------
     // Initialize tile textures
     // -------------------------
-    Tile::InitializeTextures(ft);
+    Tile::InitializeTextures();
 
     // -------------------------
     // Initialize ImGui
@@ -252,14 +275,14 @@ int main() {
         // todo: shutdown harfbuzz/freetype
         // todo: recursively delete root
         if (menu_context->user_opt) {
-            if (!write_token(token_path.string(), menu_context->user_opt->token)) {
+            if (!write_token(token_path, menu_context->user_opt->token)) {
                 Logger::instance().info("Failed to write token to disk");
             }
         }
         Logger::instance().info("Shutting down");
         root->Delete();
         Tile::DeInitializeTextures();
-        ft_de_init(ft);
+        fonts_de_init();
         rlImGuiShutdown();
         CloseWindow();
     });

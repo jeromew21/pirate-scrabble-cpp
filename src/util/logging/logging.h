@@ -55,7 +55,7 @@ private:
         std::string message = fmt::format(fmt_str, std::forward<Args>(args)...);
         std::string line = fmt::format("[{}] [{}] {}", timestamp(), level, message);
 
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard lock(mutex_);
 
         entries_.push_back(line);
 

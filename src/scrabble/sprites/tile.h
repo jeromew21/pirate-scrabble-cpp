@@ -9,7 +9,7 @@ namespace scrabble {
     public:
         static inline float dim = 81.0;
 
-        static void InitializeTextures(FT_Library ft);
+        static void InitializeTextures();
 
         static void DeInitializeTextures();
 
