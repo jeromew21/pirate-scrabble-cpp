@@ -14,7 +14,7 @@ if (EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -sUSE_PTHREADS=1")
-elseif (UNIX)
+elseif (UNIX AND NOT APPLE)
     # Enable AddressSanitizer for debug builds
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         message(STATUS "AddressSanitizer enabled")

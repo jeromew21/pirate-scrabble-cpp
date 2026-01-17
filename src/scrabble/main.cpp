@@ -281,6 +281,7 @@ int main() {
             persistent_data.window_height = GetScreenHeight();
             menu_context->multiplayer_context->should_redraw_layout = true;
             Tile::dim = std::min(static_cast<float>(persistent_data.window_width) / 40.f, 64.f);
+            Tile::dim = Tile::dim * GetLogicalRatio();
         }
 
         // -------------------------
